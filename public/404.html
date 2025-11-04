@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>STUFF.MD</title>
+    <script>
+      // GitHub Pages SPA routing fix
+      // Redirect to index.html with the correct base path
+      const pathSegments = window.location.pathname.split('/').filter(Boolean);
+      const repoName = 'stuff-md';
+      
+      // If we're at the root or a 404, redirect to index.html
+      if (pathSegments.length === 0 || pathSegments[pathSegments.length - 1] === '404.html') {
+        window.location.replace('/' + repoName + '/index.html');
+      } else {
+        // Otherwise, try to serve index.html for the current path
+        // This handles deep links in SPAs
+        const basePath = '/' + repoName;
+        window.location.replace(basePath + '/index.html');
+      }
+    </script>
+  </head>
+  <body>
+    <p>Redirecting...</p>
+  </body>
+</html>
+
