@@ -22,13 +22,16 @@ const firebaseConfig = {
 };
 
 // Validate that all necessary Firebase environment variables are set.
-for (const [key, value] of Object.entries(firebaseConfig)) {
-  if (!value) {
-    // Construct the expected .env variable name from the camelCase key
-    const envVarName = `VITE_FIREBASE_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`;
-    throw new Error(
-      `Firebase config missing: ${envVarName}. Please check your environment configuration.`
-    );
+// Only validate when Firebase is actually used (lazy validation)
+function validateFirebaseConfig() {
+  for (const [key, value] of Object.entries(firebaseConfig)) {
+    if (key !== 'measurementId' && !value) {
+      // Construct the expected .env variable name from the camelCase key
+      const envVarName = `VITE_FIREBASE_${key.replace(/([A-Z])/g, '_$1').toUpperCase()}`;
+      throw new Error(
+        `Firebase config missing: ${envVarName}. Please check your environment configuration.`
+      );
+    }
   }
 }
 
@@ -44,6 +47,7 @@ let analyticsInstance: Analytics | null = null;
  */
 function getAppInstance(): FirebaseApp {
   if (!app) {
+    validateFirebaseConfig();
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   }
   return app;
