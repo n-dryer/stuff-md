@@ -21,7 +21,7 @@
   "bugs": {
     "url": "https://github.com/n-dryer/stuff-md/issues"
   },
-  "homepage": "https://github.com/n-dryer/stuff-md#readme",
+  "homepage": "https://n-dryer.github.io/stuff-md",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
