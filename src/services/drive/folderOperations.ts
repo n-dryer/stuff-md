@@ -9,14 +9,51 @@ export const onAuthError = () => {
 const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3';
 const APP_FOLDER_NAME = 'STUFF.MD Notes';
 const APP_FOLDER_QUERY = `name='${APP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+const FOLDER_CACHE_KEY = 'stuff_md_app_folder_id';
 
 let appFolderIdCache: string | null = null;
+
+/**
+ * Load folder ID from localStorage cache
+ */
+const loadFolderCache = (): string | null => {
+  if (appFolderIdCache) return appFolderIdCache;
+  try {
+    const cached = localStorage.getItem(FOLDER_CACHE_KEY);
+    if (cached) {
+      appFolderIdCache = cached;
+      return cached;
+    }
+  } catch (error) {
+    // localStorage might be unavailable (e.g., in private browsing)
+    logError('Failed to load folder cache from localStorage:', error);
+  }
+  return null;
+};
+
+/**
+ * Save folder ID to localStorage cache
+ */
+const saveFolderCache = (folderId: string): void => {
+  appFolderIdCache = folderId;
+  try {
+    localStorage.setItem(FOLDER_CACHE_KEY, folderId);
+  } catch (error) {
+    // localStorage might be unavailable (e.g., in private browsing)
+    logError('Failed to save folder cache to localStorage:', error);
+  }
+};
 
 /**
  * Clear folder cache (useful for testing or when folder might have changed)
  */
 export const clearFolderCache = () => {
   appFolderIdCache = null;
+  try {
+    localStorage.removeItem(FOLDER_CACHE_KEY);
+  } catch (error) {
+    logError('Failed to clear folder cache from localStorage:', error);
+  }
 };
 
 /**
@@ -26,7 +63,9 @@ export const findOrCreateAppFolder = async (
   accessToken: string,
   signal?: AbortSignal
 ): Promise<string> => {
-  if (appFolderIdCache) return appFolderIdCache;
+  // Try to load from cache first
+  const cached = loadFolderCache();
+  if (cached) return cached;
 
   const searchResponse = await authorizedFetch(
     accessToken,
@@ -49,8 +88,8 @@ export const findOrCreateAppFolder = async (
   if (searchResult.files && searchResult.files.length > 0) {
     const folderId = searchResult.files[0].id;
     if (typeof folderId === 'string') {
-      appFolderIdCache = folderId;
-      return appFolderIdCache;
+      saveFolderCache(folderId);
+      return folderId;
     }
   }
 
@@ -77,8 +116,8 @@ export const findOrCreateAppFolder = async (
     throw new Error('Invalid response format from Google Drive API.');
   }
   if (typeof createResult.id === 'string') {
-    appFolderIdCache = createResult.id;
-    return appFolderIdCache;
+    saveFolderCache(createResult.id);
+    return createResult.id;
   }
   throw new Error('Failed to get folder ID from create response.');
 };

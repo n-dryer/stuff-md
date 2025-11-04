@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 
 import { getAICategorization } from '../services/aiService';
 import { driveService } from '../services/googleDriveService';
+import { findOrCreateAppFolder } from '../services/drive/folderOperations';
 import { Note } from '../types';
 import { toError } from '../utils/typeGuards';
 import {
@@ -56,6 +57,14 @@ export function useNotes(accessToken: string | null) {
     if (accessToken) {
       const controller = new AbortController();
       abortControllerRef.current = controller;
+      
+      // Pre-fetch folder ID to have it ready for saves
+      // This runs in parallel with fetchNotes to avoid blocking
+      findOrCreateAppFolder(accessToken, controller.signal).catch(err => {
+        // Log but don't throw - folder will be fetched on first save if this fails
+        logError('Failed to pre-fetch folder ID:', err);
+      });
+      
       fetchNotes(controller.signal);
     } else {
       setNotes([]);

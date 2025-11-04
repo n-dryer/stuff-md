@@ -42,7 +42,7 @@ export const useNoteHandlers = ({
 }: UseNoteHandlersProps) => {
   // Rate limiters - shared across re-renders
   const saveLimiterRef = useRef(
-    rateLimit(saveNote, { minInterval: 1000, maxCalls: 10, windowMs: 60000 })
+    rateLimit(saveNote, { minInterval: 300, maxCalls: 10, windowMs: 60000 })
   );
   const deleteLimiterRef = useRef(
     rateLimit(deleteNote, { minInterval: 500, maxCalls: 20, windowMs: 60000 })
@@ -57,7 +57,7 @@ export const useNoteHandlers = ({
 
   // Update rate limiters when functions change
   saveLimiterRef.current = rateLimit(saveNote, {
-    minInterval: 1000,
+    minInterval: 300,
     maxCalls: 10,
     windowMs: 60000,
   });
