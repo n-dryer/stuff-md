@@ -1,0 +1,109 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+.vite/
+.vite-build/
+stats.html
+*.stats.html
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+# Note: .env.example is NOT ignored - it's a template file that should be committed
+
+# IDE and editor files
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Firebase
+.firebase/
+# Note: .firebaserc is typically committed (contains project aliases, not sensitive)
+.firebase-debug.log
+.firebase-debug.*.log
+firebase-debug.log
+firebase-debug.*.log
+firestore-debug.log
+ui-debug.log
+.firestore/
+.firestore.indexes.json
+.firestore.rules
+
+# Firebase Data Connect
+dataconnect/.dataconnect/
+# Note: Generated files in src/dataconnect-generated/ should typically be committed
+# but if you want to ignore them, uncomment the line below:
+# src/dataconnect-generated/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.jest/
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.temp/
+.tmp/
+
+# Cursor IDE
+.cursor/
+
+# Package manager lock files (optional - uncomment if you want to ignore them)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Deployment
+.vercel
+.netlify
+.railway
+
+# Misc
+*.local
+.cache
+.parcel-cache
+.next
+out
+.swc
+

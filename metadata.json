@@ -1,0 +1,5 @@
+{
+  "name": "STUFF.MD",
+  "description": "A minimalist web application where users can input text-based notes, have them automatically categorized using client-side AI, and store this organized information directly within their personal Google Drive account.",
+  "requestFramePermissions": []
+}

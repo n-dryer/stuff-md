@@ -1,0 +1,9 @@
+node_modules
+dist
+build
+coverage
+*.config.js
+*.config.ts
+Archive
+# Note: package-lock.json should be formatted and committed
+
