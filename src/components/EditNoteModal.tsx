@@ -67,7 +67,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = React.memo(
       return () => {
         window.removeEventListener('keydown', handleKeyDown);
       };
-    }, [isOpen, handleSave]);
+    }, [isOpen, handleSave, content, originalContent, isSaving]);
 
     if (!isOpen || !note) {
       return null;

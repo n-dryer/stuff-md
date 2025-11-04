@@ -31,22 +31,30 @@ const loadMarkdownLibs = async () => {
   // marked can be exported as default or named export
   // It has a parse method available
   // Narrow unknown to MarkedLike by probing common export shapes
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const anyMarked = markedModule as any;
+  type MarkedModule = {
+    marked?: MarkedLike;
+    default?: MarkedLike;
+    parse?: (c: string, o?: unknown) => string;
+  } & MarkedLike;
+
+  type DOMPurifyModule = {
+    default?: DOMPurifyLike;
+  } & DOMPurifyLike;
+
+  const anyMarked = markedModule as MarkedModule;
   const markedLib: MarkedLike = (anyMarked?.marked ||
     anyMarked?.default ||
     anyMarked) as MarkedLike;
 
+  const anyDOMPurify = dompurifyModule as DOMPurifyModule;
+
   return {
     marked: markedLib,
     // Some versions expose parse at root in addition to .parse
-
     parse: ((anyMarked?.parse as
       | ((c: string, o?: unknown) => string)
       | undefined) ?? markedLib.parse) as (c: string, o?: unknown) => string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    DOMPurify: ((dompurifyModule as any)?.default ||
-      (dompurifyModule as any)) as DOMPurifyLike,
+    DOMPurify: (anyDOMPurify?.default || anyDOMPurify) as DOMPurifyLike,
   };
 };
 

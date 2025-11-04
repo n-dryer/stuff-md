@@ -80,6 +80,7 @@ export default [
       '*.config.js',
       '*.config.ts',
       'src/test/**',
+      'src/dataconnect-generated/**',
     ],
   },
 ];

@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, '.'),
+          '@': path.resolve(__dirname, 'src'),
         }
       },
       build: {
@@ -82,13 +82,13 @@ export default defineConfig(({ mode }) => {
                 return 'vendor';
               }
               // Split large local components into separate chunks
-              if (id.includes('/components/NoteList.tsx')) {
+              if (id.includes('/src/components/NoteList.tsx') || id.includes('\\src\\components\\NoteList.tsx')) {
                 return 'note-list';
               }
-              if (id.includes('/components/MainLayout.tsx')) {
+              if (id.includes('/src/components/MainLayout.tsx') || id.includes('\\src\\components\\MainLayout.tsx')) {
                 return 'main-layout';
               }
-              if (id.includes('/components/MarkdownRenderer.tsx')) {
+              if (id.includes('/src/components/MarkdownRenderer.tsx') || id.includes('\\src\\components\\MarkdownRenderer.tsx')) {
                 return 'markdown-renderer';
               }
             },

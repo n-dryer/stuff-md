@@ -79,7 +79,6 @@ const SegmentedControl: React.FC<SegmentedControlProps> = ({
             }}
             type='button'
             role='radio'
-            aria-pressed={isActive}
             aria-checked={isActive}
             className={`flex-1 px-3 sm:px-4 py-2 min-h-[44px] font-mono text-xs sm:text-sm uppercase tracking-widest cursor-pointer transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
               index !== options.length - 1

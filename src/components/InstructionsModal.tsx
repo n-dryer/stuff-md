@@ -83,12 +83,6 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
       onSave(instructions);
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
     const hasChanges = useMemo(
       () => instructions !== sanitizedInitialInstructions,
       [instructions, sanitizedInitialInstructions]
@@ -121,12 +115,17 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
         aria-labelledby='instructions-modal-title'
         aria-describedby='instructions-description'
       >
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <div
           ref={modalRef}
           className='relative flex h-[100svh] w-full max-w-none flex-col overflow-hidden bg-off-white dark:bg-brutal-gray border-2 border-accent-black dark:border-off-white/50 font-mono uppercase modal-enter sm:h-auto sm:max-w-5xl sm:m-4'
           onClick={event => event.stopPropagation()}
-          onKeyDown={handleKeyDown}
-          role='document'
+          onKeyDown={event => {
+            // Stop propagation for keyboard events to prevent backdrop from closing modal
+            if (event.key === 'Escape') {
+              event.stopPropagation();
+            }
+          }}
         >
           <header className='sticky top-0 z-10 flex items-center justify-between border-b border-accent-black/15 dark:border-off-white/20 px-5 py-4 bg-off-white dark:bg-brutal-gray sm:static sm:px-8 sm:py-6'>
             <h2

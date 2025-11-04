@@ -6,7 +6,7 @@ import {
   signOutFirebase,
   onAuthStateChanged as onAuthStateChangedLazy,
   loadAnalyticsIfSupported,
-} from '../src/lib/firebaseClient';
+} from '../lib/firebaseClient';
 import { logError } from '../utils/logger';
 
 export interface UserProfile {

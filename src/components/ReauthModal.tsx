@@ -33,6 +33,7 @@ const ReauthModal: React.FC<ReauthModalProps> = React.memo(({
   }
 
   return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       className="fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={handleBackdropClick}
@@ -43,10 +44,17 @@ const ReauthModal: React.FC<ReauthModalProps> = React.memo(({
       tabIndex={-1}
       aria-label="Reauth dialog backdrop"
     >
+      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
       <div
         ref={modalRef}
         className="bg-off-white dark:bg-brutal-gray p-8 border-2 border-accent-black dark:border-off-white/50 w-full max-w-md m-4 relative"
-        role="document"
+        onClick={event => event.stopPropagation()}
+        onKeyDown={event => {
+          // Stop propagation for keyboard events to prevent backdrop from closing modal
+          if (event.key === 'Escape') {
+            event.stopPropagation();
+          }
+        }}
       >
         <button
           onClick={onLogout}

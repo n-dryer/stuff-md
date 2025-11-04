@@ -1,6 +1,0 @@
-# Seed data for Firebase Data Connect
-# Replace with your own data or remove if not needed
-
-mutation @transaction {
-  # Add your seed data here
-}

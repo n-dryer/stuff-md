@@ -43,7 +43,7 @@ const NoteItem: React.FC<NoteItemProps> = React.memo(
     };
 
     return (
-      <article
+      <div
         className='relative py-3 sm:py-4 px-3 sm:px-4 border-b border-gray-200 dark:border-off-white/10 break-inside-avoid cursor-pointer transition-colors duration-150 hover:bg-off-black/5 dark:hover:bg-off-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black group'
         role='button'
         tabIndex={0}
@@ -98,7 +98,7 @@ const NoteItem: React.FC<NoteItemProps> = React.memo(
             </button>
           </div>
         )}
-      </article>
+      </div>
     );
   }
 );
