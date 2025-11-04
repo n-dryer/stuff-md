@@ -82,6 +82,7 @@ export function getProviderInstance(): GoogleAuthProvider {
 /**
  * Initialize Firebase Analytics after the initial render.
  * Uses requestIdleCallback to avoid blocking the main thread.
+ * Silently fails if Analytics is not supported or configured.
  */
 export function initAnalytics(): void {
   if (
@@ -92,8 +93,13 @@ export function initAnalytics(): void {
     return;
   }
 
-  // Use requestIdleCallback with a timeout fallback
+  // Skip Analytics on GitHub Pages to avoid installation errors
+  // GitHub Pages domain may not be authorized in Firebase project
+  if (window.location.hostname.includes('github.io')) {
+    return;
+  }
 
+  // Use requestIdleCallback with a timeout fallback
   const idleCallback =
     (window as any).requestIdleCallback ||
     ((fn: () => void) => setTimeout(fn, 1));
@@ -103,8 +109,8 @@ export function initAnalytics(): void {
       try {
         analyticsInstance = getAnalytics(getAppInstance());
       } catch (error) {
-        // Analytics initialization can fail in certain environments (e.g., extensions)
-        logWarning('Failed to initialize Firebase Analytics:', error);
+        // Analytics initialization can fail in certain environments (e.g., extensions, unauthorized domains)
+        // Silently fail - this is expected behavior
       }
     },
     { timeout: 2000 }

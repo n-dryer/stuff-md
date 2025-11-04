@@ -121,10 +121,17 @@ export async function onAuthStateChanged(
 /**
  * Load Google Analytics lazily; safe if no Measurement ID.
  * Call after first user interaction to defer loading.
+ * Skips Analytics on GitHub Pages to avoid installation errors.
  */
 export async function loadAnalyticsIfSupported(): Promise<
   import('firebase/analytics').Analytics | null
 > {
+  // Skip Analytics on GitHub Pages to avoid installation errors
+  // GitHub Pages domain may not be authorized in Firebase project
+  if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
+    return null;
+  }
+
   const app = await getFirebaseApp();
   const { isSupported, getAnalytics } = await import('firebase/analytics');
 
@@ -133,7 +140,7 @@ export async function loadAnalyticsIfSupported(): Promise<
       return getAnalytics(app);
     }
   } catch {
-    // Analytics initialization can fail in certain environments (e.g., extensions)
+    // Analytics initialization can fail in certain environments (e.g., extensions, unauthorized domains)
     // Silently fail - this is expected behavior
   }
 
