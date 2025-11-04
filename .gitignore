@@ -11,14 +11,13 @@ build/
 stats.html
 *.stats.html
 
-# Environment variables
+# Env variables
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
 .env.*.local
-# Note: .env.example is NOT ignored - it's a template file that should be committed
 
 # IDE and editor files
 .vscode/
@@ -45,7 +44,6 @@ Desktop.ini
 
 # Firebase
 .firebase/
-# Note: .firebaserc is typically committed (contains project aliases, not sensitive)
 .firebase-debug.log
 .firebase-debug.*.log
 firebase-debug.log
@@ -58,9 +56,6 @@ ui-debug.log
 
 # Firebase Data Connect
 dataconnect/.dataconnect/
-# Note: Generated files in src/dataconnect-generated/ should typically be committed
-# but if you want to ignore them, uncomment the line below:
-# src/dataconnect-generated/
 
 # Logs
 *.log
@@ -86,13 +81,10 @@ coverage/
 .temp/
 .tmp/
 
-# Cursor IDE
-.cursor/
-
-# Package manager lock files (optional - uncomment if you want to ignore them)
-# package-lock.json
-# yarn.lock
-# pnpm-lock.yaml
+# Package manager lock files 
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # Deployment
 .vercel
