@@ -2,6 +2,8 @@
 
 A notepad that saves to Google Drive. Notes are automatically categorized by AI.
 
+🌐 **Live Demo:** [https://n-dryer.github.io/stuff-md](https://n-dryer.github.io/stuff-md)
+
 ## What It Does
 
 You type notes. They get saved to your Google Drive. AI categorizes them in the background. That's it.
