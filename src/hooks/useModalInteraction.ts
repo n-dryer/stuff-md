@@ -9,10 +9,6 @@ import {
   unregisterModal,
 } from '../utils/modalStack';
 
-/**
- * Elements that should prevent Escape key from closing modals.
- * These are interactive elements where Escape has its own meaning (e.g., closing dropdowns).
- */
 const ESCAPE_PROTECTED_SELECTOR =
   '[data-modal-escape-stop="true"], [role="combobox"], [aria-autocomplete], [role="listbox"], [role="menu"], [role="tree"], [role="grid"]';
 
@@ -22,19 +18,6 @@ interface UseModalInteractionOptions {
   modalRef: React.RefObject<HTMLElement>;
   triggerRef?: React.RefObject<HTMLElement>;
 }
-
-/**
- * Hook for managing modal interactions including escape key handling.
- * 
- * Implements 2025 best practices for modal accessibility:
- * - Escape key closes only the topmost modal (modal stack system)
- * - Escape is prevented when focus is in protected elements (dropdowns, comboboxes)
- * - Focus trapping within modals
- * - Focus restoration to trigger element on close
- * 
- * @param options Configuration options for modal interaction
- * @returns Handlers for backdrop clicks and keyboard events
- */
 
 export const useModalInteraction = ({
   isOpen,
@@ -76,21 +59,10 @@ export const useModalInteraction = ({
     };
   }, [isOpen, modalRef]);
 
-  /**
-   * Escape key handler following 2025 best practices:
-   * 1. Only closes the topmost modal (respects modal stack)
-   * 2. Respects protected elements (dropdowns, comboboxes, etc.)
-   * 3. Prevents event bubbling to avoid conflicts
-   * 4. Uses capture phase for reliable handling
-   */
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return;
-      
-      // Don't handle if event was already handled
       if (e.defaultPrevented) return;
-      
-      // Only handle if this modal is open and is the top modal
       if (!isOpen) return;
       if (!hasOpenModals()) return;
       if (!isTopModal(modalIdRef.current)) return;
@@ -98,9 +70,8 @@ export const useModalInteraction = ({
       const topModal = getTopModalElement();
       const eventTarget = e.target instanceof Node ? e.target : null;
       const activeElement = document.activeElement;
-      
+
       if (topModal) {
-        // Verify focus is within the modal
         const containsTarget = eventTarget
           ? topModal.contains(eventTarget)
           : false;
@@ -109,13 +80,11 @@ export const useModalInteraction = ({
             ? topModal.contains(activeElement)
             : false;
 
-        // If focus escaped the modal, restore it
         if (!containsTarget && !containsActive) {
           (topModal as HTMLElement).focus();
           return;
         }
 
-        // Don't close if focus is in a protected element (dropdown, combobox, etc.)
         if (
           eventTarget instanceof HTMLElement &&
           eventTarget.closest(ESCAPE_PROTECTED_SELECTOR)
@@ -131,17 +100,15 @@ export const useModalInteraction = ({
         }
       }
 
-      // Close the modal
       e.stopPropagation();
       e.preventDefault();
       onClose();
     };
-    
+
     if (isOpen) {
-      // Use capture phase to ensure we handle before other handlers
       window.addEventListener('keydown', handleKeyDown, true);
     }
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown, true);
     };

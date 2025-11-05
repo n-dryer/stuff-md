@@ -1,23 +1,6 @@
-/**
- * Rate limiter utility for client-side throttling
- * Prevents spam operations by limiting how often functions can be called
- */
-
 interface RateLimiterOptions {
-  /**
-   * Minimum time (in milliseconds) between function calls
-   * @default 1000 (1 second)
-   */
   minInterval: number;
-  /**
-   * Maximum number of calls allowed in a time window
-   * @default 10
-   */
   maxCalls: number;
-  /**
-   * Time window (in milliseconds) for maxCalls
-   * @default 60000 (1 minute)
-   */
   windowMs: number;
 }
 
@@ -25,12 +8,6 @@ interface CallRecord {
   timestamp: number;
 }
 
-/**
- * Creates a rate-limited version of a function
- * @param fn Function to rate limit
- * @param options Rate limiting options
- * @returns Rate-limited function
- */
 export function rateLimit<T extends (...args: unknown[]) => Promise<unknown>>(
   fn: T,
   options: Partial<RateLimiterOptions> = {}

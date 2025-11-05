@@ -40,25 +40,21 @@ export const useNoteHandlers = ({
   setNoteToDelete,
   setShowNoteSavedToast,
 }: UseNoteHandlersProps) => {
-  // Store latest function references to avoid recreating limiters
   const saveNoteRef = useRef(saveNote);
   const deleteNoteRef = useRef(deleteNote);
   const regenerateNoteRef = useRef(regenerateNote);
 
-  // Update refs when functions change
   saveNoteRef.current = saveNote;
   deleteNoteRef.current = deleteNote;
   regenerateNoteRef.current = regenerateNote;
 
-  // Create stable rate limiters that use refs to always call latest functions
-  // This prevents unnecessary recreation while ensuring latest functions are called
   const saveLimiter = useMemo(
     () =>
       rateLimit(
         (...args) => saveNoteRef.current(...args),
         { minInterval: 300, maxCalls: 10, windowMs: 60000 }
       ),
-    [] // Empty deps - limiter is stable, uses ref for latest function
+    []
   );
 
   const deleteLimiter = useMemo(
@@ -67,7 +63,7 @@ export const useNoteHandlers = ({
         (...args) => deleteNoteRef.current(...args),
         { minInterval: 500, maxCalls: 20, windowMs: 60000 }
       ),
-    [] // Empty deps - limiter is stable, uses ref for latest function
+    []
   );
 
   const updateLimiter = useMemo(
@@ -76,7 +72,7 @@ export const useNoteHandlers = ({
         (...args) => regenerateNoteRef.current(...args),
         { minInterval: 2000, maxCalls: 5, windowMs: 60000 }
       ),
-    [] // Empty deps - limiter is stable, uses ref for latest function
+    []
   );
 
   const handleSaveNote = useCallback(async () => {

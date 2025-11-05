@@ -49,7 +49,6 @@ const NoteInput: React.FC<NoteInputProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Preview toggle: Cmd/Ctrl + Shift + P
       const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
       const modifierKey = isMac ? e.metaKey : e.ctrlKey;
 
@@ -68,17 +67,13 @@ const NoteInput: React.FC<NoteInputProps> = ({
         return;
       }
 
-      // Save: Cmd/Ctrl + Enter
       if (modifierKey && e.key === 'Enter') {
         e.preventDefault();
         handleSave();
         return;
       }
 
-      // Escape: exit preview or blur/clear input
-      // Respect modal stack - only handle if no modals are open
       if (e.key === 'Escape') {
-        // Always respect modals - let modal system handle escape first
         if (hasOpenModals()) {
           return;
         }
@@ -120,11 +115,9 @@ const NoteInput: React.FC<NoteInputProps> = ({
       !isSaving &&
       !justSavedRef.current
     ) {
-      // Show inline indicator immediately when draft is saved
       setShowDraftSaved(true);
       onDraftSaved?.();
 
-      // Hide after shorter duration for inline indicator
       const timer = setTimeout(() => {
         setShowDraftSaved(false);
       }, 1500);
@@ -135,17 +128,11 @@ const NoteInput: React.FC<NoteInputProps> = ({
     }
   }, [debouncedValue, isPreview, isSaving, onDraftSaved]);
 
-  // Initial focus on mount (when user first accesses the app)
   useEffect(() => {
     if (!hasFocusedInitially.current && inputRef.current && !isPreview) {
-      const timer = setTimeout(() => {
-        if (inputRef.current && !hasFocusedInitially.current) {
-          inputRef.current.focus();
-          setIsFocused(true);
-          hasFocusedInitially.current = true;
-        }
-      }, 300); // Small delay to ensure layout is complete
-      return () => clearTimeout(timer);
+      inputRef.current.focus();
+      setIsFocused(true);
+      hasFocusedInitially.current = true;
     }
   }, [inputRef, isPreview]);
 
@@ -234,7 +221,6 @@ const NoteInput: React.FC<NoteInputProps> = ({
           />
         </div>
       )}
-      {/* Spinner positioned at top-center of input area, horizontally centered like toasts (same parent level) */}
       {isSaving && (
         <div className='absolute top-3.5 sm:top-5 md:top-6 left-0 right-0 flex justify-center z-20 pointer-events-none transition-opacity duration-200 ease-in-out'>
           <BrutalistSpinner />
