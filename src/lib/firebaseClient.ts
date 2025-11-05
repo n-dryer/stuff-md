@@ -10,7 +10,8 @@ function getFirebaseConfig() {
     authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN?.trim(),
     projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID?.trim(),
     storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET?.trim(),
-    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID?.trim(),
+    messagingSenderId:
+      import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID?.trim(),
     appId: import.meta.env.VITE_FIREBASE_APP_ID?.trim(),
     measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID?.trim(),
   };
@@ -128,7 +129,10 @@ export async function loadAnalyticsIfSupported(): Promise<
 > {
   // Skip Analytics on GitHub Pages to avoid installation errors
   // GitHub Pages domain may not be authorized in Firebase project
-  if (typeof window !== 'undefined' && window.location.hostname.includes('github.io')) {
+  if (
+    typeof window !== 'undefined' &&
+    window.location.hostname.includes('github.io')
+  ) {
     return null;
   }
 

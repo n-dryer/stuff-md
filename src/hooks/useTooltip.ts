@@ -7,12 +7,21 @@ import {
 } from 'react';
 import type { Coords } from '../utils/tooltipPositioning';
 import { computeTooltipPosition } from '../utils/tooltipPositioning';
+import { hasOpenModals } from '../utils/modalStack';
 
 type Placement = 'top' | 'bottom' | 'left' | 'right';
 
+interface UseTooltipOptions {
+  forcePreferredPosition?: boolean;
+}
+
 const AUTO_CLOSE_DELAY_MS = 100; // ms auto-hide delay
 
-export const useTooltip = (position: Placement, text: string) => {
+export const useTooltip = (
+  position: Placement,
+  text: string,
+  options?: UseTooltipOptions
+) => {
   const triggerRef = useRef<HTMLElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [open, setOpen] = useState(false);
@@ -75,6 +84,7 @@ export const useTooltip = (position: Placement, text: string) => {
     const tooltipEl = tooltipRef.current;
     const docWidth = window.innerWidth;
     const docHeight = window.innerHeight;
+    const forcePreferred = options?.forcePreferredPosition ?? false;
 
     const tooltipWidth =
       tooltipEl?.offsetWidth ?? Math.min(320, Math.max(160, text.length * 7));
@@ -86,11 +96,12 @@ export const useTooltip = (position: Placement, text: string) => {
       tooltipHeight,
       position,
       docWidth,
-      docHeight
+      docHeight,
+      forcePreferred
     );
 
     setCoords(computedCoords);
-  }, [position, text]);
+  }, [options?.forcePreferredPosition, position, text]);
 
   useEffect(() => {
     if (open) {
@@ -123,7 +134,12 @@ export const useTooltip = (position: Placement, text: string) => {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') {
+        if (hasOpenModals()) {
+          return;
+        }
+        setOpen(false);
+      }
     };
     const onClickAway = (e: Event) => {
       const t = e.target as Node;

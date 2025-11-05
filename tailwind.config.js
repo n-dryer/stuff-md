@@ -43,6 +43,9 @@ export default {
         '8': '8px',
         '10': '10px',
       },
+      animation: {
+        'brutalist-pulse': 'brutalist-pulse 1.5s ease-in-out infinite',
+      },
     }
   },
   plugins: [require('@tailwindcss/line-clamp')],

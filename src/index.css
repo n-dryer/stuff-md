@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,26 +22,26 @@ body {
     color 0.3s ease;
 }
 
-/* Theme variables */
+/* Theme variables - using design tokens */
 :root {
-  --tooltip-bg: #0a0a0a;
-  --tooltip-fg: #fafafa;
+  --tooltip-bg: #000000; /* accent-black */
+  --tooltip-fg: #F8F8F8; /* off-white */
 
-  --toast-bg: #ffffff;
-  --toast-fg: #0a0a0a;
-  --toast-border: #0a0a0a;
-  --toast-success: #16a34a; /* green-600 */
-  --toast-error: #dc2626; /* red-600 */
-  --toast-info: #2563eb; /* blue-600 */
+  --toast-bg: #F8F8F8; /* off-white */
+  --toast-fg: #000000; /* accent-black */
+  --toast-border: #000000; /* accent-black */
+  --toast-success: #16a34a; /* green-600 - semantic color, keeping as is */
+  --toast-error: #FF0000; /* destructive-red */
+  --toast-info: #2563eb; /* blue-600 - semantic color, keeping as is */
 }
 
 .dark {
-  --tooltip-bg: #fafafa;
-  --tooltip-fg: #0a0a0a;
+  --tooltip-bg: #F8F8F8; /* off-white */
+  --tooltip-fg: #000000; /* accent-black */
 
-  --toast-bg: #111111; /* brutal-gray or near-off-black */
-  --toast-fg: #fafafa;
-  --toast-border: #fafafa;
+  --toast-bg: #222222; /* brutal-gray */
+  --toast-fg: #F8F8F8; /* off-white */
+  --toast-border: #F8F8F8; /* off-white */
 }
 
 /* Custom animations from index.html */
@@ -78,6 +80,28 @@ body {
   animation: fadeInOut 2s ease-in-out forwards;
 }
 
+/* Brutalist pulse animation - harsh transitions for skeleton loaders */
+@keyframes brutalist-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.brutalist-pulse {
+  animation: brutalist-pulse 1.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brutalist-pulse {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
 /* Allows for open/close icon on details/summary */
 summary::marker {
   content: '';
@@ -89,7 +113,7 @@ input {
   transition:
     border-width 0.1s ease-in-out,
     padding 0.1s ease-in-out,
-    height 0.2s ease-in-out;
+    height 0.25s ease-in-out;
 }
 
 /* Markdown content styles */
@@ -147,10 +171,10 @@ input {
 }
 
 .markdown-content blockquote {
-  border-left: 4px solid #ccc;
+  border-left: 4px solid #CCCCCC; /* light-gray */
   padding-left: 1em;
   margin-left: 0;
-  color: #666;
+  color: rgba(0, 0, 0, 0.4); /* accent-black with opacity */
 }
 
 .dark .markdown-content code {
@@ -222,8 +246,8 @@ input {
 }
 
 .dark .markdown-content blockquote {
-  border-left-color: #555;
-  color: #aaa;
+  border-left-color: rgba(248, 248, 248, 0.4); /* off-white with opacity */
+  color: rgba(248, 248, 248, 0.6); /* off-white with opacity */
 }
 
 /* Harsh linear modal transitions for brutalist aesthetic */
@@ -263,4 +287,90 @@ input {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* Google Sign-In Button - Light Mode (Dark Button) */
+/* Note: Google branding requires specific colors, some values kept for compliance */
+.google-signin-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family:
+    'Roboto',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1;
+  color: #F8F8F8; /* off-white */
+  background-color: #1A1A1A; /* off-black */
+  border: 1px solid #1A1A1A; /* off-black */
+  border-radius: 4px;
+  padding: 10px 24px;
+  min-height: 48px;
+  min-width: 240px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.1s ease;
+}
+
+.google-signin-button:hover {
+  background-color: #222222; /* brutal-gray */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.google-signin-button:active {
+  background-color: #000000; /* accent-black */
+  transform: scale(0.99);
+}
+
+.google-signin-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.35);
+}
+
+.google-signin-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+.google-signin-button__icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+}
+
+.google-signin-button__label {
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+/* Google Sign-In Button - Dark Mode (White Button) */
+/* Note: Google branding requires specific colors, some values kept for compliance */
+.dark .google-signin-button {
+  background-color: #F8F8F8; /* off-white */
+  border-color: #CCCCCC; /* light-gray */
+  color: #1A1A1A; /* off-black */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark .google-signin-button:hover {
+  background-color: #FFFFFF; /* pure white for hover per Google spec */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.dark .google-signin-button:active {
+  background-color: #F0F0F0; /* slightly off white */
+  transform: scale(0.99);
+}
+
+.dark .google-signin-button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.35);
 }

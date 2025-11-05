@@ -37,7 +37,7 @@ type GenAIModule = {
 
 // Configuration
 const REQUEST_TIMEOUT_MS: number = Number(
-  import.meta.env.VITE_GEMINI_TIMEOUT_MS ?? 30000
+  import.meta.env.VITE_GEMINI_TIMEOUT_MS ?? 20000
 );
 
 // Lazy load @google/genai only when needed for fallback
@@ -67,10 +67,18 @@ export const loadGoogleGenAI = async (): Promise<{
 };
 
 /**
+ * Validate API key format without exposing it
+ */
+const validateApiKey = (): boolean => {
+  if (!apiKey) return false;
+  return apiKey.startsWith('AI') && apiKey.length > 20;
+};
+
+/**
  * Check if API key is configured
  */
 export const isApiKeyConfigured = (): boolean => {
-  return !!apiKey;
+  return validateApiKey();
 };
 
 // Promise timeout helper
@@ -137,6 +145,11 @@ export const useGeminiAPI = async (
     }),
     REQUEST_TIMEOUT_MS
   );
+
+  // Ensure response has text property
+  if (!response.text) {
+    throw new Error('Gemini API returned empty response');
+  }
 
   return response.text;
 };

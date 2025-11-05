@@ -29,8 +29,8 @@ export function createOptimisticNote(
     title,
     summary: 'Processing...',
     date: new Date().toISOString(),
-    categoryPath: ['Uncategorized'],
-    tags: [],
+    categoryPath: ['Misc'],
+    tags: ['misc'],
     aiGenerated: null,
   };
 }

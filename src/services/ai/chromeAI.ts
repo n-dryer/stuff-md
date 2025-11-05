@@ -1,5 +1,6 @@
-import { logError } from '../../utils/logger';
+import { logError, logDebug } from '../../utils/logger';
 import { BrowserAPIError, TimeoutError } from '../aiService';
+import { formatSchemaDescription } from './utils';
 
 // Chrome Built-in AI API types (Prompt API)
 type ChromeAISession = {
@@ -9,7 +10,7 @@ type ChromeAISession = {
 
 // Configuration
 const REQUEST_TIMEOUT_MS: number = Number(
-  import.meta.env.VITE_GEMINI_TIMEOUT_MS ?? 30000
+  import.meta.env.VITE_GEMINI_TIMEOUT_MS ?? 20000
 );
 
 // Promise timeout helper
@@ -39,13 +40,22 @@ const withTimeout = async <T>(
 export const checkChromeAIAvailability = async (): Promise<
   'readily' | 'after-download' | 'no'
 > => {
-  if (typeof window === 'undefined' || !window.ai) {
+  if (typeof window === 'undefined') {
+    logDebug('[Chrome AI] Window is undefined (SSR)');
     return 'no';
   }
+
+  if (!window.ai) {
+    logDebug('[Chrome AI] window.ai is not available');
+    return 'no';
+  }
+
   try {
     const availability = await window.ai.canCreateTextSession();
+    logDebug(`[Chrome AI] Availability check returned: ${availability}`);
     return availability;
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     logError('Failed to check Chrome AI availability:', error);
     return 'no';
   }
@@ -57,10 +67,13 @@ export const checkChromeAIAvailability = async (): Promise<
 export const createChromeAISession =
   async (): Promise<ChromeAISession | null> => {
     if (typeof window === 'undefined' || !window.ai) {
+      logDebug('[Chrome AI] Cannot create session: window.ai not available');
       return null;
     }
     try {
+      logDebug('[Chrome AI] Attempting to create text session...');
       const session = await window.ai.createTextSession();
+      logDebug('[Chrome AI] Session created successfully');
       return session as unknown as ChromeAISession;
     } catch (error) {
       logError('Failed to create Chrome AI session:', error);
@@ -70,45 +83,76 @@ export const createChromeAISession =
 
 /**
  * Use Chrome built-in AI (Prompt API with Gemini Nano)
+ *
+ * Note: The Prompt API (window.ai.createTextSession) is the correct API for structured output.
+ * The Prompt API doesn't support separate system instructions, so we concatenate the system
+ * instruction with the user prompt. This matches the API's expected usage pattern.
+ *
+ * The API is available when:
+ * - Chrome browser with built-in AI enabled
+ * - Gemini Nano model is available (readily or after-download)
+ * - For web: Origin trial enrollment required (https://developer.chrome.com/origintrials/#/view_trial/2533837740349325313)
+ * - For extensions: Chrome 138+ stable
+ *
+ * Reference: https://developer.chrome.com/docs/ai/built-in-apis
  */
 export const useChromeBuiltInAI = async (
   prompt: string,
   systemInstruction: string,
   responseSchema: unknown
 ): Promise<string> => {
+  logDebug('[Chrome AI] Starting Chrome built-in AI request');
+
   const availability = await checkChromeAIAvailability();
 
   if (availability === 'no') {
-    throw new BrowserAPIError('Chrome built-in AI is not available');
+    logDebug('[Chrome AI] Availability check returned "no"');
+    logDebug('[Chrome AI] Possible reasons:');
+    logDebug('  - Not using Chrome browser');
+    logDebug('  - Chrome version < 138 (for extensions)');
+    logDebug('  - Origin trial not enrolled (for web usage)');
+    logDebug('  - Chrome AI flags not enabled');
+    logDebug('  - Gemini Nano model not available');
+    throw new BrowserAPIError(
+      'Chrome built-in AI is not available. Ensure you are using Chrome 138+ with built-in AI enabled, or enroll in the origin trial for web usage.'
+    );
   }
+
+  logDebug(`[Chrome AI] Availability: ${availability}`);
 
   // Wait for download if needed
   if (availability === 'after-download') {
+    logDebug('[Chrome AI] Model needs download, waiting...');
     // Wait a bit for model download, then try again
     await new Promise(resolve => setTimeout(resolve, 2000));
     const retryAvailability = await checkChromeAIAvailability();
     if (retryAvailability === 'no') {
+      logDebug('[Chrome AI] Model download failed or timed out');
       throw new BrowserAPIError(
         'Chrome built-in AI model download failed or timed out'
       );
     }
+    logDebug(`[Chrome AI] After download check: ${retryAvailability}`);
   }
 
   const session = await createChromeAISession();
   if (!session) {
+    logDebug('[Chrome AI] Session creation returned null');
     throw new BrowserAPIError('Failed to create Chrome AI session');
   }
 
   try {
-    // Chrome Prompt API - format prompt to request JSON output
-    // Include schema in the prompt for structured output
-    const schemaDescription = JSON.stringify(responseSchema, null, 2);
-    const fullPrompt = `${systemInstruction}\n\n${prompt}\n\nIMPORTANT: Respond with valid JSON only, matching this exact schema structure:\n${schemaDescription}\n\nDo not include any text before or after the JSON. Return only the JSON object.`;
+    logDebug('[Chrome AI] Constructing prompt with schema...');
+    const schemaDescription = formatSchemaDescription(responseSchema);
+    const fullPrompt = `${systemInstruction}\n\n${prompt}\n\nCRITICAL REQUIREMENTS:\n- The summary field MUST be exactly 100-300 characters (2-4 sentences). This is mandatory.\n- The summary must be informative and substantive, capturing key points from the content.\n- Never return a summary shorter than 100 characters or longer than 300 characters.\n\nIMPORTANT: Respond with valid JSON only, matching this exact schema structure:\n${schemaDescription}\n\nDo not include any text before or after the JSON. Return only the JSON object.`;
 
+    logDebug('[Chrome AI] Sending prompt to session...');
     const response = await withTimeout(
       session.prompt(fullPrompt),
       REQUEST_TIMEOUT_MS
     );
+
+    logDebug('[Chrome AI] Received response, cleaning...');
 
     // Clean up response - remove markdown code blocks if present
     let cleanedResponse = response.trim();
@@ -122,8 +166,14 @@ export const useChromeBuiltInAI = async (
         .replace(/\s*```$/, '');
     }
 
+    logDebug('[Chrome AI] Successfully processed response');
+
     return cleanedResponse.trim();
+  } catch (error) {
+    logError('[Chrome AI] Error during prompt execution:', error);
+    throw error;
   } finally {
+    logDebug('[Chrome AI] Destroying session');
     session.destroy();
   }
 };

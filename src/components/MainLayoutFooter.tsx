@@ -1,23 +1,23 @@
 import React from 'react';
 import BrutalistTooltip from './BrutalistTooltip';
-import ExportButtons from './ExportButtons';
 import ThemeToggle from './ThemeToggle';
+import ExportButtons from './ExportButtons';
 import { Note } from '../types';
 
 interface MainLayoutFooterProps {
   isSidebarCollapsed: boolean;
-  notes: Note[];
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   instructionsControl: React.ReactNode;
+  notes: Note[];
 }
 
 const MainLayoutFooter: React.FC<MainLayoutFooterProps> = ({
   isSidebarCollapsed,
-  notes,
   isDarkMode,
   onToggleDarkMode,
   instructionsControl,
+  notes,
 }) => {
   const themeToggleTooltip = isDarkMode
     ? 'Switch to Light mode'
@@ -47,14 +47,16 @@ const MainLayoutFooter: React.FC<MainLayoutFooterProps> = ({
                 <div className='inline-flex flex-shrink-0 whitespace-nowrap'>
                   <ExportButtons notes={notes} />
                 </div>
-                <BrutalistTooltip text={themeToggleTooltip} position='top'>
-                  <div className='flex justify-center flex-shrink-0 whitespace-nowrap'>
-                    <ThemeToggle
-                      isDarkMode={isDarkMode}
-                      onToggle={onToggleDarkMode}
-                    />
-                  </div>
-                </BrutalistTooltip>
+                <div className='inline-flex flex-shrink-0 whitespace-nowrap'>
+                  <BrutalistTooltip text={themeToggleTooltip} position='top'>
+                    <div className='flex justify-center flex-shrink-0 whitespace-nowrap'>
+                      <ThemeToggle
+                        isDarkMode={isDarkMode}
+                        onToggle={onToggleDarkMode}
+                      />
+                    </div>
+                  </BrutalistTooltip>
+                </div>
               </div>
             </div>
           </div>

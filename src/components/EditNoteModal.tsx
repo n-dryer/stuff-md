@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { useModalInteraction } from '../hooks/useModalInteraction';
 import Button from './Button';
+import BrutalistSpinner from './BrutalistSpinner';
 import { Note } from '../types';
 import { logError } from '../utils/logger';
 
@@ -10,10 +11,12 @@ interface EditNoteModalProps {
   onClose: () => void;
   onSave: (note: Note, newContent: string) => Promise<void>;
   note: Note | null;
+  onRequestDelete?: (noteId: string) => void;
+  isDeleting?: boolean;
 }
 
 const EditNoteModal: React.FC<EditNoteModalProps> = React.memo(
-  ({ isOpen, onClose, onSave, note }) => {
+  ({ isOpen, onClose, onSave, note, onRequestDelete, isDeleting = false }) => {
     const [content, setContent] = useState('');
     const [isSaving, setIsSaving] = useState(false);
     const [originalContent, setOriginalContent] = useState('');
@@ -98,12 +101,14 @@ const EditNoteModal: React.FC<EditNoteModalProps> = React.memo(
           >
             ×
           </button>
-          <h2
-            id='edit-note-title'
-            className='text-xl md:text-2xl font-black uppercase font-mono tracking-wider truncate mb-2 text-off-black dark:text-off-white pr-8'
-          >
-            EDIT: {note.title}
-          </h2>
+          <div className='mb-2'>
+            <h2
+              id='edit-note-title'
+              className='text-xl md:text-2xl font-black uppercase font-mono tracking-wider truncate text-off-black dark:text-off-white pr-8'
+            >
+              VIEW/EDIT: {note.title}
+            </h2>
+          </div>
           <p
             id='edit-note-description'
             className='text-base text-off-black/80 dark:text-off-white/80 mb-6 leading-relaxed tracking-wide'
@@ -112,34 +117,72 @@ const EditNoteModal: React.FC<EditNoteModalProps> = React.memo(
             Drive.
           </p>
 
-          <textarea
-            id='edit-note-content'
-            name='noteContent'
-            ref={textareaRef}
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            className='w-full flex-grow bg-off-white dark:bg-brutal-gray text-base font-mono text-off-black dark:text-off-white placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none p-3 border-2 border-accent-black dark:border-off-white/50 min-h-[30vh]'
-          />
+          <div className='relative flex-grow'>
+            <textarea
+              id='edit-note-content'
+              name='noteContent'
+              ref={textareaRef}
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              disabled={isSaving || isDeleting}
+              className='w-full flex-grow bg-off-white dark:bg-brutal-gray text-base font-mono text-off-black dark:text-off-white placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none p-3 border-2 border-accent-black dark:border-off-white/50 min-h-[30vh] disabled:opacity-60 disabled:cursor-not-allowed'
+            />
+            {isSaving && (
+              <div
+                className='absolute inset-0 pointer-events-auto cursor-not-allowed z-10'
+                aria-label='Saving note, please wait'
+                role='status'
+              />
+            )}
+          </div>
           <p className='text-xs text-off-black/60 dark:text-off-white/60 mt-2'>
             Cmd/Ctrl + Enter to save. ESC to close.
           </p>
 
-          <div className='flex items-center gap-x-4 mt-6 flex-shrink-0'>
-            <Button
-              onClick={handleSave}
-              variant='fill'
-              disabled={
-                isSaving || !content.trim() || content === originalContent
-              }
-              aria-disabled={
-                isSaving || !content.trim() || content === originalContent
-              }
-            >
-              {isSaving ? 'SAVING...' : 'SAVE'}
-            </Button>
-            <Button onClick={onClose} variant='default' disabled={isSaving}>
-              CANCEL
-            </Button>
+          <div className='flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-x-4 mt-6 flex-shrink-0'>
+            <div className='flex items-center gap-[clamp(0.5rem,1.5vw,0.75rem)]'>
+              <Button
+                onClick={handleSave}
+                variant='fill'
+                disabled={
+                  isSaving ||
+                  isDeleting ||
+                  !content.trim() ||
+                  content === originalContent
+                }
+                aria-disabled={
+                  isSaving ||
+                  isDeleting ||
+                  !content.trim() ||
+                  content === originalContent
+                }
+                className='w-full sm:w-auto'
+              >
+                {isSaving ? 'SAVING...' : 'SAVE'}
+              </Button>
+              {isSaving && <BrutalistSpinner />}
+              <Button
+                onClick={onClose}
+                variant='default'
+                disabled={isSaving || isDeleting}
+                className='w-full sm:w-auto'
+              >
+                CANCEL
+              </Button>
+            </div>
+            <div className='flex items-center gap-3 sm:gap-x-4 flex-wrap'>
+              {onRequestDelete && note && (
+                <button
+                  onClick={() => onRequestDelete(note.id)}
+                  disabled={isSaving || isDeleting}
+                  className='inline-flex items-center justify-center uppercase font-mono font-bold text-xs sm:text-sm md:text-base tracking-wider text-light-gray hover:text-destructive-red dark:text-gray-500 dark:hover:text-destructive-red hover:font-black focus:font-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black px-2 sm:px-2.5 md:px-3 py-1 sm:py-1.5 md:py-2 text-center whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed w-full sm:w-auto'
+                  aria-label='Delete note'
+                  title='Delete note'
+                >
+                  [DELETE]
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

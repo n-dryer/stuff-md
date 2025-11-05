@@ -37,11 +37,10 @@ export const validateAndParseResponse = (
     );
   }
 
-  if (candidate.summary.length < 50 || candidate.summary.length > 300) {
-    // Allow slightly shorter summaries but warn in dev
-    if (import.meta.env.DEV && candidate.summary.length < 50) {
-      console.warn(
-        `[AI Service] Summary is shorter than recommended (${candidate.summary.length} chars, min 50)`
+  if (candidate.summary.length < 100 || candidate.summary.length > 300) {
+    if (candidate.summary.length < 100) {
+      throw new SchemaError(
+        `Summary length must be at least 100 characters (got ${candidate.summary.length}). Summaries must be 2-4 sentences and informative.`
       );
     }
     if (candidate.summary.length > 300) {
@@ -118,12 +117,88 @@ export const validateAndParseResponse = (
     })
     .filter(cat => cat.length > 0); // Remove empty categories
 
+  // Validate and normalize icon
+  const normalizedIcon = validateAndNormalizeIcon(
+    candidate.icon.trim(),
+    normalizedCategories
+  );
+
   return {
     title: candidate.title.trim(),
     summary: candidate.summary.trim(),
     categories: normalizedCategories,
     tags: normalizedTags,
-    icon: candidate.icon.trim().toLowerCase(),
+    icon: normalizedIcon,
     rationale: candidate.rationale.trim(),
   };
+};
+
+/**
+ * Validate icon relevance to category and ensure uniqueness
+ */
+const isIconRelevantToCategory = (icon: string, category: string): boolean => {
+  const mappings: Record<string, string[]> = {
+    code: ['programming', 'code', 'development', 'dev', 'tech', 'technical'],
+    'shopping-cart': ['shopping', 'personal', 'purchase', 'grocery', 'store'],
+    link: ['link', 'url', 'bookmark', 'reference', 'web'],
+    lightbulb: ['idea', 'note', 'thought', 'brainstorm', 'creative'],
+  };
+
+  const relevantTerms = mappings[icon] || [];
+  return relevantTerms.some(term => category.includes(term));
+};
+
+/**
+ * Derive icon from category path for uniqueness
+ */
+const deriveIconFromCategory = (categoryPath: string[]): string => {
+  const primaryCategory = categoryPath[0]?.toLowerCase() || '';
+
+  if (
+    primaryCategory.includes('programming') ||
+    primaryCategory.includes('code') ||
+    primaryCategory.includes('dev') ||
+    primaryCategory.includes('tech')
+  ) {
+    return 'code';
+  }
+  if (
+    primaryCategory.includes('shopping') ||
+    primaryCategory.includes('personal')
+  ) {
+    return 'shopping-cart';
+  }
+  if (primaryCategory.includes('link') || primaryCategory.includes('url')) {
+    return 'link';
+  }
+  if (primaryCategory.includes('idea') || primaryCategory.includes('note')) {
+    return 'lightbulb';
+  }
+
+  return 'default';
+};
+
+/**
+ * Validate and normalize icon name based on category
+ */
+const validateAndNormalizeIcon = (
+  icon: string,
+  categoryPath: string[]
+): string => {
+  const normalized = icon.toLowerCase().trim().replace(/\s+/g, '-');
+  const allowedIcons = [
+    'lightbulb',
+    'link',
+    'code',
+    'shopping-cart',
+    'default',
+  ];
+
+  if (allowedIcons.includes(normalized)) {
+    const primaryCategory = categoryPath[0]?.toLowerCase() || '';
+    const isRelevant = isIconRelevantToCategory(normalized, primaryCategory);
+    if (isRelevant) return normalized;
+  }
+
+  return deriveIconFromCategory(categoryPath);
 };

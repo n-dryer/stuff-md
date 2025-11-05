@@ -1,5 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
+import BrutalistSpinner from './BrutalistSpinner';
 
 interface ExportMenuProps {
   isExpanded: boolean;
@@ -20,6 +21,7 @@ interface ExportMenuProps {
     exportFn: () => void | Promise<void>,
     errorMessage: string
   ) => Promise<void>;
+  isExporting: boolean;
 }
 
 const ExportMenu: React.FC<ExportMenuProps> = ({
@@ -29,6 +31,7 @@ const ExportMenu: React.FC<ExportMenuProps> = ({
   menuPosition,
   exportOptions,
   onExport,
+  isExporting,
 }) => {
   if (!isExpanded) return null;
 
@@ -71,6 +74,8 @@ const ExportMenu: React.FC<ExportMenuProps> = ({
           role='menuitem'
           aria-label={option.ariaLabel}
           onClick={() => onExport(option.fn, option.errorMsg)}
+          disabled={isExporting}
+          aria-disabled={isExporting}
           className={`
             font-mono text-sm uppercase
             text-accent-black dark:text-off-white
@@ -78,9 +83,12 @@ const ExportMenu: React.FC<ExportMenuProps> = ({
             transition-colors duration-150
             hover:font-bold hover:bg-off-black/10 dark:hover:bg-off-white/10
             focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black focus-visible:bg-off-black/10 dark:focus-visible:bg-off-white/10
+            disabled:opacity-60 disabled:cursor-not-allowed
+            flex items-center justify-between gap-[clamp(0.5rem,1.5vw,0.75rem)]
           `}
         >
-          {option.label}
+          <span>{option.label}</span>
+          {isExporting && <BrutalistSpinner />}
         </button>
       ))}
     </div>,

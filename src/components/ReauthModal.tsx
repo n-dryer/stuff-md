@@ -7,17 +7,19 @@ interface ReauthModalProps {
   isOpen: boolean;
   onReconnect: () => void;
   onLogout: () => void;
+  onClose: () => void;
 }
 
 const ReauthModal: React.FC<ReauthModalProps> = React.memo(({
   isOpen,
   onReconnect,
   onLogout,
+  onClose,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const { handleBackdropClick, handleBackdropKeyDown } = useModalInteraction({
     isOpen,
-    onClose: onLogout,
+    onClose,
     modalRef,
   });
 
@@ -49,15 +51,9 @@ const ReauthModal: React.FC<ReauthModalProps> = React.memo(({
         ref={modalRef}
         className="bg-off-white dark:bg-brutal-gray p-8 border-2 border-accent-black dark:border-off-white/50 w-full max-w-md m-4 relative"
         onClick={event => event.stopPropagation()}
-        onKeyDown={event => {
-          // Stop propagation for keyboard events to prevent backdrop from closing modal
-          if (event.key === 'Escape') {
-            event.stopPropagation();
-          }
-        }}
       >
         <button
-          onClick={onLogout}
+          onClick={onClose}
           aria-label='Close dialog'
           className='absolute top-4 right-4 flex h-8 w-8 items-center justify-center bg-off-white text-xl font-bold leading-none text-accent-black transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-black focus-visible:ring-offset-2 focus-visible:ring-offset-off-white hover:bg-accent-black hover:text-off-white dark:bg-brutal-gray dark:text-off-white dark:focus-visible:ring-off-white dark:hover:bg-off-white dark:hover:text-off-black'
         >

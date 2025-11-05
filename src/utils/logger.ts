@@ -18,3 +18,12 @@ export const logInfo = (message: string, ...args: unknown[]): void => {
     console.info(message, ...args);
   }
 };
+
+/**
+ * Log debug information (dev-only)
+ */
+export const logDebug = (message: string, ...args: unknown[]): void => {
+  if (isDevelopment) {
+    console.log(message, ...args);
+  }
+};

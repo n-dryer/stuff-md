@@ -28,6 +28,7 @@ export function useUIState() {
   );
 
   const [showInstructions, setShowInstructions] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   const displayFeedback = (
     message: string,
@@ -59,7 +60,16 @@ export function useUIState() {
     setActiveTags([]);
   };
 
-  const saveInstructions = (instructions: string) => {
+  const [showRegenerateConfirmation, setShowRegenerateConfirmation] =
+    useState(false);
+  const [pendingInstructions, setPendingInstructions] = useState<string | null>(
+    null
+  );
+
+  const saveInstructions = (
+    instructions: string,
+    shouldRegenerate: boolean = false
+  ) => {
     const previous = customInstructions;
     const normalized = instructions.trim();
 
@@ -74,11 +84,48 @@ export function useUIState() {
       return;
     }
 
+    // Check if instructions actually changed
+    const previousNormalized = previous.trim();
+    const hasChanged =
+      previousNormalized !== normalized && previousNormalized !== '';
+
+    // If instructions changed, show confirmation (but don't auto-regenerate all notes - too many API calls)
+    // Users can manually regenerate individual notes if needed
+    if (hasChanged && !shouldRegenerate) {
+      setPendingInstructions(normalized);
+      setShowRegenerateConfirmation(true);
+      return;
+    }
+
     // Saving a custom instruction updates both current and last
     setCustomInstructions(instructions);
     setLastCustomInstructions(instructions);
     setShowInstructions(false);
+    setShowRegenerateConfirmation(false);
+    setPendingInstructions(null);
     displayFeedback('Custom instructions saved.', 'success');
+  };
+
+  const confirmRegenerate = () => {
+    if (pendingInstructions) {
+      saveInstructions(pendingInstructions, true);
+    }
+  };
+
+  const cancelRegenerate = () => {
+    if (pendingInstructions) {
+      // Save without regenerating
+      const normalized = pendingInstructions.trim();
+      setCustomInstructions(normalized);
+      setLastCustomInstructions(normalized);
+      setShowInstructions(false);
+      setShowRegenerateConfirmation(false);
+      setPendingInstructions(null);
+      displayFeedback(
+        'Custom instructions saved. Existing notes not regenerated.',
+        'success'
+      );
+    }
   };
 
   return {
@@ -97,5 +144,10 @@ export function useUIState() {
     dismissTip: setIsTipDismissed,
     showInstructions,
     setShowInstructions,
+    showHelp,
+    setShowHelp,
+    showRegenerateConfirmation,
+    confirmRegenerate,
+    cancelRegenerate,
   };
 }

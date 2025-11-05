@@ -31,8 +31,8 @@ export const buildResponseSchema = (Type?: GenAIModule['Type']) => {
       summary: {
         type: isString(Type?.STRING) ? Type?.STRING : 'string',
         description:
-          "A detailed summary of the note's content, 2-4 sentences, 100-300 characters. Should capture key points and be informative, not just a restatement.",
-        minLength: 50,
+          "A detailed summary of the note's content, 2-4 sentences, 100-300 characters. CRITICAL: Must be exactly 100-300 characters. Should capture key points and be informative, not just a restatement. Always provide meaningful context and essential information.",
+        minLength: 100,
         maxLength: 300,
       },
       categories: {
@@ -58,7 +58,7 @@ export const buildResponseSchema = (Type?: GenAIModule['Type']) => {
       icon: {
         type: isString(Type?.STRING) ? Type?.STRING : 'string',
         description:
-          'An icon name suggestion that matches the content type. Common values: "lightbulb", "link", "code", "shopping-cart", "book", "file", "folder", "star", "calendar", "tag".',
+          'An icon name suggestion that matches the content type and primary category. Must be one of: "lightbulb" (ideas/notes/thoughts), "link" (links/URLs/bookmarks), "code" (programming/development/technical), "shopping-cart" (shopping/personal/purchases), or "default" (all other content types). The icon must match the primary category path element.',
       },
       rationale: {
         type: isString(Type?.STRING) ? Type?.STRING : 'string',

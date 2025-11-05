@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useMemo } from 'react';
 import { Note } from '../types';
 import { logError } from '../utils/logger';
 import { rateLimit } from '../utils/rateLimiter';
@@ -40,43 +40,50 @@ export const useNoteHandlers = ({
   setNoteToDelete,
   setShowNoteSavedToast,
 }: UseNoteHandlersProps) => {
-  // Rate limiters - shared across re-renders
-  const saveLimiterRef = useRef(
-    rateLimit(saveNote, { minInterval: 300, maxCalls: 10, windowMs: 60000 })
-  );
-  const deleteLimiterRef = useRef(
-    rateLimit(deleteNote, { minInterval: 500, maxCalls: 20, windowMs: 60000 })
-  );
-  const updateLimiterRef = useRef(
-    rateLimit(regenerateNote, {
-      minInterval: 2000,
-      maxCalls: 5,
-      windowMs: 60000,
-    })
+  // Store latest function references to avoid recreating limiters
+  const saveNoteRef = useRef(saveNote);
+  const deleteNoteRef = useRef(deleteNote);
+  const regenerateNoteRef = useRef(regenerateNote);
+
+  // Update refs when functions change
+  saveNoteRef.current = saveNote;
+  deleteNoteRef.current = deleteNote;
+  regenerateNoteRef.current = regenerateNote;
+
+  // Create stable rate limiters that use refs to always call latest functions
+  // This prevents unnecessary recreation while ensuring latest functions are called
+  const saveLimiter = useMemo(
+    () =>
+      rateLimit(
+        (...args) => saveNoteRef.current(...args),
+        { minInterval: 300, maxCalls: 10, windowMs: 60000 }
+      ),
+    [] // Empty deps - limiter is stable, uses ref for latest function
   );
 
-  // Update rate limiters when functions change
-  saveLimiterRef.current = rateLimit(saveNote, {
-    minInterval: 300,
-    maxCalls: 10,
-    windowMs: 60000,
-  });
-  deleteLimiterRef.current = rateLimit(deleteNote, {
-    minInterval: 500,
-    maxCalls: 20,
-    windowMs: 60000,
-  });
-  updateLimiterRef.current = rateLimit(regenerateNote, {
-    minInterval: 2000,
-    maxCalls: 5,
-    windowMs: 60000,
-  });
+  const deleteLimiter = useMemo(
+    () =>
+      rateLimit(
+        (...args) => deleteNoteRef.current(...args),
+        { minInterval: 500, maxCalls: 20, windowMs: 60000 }
+      ),
+    [] // Empty deps - limiter is stable, uses ref for latest function
+  );
+
+  const updateLimiter = useMemo(
+    () =>
+      rateLimit(
+        (...args) => regenerateNoteRef.current(...args),
+        { minInterval: 2000, maxCalls: 5, windowMs: 60000 }
+      ),
+    [] // Empty deps - limiter is stable, uses ref for latest function
+  );
 
   const handleSaveNote = useCallback(async () => {
     if (!accessToken || !draft.trim()) return;
 
     try {
-      await saveLimiterRef.current(draft, customInstructions);
+      await saveLimiter(draft, customInstructions);
       setDraft('');
       if (noteInputRef.current) {
         noteInputRef.current.style.height = 'auto';
@@ -98,13 +105,14 @@ export const useNoteHandlers = ({
     noteInputRef,
     setDraft,
     setShowNoteSavedToast,
+    saveLimiter,
   ]);
 
   const handleConfirmDelete = useCallback(
     async (noteToDelete: string | null) => {
       if (!noteToDelete) return;
       try {
-        await deleteLimiterRef.current(noteToDelete);
+        await deleteLimiter(noteToDelete);
         displayFeedback('Note deleted.', 'success');
       } catch (error) {
         if (error instanceof Error && error.message.includes('Rate limit')) {
@@ -117,13 +125,13 @@ export const useNoteHandlers = ({
         setNoteToDelete(null);
       }
     },
-    [setNoteToDelete, displayFeedback]
+    [setNoteToDelete, displayFeedback, deleteLimiter]
   );
 
   const handleUpdateAndRecategorizeNote = useCallback(
     async (note: Note, newContent: string) => {
       try {
-        await updateLimiterRef.current(note, newContent, customInstructions);
+        await updateLimiter(note, newContent, customInstructions);
         displayFeedback('Note updated.', 'success');
       } catch (error) {
         if (error instanceof Error && error.message.includes('Rate limit')) {
@@ -134,7 +142,7 @@ export const useNoteHandlers = ({
         }
       }
     },
-    [customInstructions, displayFeedback]
+    [customInstructions, displayFeedback, updateLimiter]
   );
 
   return {

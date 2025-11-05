@@ -79,16 +79,16 @@ const InstructionsModalContent: React.FC<InstructionsModalContentProps> = ({
             value={instructions}
             onChange={event => setInstructions(event.target.value)}
             placeholder="e.g., 'Always categorize technical notes under a programming parent category.'"
-            className='w-full flex-1 min-h-[220px] bg-transparent text-sm sm:text-base font-mono text-off-black dark:text-off-white placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none p-3'
+            className='w-full flex-1 min-h-[220px] sm:min-h-[280px] bg-transparent text-sm sm:text-base font-mono text-off-black dark:text-off-white placeholder-gray-400 dark:placeholder-gray-500 resize-none focus:outline-none p-3 sm:p-4'
             rows={6}
             aria-describedby='instructions-description'
             aria-labelledby='instructions-modal-title'
-            maxLength={300}
+            maxLength={2000}
           />
           <div className='flex justify-end pt-2'>
             <CharCounter
               valueLength={instructions.length}
-              max={300}
+              max={2000}
               className='normal-case'
             />
           </div>

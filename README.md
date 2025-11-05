@@ -38,7 +38,7 @@ Get your Firebase config from [Firebase Console](https://console.firebase.google
 
 Add to `.env.local`:
 
-```
+```bash
 VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
@@ -51,14 +51,70 @@ VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 ## How It Works
 
 - Uses Chrome's built-in AI (Gemini Nano) when available
-- Falls back to Gemini API if needed
+- Falls back to Gemini API if Chrome AI is unavailable
+- **Automatic fallback categorization** if both AI services fail
 - All data stored in your Google Drive
 - No server, no database
 - Client-side only
 
+### AI Fallback System
+
+The app has a three-tier fallback system for reliability:
+
+1. **Primary**: Chrome Built-in AI (Gemini Nano via Prompt API) - Free, runs locally
+2. **Secondary**: Gemini API (Gemini 1.5 Flash) - Requires API key, used when Chrome AI unavailable
+3. **Tertiary**: Rule-based fallback categorization - Automatically categorizes notes using keyword detection when AI services fail
+
+All three methods ensure your notes are always categorized, even if AI services are unavailable.
+
+### AI Categorization
+
+The app uses AI to automatically categorize notes with:
+
+- **Titles**: Concise, descriptive titles (50-100 characters)
+- **Summaries**: Detailed summaries (2-4 sentences, 100-300 characters)
+- **Categories**: Hierarchical category paths (2-3 levels, PascalCase)
+- **Tags**: Context-aware tags (1-2 words, lowercase, max 5)
+- **Icons**: Category-relevant icons (lightbulb, link, code, shopping-cart, default)
+- **Rationale**: Brief explanation of categorization decisions
+
+#### Custom Instructions
+
+You can customize how the AI categorizes notes by providing custom instructions. Custom instructions are combined with the base system instructions to ensure proper formatting while allowing customization.
+
+**Security Features:**
+
+- Prompt injection protection
+- Content sanitization
+- Rate limiting (5 requests/minute, 20/hour)
+- Token usage optimization
+- Spam detection
+- Automatic fallback categorization when AI fails
+
+**AI Validation & Testing:**
+
+- Automated workflow validation test suite
+- Chrome AI availability checks
+- Schema validation for all AI responses
+- Summary length validation (100-300 characters)
+- Custom instructions integration testing
+- Rate limiting behavior verification
+- Error handling validation
+
+See [PROMPT_ENGINEERING.md](PROMPT_ENGINEERING.md) for detailed information about prompt structure, validation, and testing.
+
 ## Usage
 
 Type in the input area and press Enter. Notes are saved immediately and categorized automatically.
+
+### Editing Notes
+
+Click on any note to open the edit modal. You can:
+
+- Edit the note content
+- Save changes with Cmd/Ctrl + Enter
+- Delete the note (with confirmation prompt)
+- Cancel changes with ESC or the Cancel button
 
 ## Tech Stack
 

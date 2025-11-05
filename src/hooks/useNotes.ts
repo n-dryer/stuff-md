@@ -57,14 +57,14 @@ export function useNotes(accessToken: string | null) {
     if (accessToken) {
       const controller = new AbortController();
       abortControllerRef.current = controller;
-      
+
       // Pre-fetch folder ID to have it ready for saves
       // This runs in parallel with fetchNotes to avoid blocking
       findOrCreateAppFolder(accessToken, controller.signal).catch(err => {
         // Log but don't throw - folder will be fetched on first save if this fails
         logError('Failed to pre-fetch folder ID:', err);
       });
-      
+
       fetchNotes(controller.signal);
     } else {
       setNotes([]);
@@ -121,8 +121,8 @@ export function useNotes(accessToken: string | null) {
           title: tempTitle,
           summary: 'Processing...',
           date: optimisticNote.date,
-          categoryPath: ['Uncategorized'],
-          tags: [],
+          categoryPath: ['Misc'],
+          tags: ['misc'],
           aiGenerated: null,
         });
 
@@ -152,8 +152,8 @@ export function useNotes(accessToken: string | null) {
           title: tempTitle,
           summary: 'Processing...',
           date: savedNote.date,
-          categoryPath: ['Uncategorized'],
-          tags: [],
+          categoryPath: ['Misc'],
+          tags: ['misc'],
           aiGenerated: null,
         };
       } catch (err) {
@@ -162,7 +162,8 @@ export function useNotes(accessToken: string | null) {
         throw error;
       }
     },
-    [accessToken]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [accessToken, applyAICategorization]
   );
 
   const updateNote = useCallback(
@@ -172,10 +173,23 @@ export function useNotes(accessToken: string | null) {
       }
       setError(null);
 
+      // Ensure notes always have at least the "misc" tag
+      const finalUpdates = { ...updates };
+      if (finalUpdates.tags !== undefined && finalUpdates.tags.length === 0) {
+        finalUpdates.tags = ['misc'];
+        // Also ensure Misc category exists if tags are empty
+        if (
+          !finalUpdates.categoryPath ||
+          finalUpdates.categoryPath.length === 0
+        ) {
+          finalUpdates.categoryPath = ['Misc'];
+        }
+      }
+
       const { applyOptimistic, rollback } = withOptimisticUpdate(
         notes,
         noteId,
-        updates,
+        finalUpdates,
         setNotes,
         error => {
           setError(error);
@@ -186,15 +200,22 @@ export function useNotes(accessToken: string | null) {
       applyOptimistic();
 
       try {
-        await driveService.updateNote(accessToken, noteId, updates);
+        await driveService.updateNote(accessToken, noteId, finalUpdates);
       } catch (err) {
         await rollback(err);
         const error = toError(err);
         throw error;
       }
     },
-    [accessToken, fetchNotes]
+    [accessToken, fetchNotes, notes]
   );
+
+  // Track regeneration attempts per note to prevent abuse
+  const regenerationAttempts = useRef<
+    Map<string, { count: number; lastAttempt: number }>
+  >(new Map());
+  const MAX_REGENERATIONS_PER_NOTE = 10; // Max regenerations per note per hour
+  const REGENERATION_WINDOW_MS = 3600000; // 1 hour
 
   const regenerateNote = useCallback(
     async (
@@ -204,6 +225,42 @@ export function useNotes(accessToken: string | null) {
     ): Promise<void> => {
       if (!accessToken) {
         throw new Error('Access token is required.');
+      }
+
+      // Check if content has actually changed
+      if (note.content.trim() === newContent.trim() && note.aiGenerated) {
+        // Content unchanged and already has AI categorization - skip regeneration
+        if (import.meta.env.DEV) {
+          console.log(
+            '[useNotes] Skipping regeneration - content unchanged and already categorized'
+          );
+        }
+        return;
+      }
+
+      // Check regeneration rate limit for this specific note
+      const now = Date.now();
+      const noteAttempts = regenerationAttempts.current.get(note.id);
+      if (noteAttempts) {
+        // Reset if window has passed
+        if (now - noteAttempts.lastAttempt > REGENERATION_WINDOW_MS) {
+          noteAttempts.count = 0;
+        }
+
+        // Check if limit exceeded
+        if (noteAttempts.count >= MAX_REGENERATIONS_PER_NOTE) {
+          throw new Error(
+            `Rate limit exceeded: Maximum ${MAX_REGENERATIONS_PER_NOTE} regenerations per hour for this note. Please wait before trying again.`
+          );
+        }
+
+        noteAttempts.count += 1;
+        noteAttempts.lastAttempt = now;
+      } else {
+        regenerationAttempts.current.set(note.id, {
+          count: 1,
+          lastAttempt: now,
+        });
       }
 
       // Validate inputs

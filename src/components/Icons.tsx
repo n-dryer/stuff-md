@@ -55,6 +55,21 @@ export const categoryIcons = {
   ),
 };
 
+export const IconHelp = createIcon(
+  <>
+    <path d='M9 8a3 3 0 0 1 6 0c0 2-3 2-3 5'></path>
+    <path d='M12 17h.01'></path>
+  </>
+);
+
+export const IconInfo = createIcon(
+  <>
+    <circle cx='12' cy='12' r='9'></circle>
+    <line x1='12' y1='10' x2='12' y2='16'></line>
+    <line x1='12' y1='7' x2='12.01' y2='7'></line>
+  </>
+);
+
 export const IconToggleLeft = createIcon(
   <polyline points='15 18 9 12 15 6'></polyline>
 );

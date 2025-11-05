@@ -8,6 +8,7 @@ interface BrutalistTooltipProps {
   children: React.ReactElement;
   text: string;
   position?: Placement;
+  forcePreferredPosition?: boolean;
   /**
    * Deprecated: tooltips are hover/focus-only. This prop is ignored to meet accessibility and UX requirements.
    */
@@ -18,6 +19,7 @@ const BrutalistTooltip: React.FC<BrutalistTooltipProps> = ({
   children,
   text,
   position = 'top',
+  forcePreferredPosition = false,
 }) => {
   const id = useId();
   const {
@@ -30,7 +32,7 @@ const BrutalistTooltip: React.FC<BrutalistTooltipProps> = ({
     clearCloseTimer,
     cancelAutoHide,
     handleClick,
-  } = useTooltip(position, text);
+  } = useTooltip(position, text, { forcePreferredPosition });
 
   const triggerProps = useMemo(
     () =>
@@ -161,9 +163,9 @@ const BrutalistTooltip: React.FC<BrutalistTooltipProps> = ({
     delete enhancedProps['aria-describedby'];
   }
 
-  const childRef = (
-    child as React.ReactElement & { ref?: React.Ref<HTMLElement> }
-  ).ref;
+  const childRef = React.isValidElement(child)
+    ? (child.props as { ref?: React.Ref<HTMLElement> })?.ref
+    : undefined;
   enhancedProps.ref = mergeRefs(childRef, triggerProps.ref);
 
   const existingClassName =

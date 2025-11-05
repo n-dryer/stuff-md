@@ -19,6 +19,25 @@ export interface UserProfile {
 const ACCESS_TOKEN_KEY = 'stuffmd.gdrive_access_token';
 
 /**
+ * Normalize errors to AuthError format for consistent error handling.
+ * Handles both Firebase AuthErrors and regular Errors (e.g., missing env vars).
+ */
+function normalizeAuthError(error: unknown): AuthError {
+  // If it's already an AuthError, return it
+  if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+    return error as AuthError;
+  }
+  
+  // Convert regular Error to AuthError-like object
+  const errorMessage = error instanceof Error ? error.message : String(error);
+  return {
+    code: errorMessage.includes('Missing required env') ? 'config/missing-env' : 'auth/unknown-error',
+    message: errorMessage,
+    name: 'AuthError',
+  } as AuthError;
+}
+
+/**
  * This hook manages the entire authentication flow using Firebase Authentication.
  * Firebase SDK is loaded lazily only on first user interaction (login click).
  */
@@ -125,7 +144,7 @@ export function useAuth() {
       }
     } catch (error) {
       logError('Authentication failed:', error);
-      setError(error as AuthError);
+      setError(normalizeAuthError(error));
       // Ensure a clean state on authentication failure.
       setUser(null);
       setAccessToken(null);

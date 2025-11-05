@@ -28,7 +28,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
     });
 
     const sanitizedInitialInstructions = useMemo(
-      () => initialInstructions.slice(0, 300),
+      () => initialInstructions.slice(0, 2000),
       [initialInstructions]
     );
 
@@ -106,7 +106,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
     return (
       // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
       <div
-        className='fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-center justify-center z-50'
+        className='fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-stretch justify-center px-0 py-0 z-50 sm:items-center sm:px-4'
         onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
         aria-modal='true'
@@ -118,7 +118,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
         {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
         <div
           ref={modalRef}
-          className='relative flex h-[100svh] w-full max-w-none flex-col overflow-hidden bg-off-white dark:bg-brutal-gray border-2 border-accent-black dark:border-off-white/50 font-mono uppercase modal-enter sm:h-auto sm:max-w-5xl sm:m-4'
+          className='relative flex h-full max-h-[100svh] w-full flex-col overflow-hidden bg-off-white dark:bg-brutal-gray border-0 border-accent-black font-mono uppercase modal-enter sm:h-auto sm:max-w-4xl sm:rounded-[1.5rem] sm:border-2 sm:px-2 lg:max-w-3xl'
           onClick={event => event.stopPropagation()}
           onKeyDown={event => {
             // Stop propagation for keyboard events to prevent backdrop from closing modal
@@ -161,7 +161,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
                     if (next === 'custom') {
                       const norm = sanitizedInitialInstructions.trim();
                       if (norm === SYSTEM_INSTRUCTION.trim() && lastCustomInstructions) {
-                        setInstructions(lastCustomInstructions.slice(0, 300));
+                        setInstructions(lastCustomInstructions.slice(0, 2000));
                       }
                     }
                   }}

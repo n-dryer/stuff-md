@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useNoteFilters } from '../hooks/useNoteFilters';
 import {
@@ -6,6 +6,7 @@ import {
   type SortKey,
   type SortDirection,
 } from '../hooks/useNoteSorting';
+import { useNoteSelection } from '../hooks/useNoteSelection';
 import Button from './Button';
 import NoteListEmpty from './NoteListEmpty';
 import NoteListFilters from './NoteListFilters';
@@ -13,6 +14,7 @@ import NoteListGrid from './NoteListGrid';
 import NoteListTable from './NoteListTable';
 import NoteListHeader from './NoteListHeader';
 import NoteListActiveTags from './NoteListActiveTags';
+import BulkActionBar from './BulkActionBar';
 import { Note } from '../types';
 
 interface NoteListProps {
@@ -20,6 +22,7 @@ interface NoteListProps {
   isLoading: boolean;
   activeCategory: string;
   onDeleteNote: (noteId: string) => void;
+  onDeleteNotes: (noteIds: string[]) => void;
   onEditNote: (note: Note) => void;
   viewMode: 'grid' | 'table';
   setViewMode: (mode: 'grid' | 'table') => void;
@@ -30,8 +33,10 @@ interface NoteListProps {
   setSearchQuery: (query: string) => void;
   debouncedSearchQuery: string;
   onFocusNoteInput: () => void;
-  onOpenInstructions: () => void;
+  onOpenHelp: () => void;
   onResetFilters: () => void;
+  onDeleteAll: () => void;
+  isDeleting?: boolean;
 }
 
 const NoteList: React.FC<NoteListProps> = ({
@@ -39,6 +44,7 @@ const NoteList: React.FC<NoteListProps> = ({
   isLoading,
   activeCategory,
   onDeleteNote,
+  onDeleteNotes,
   onEditNote,
   viewMode,
   setViewMode,
@@ -49,13 +55,25 @@ const NoteList: React.FC<NoteListProps> = ({
   setSearchQuery,
   debouncedSearchQuery,
   onFocusNoteInput,
-  onOpenInstructions,
+  onOpenHelp,
   onResetFilters,
+  onDeleteAll,
+  isDeleting = false,
 }) => {
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [isEditMode, setIsEditMode] = useState(false);
-  const [showSortOptions, setShowSortOptions] = useState(false);
+  const [isSortMenuOpen, setIsSortMenuOpen] = useState(false);
+
+  const {
+    selectedIds,
+    isSelected,
+    toggleSelection,
+    selectAll,
+    deselectAll,
+    selectedCount,
+    hasSelection,
+  } = useNoteSelection();
 
   const sortMode = useMemo<'recent' | 'oldest' | 'title'>(() => {
     if (sortKey === 'title') {
@@ -72,6 +90,19 @@ const NoteList: React.FC<NoteListProps> = ({
       setSortDirection(key === 'title' ? 'asc' : 'desc');
     }
   };
+
+  const handleSortModeChange = useCallback(
+    (mode: 'recent' | 'oldest' | 'title') => {
+      if (mode === 'title') {
+        setSortKey('title');
+        setSortDirection('asc');
+        return;
+      }
+      setSortKey('date');
+      setSortDirection(mode === 'recent' ? 'desc' : 'asc');
+    },
+    []
+  );
 
   const filteredNotes = useNoteFilters({
     notes,
@@ -92,37 +123,119 @@ const NoteList: React.FC<NoteListProps> = ({
     activeTags.length > 0 ||
     debouncedSearchQuery.trim().length > 0;
 
+  // Reset selection when exiting edit mode
+  useEffect(() => {
+    if (!isEditMode) {
+      deselectAll();
+    }
+  }, [isEditMode, deselectAll]);
+
+  const handleSelectAll = useCallback(() => {
+    const allIds = sortedNotes.map(note => note.id);
+    selectAll(allIds);
+  }, [sortedNotes, selectAll]);
+
+  const handleDeleteSelected = useCallback(() => {
+    if (hasSelection && onDeleteNotes && selectedCount > 0) {
+      const idsArray = Array.from(selectedIds);
+      if (idsArray.length > 0) {
+        onDeleteNotes(idsArray);
+        // Don't deselect here - wait for confirmation
+      }
+    }
+  }, [hasSelection, selectedCount, selectedIds, onDeleteNotes]);
+
+  const allSelected = useMemo(() => {
+    return sortedNotes.length > 0 && selectedCount === sortedNotes.length;
+  }, [sortedNotes.length, selectedCount]);
+
   if (isLoading) {
     return (
       <div aria-live='polite' className='min-h-[400px]'>
-        <div className='animate-pulse space-y-4'>
-          <div className='flex justify-between items-center mb-4'>
-            <div className='h-6 w-28 bg-off-black/10 dark:bg-off-white/10 rounded' />
-            <div className='h-8 w-16 bg-off-black/10 dark:bg-off-white/10 rounded' />
+        <div className='space-y-[clamp(1rem,2.5vw,1.5rem)]'>
+          {/* Header skeleton */}
+          <div className='flex justify-between items-center mb-[clamp(1rem,2.5vw,1.5rem)]'>
+            <div className='h-[clamp(1.25rem,3vw,1.5rem)] w-[clamp(6rem,15vw,7rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+            <div className='h-[clamp(1.75rem,4vw,2rem)] w-[clamp(3.5rem,9vw,4rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
           </div>
-          <div className='mb-6'>
-            <div className='h-12 w-full bg-off-black/10 dark:bg-off-white/10 rounded border-2 border-accent-black/20 dark:border-off-white/20' />
-            <div className='mt-4 flex gap-2'>
-              <div className='h-8 w-24 bg-off-black/10 dark:bg-off-white/10 rounded' />
-              <div className='h-8 w-20 bg-off-black/10 dark:bg-off-white/10 rounded' />
+          {/* Filters skeleton */}
+          <div className='mb-[clamp(1.25rem,3vw,1.5rem)]'>
+            <div className='h-[clamp(2.5rem,6vw,3rem)] w-full bg-off-black/10 dark:bg-off-white/10 border-2 border-accent-black/20 dark:border-off-white/20 brutalist-pulse' />
+            <div className='mt-[clamp(0.75rem,2vw,1rem)] flex gap-[clamp(0.5rem,1.5vw,0.75rem)]'>
+              <div className='h-[clamp(1.75rem,4vw,2rem)] w-[clamp(5rem,12vw,6rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+              <div className='h-[clamp(1.75rem,4vw,2rem)] w-[clamp(4rem,10vw,5rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
             </div>
           </div>
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6'>
-            {Array.from({ length: 4 }).map((_, idx) => (
-              <div
-                key={idx}
-                className='border-2 border-accent-black dark:border-off-white/20 p-4 min-h-[180px]'
-              >
-                <div className='h-5 w-3/4 bg-off-black/10 dark:bg-off-white/10 mb-3 rounded' />
-                <div className='h-16 w-full bg-off-black/10 dark:bg-off-white/10 mb-3 rounded' />
-                <div className='flex gap-2 mt-4'>
-                  <div className='h-6 w-20 bg-off-black/10 dark:bg-off-white/10 rounded' />
-                  <div className='h-6 w-16 bg-off-black/10 dark:bg-off-white/10 rounded' />
+          {/* Conditional skeleton based on viewMode */}
+          {viewMode === 'grid' ? (
+            /* Grid view skeleton */
+            <div className='grid grid-cols-1 lg:grid-cols-2 gap-x-[clamp(2rem,5vw,3rem)] gap-y-[clamp(1rem,2.5vw,1.5rem)]'>
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className='border-2 border-accent-black dark:border-off-white/20 shadow-brutalist dark:shadow-brutalist-dark p-[clamp(0.75rem,2vw,1rem)] min-h-[clamp(11rem,28vw,13rem)]'
+                >
+                  {/* Title skeleton */}
+                  <div className='h-[clamp(1.125rem,2.8vw,1.25rem)] w-3/4 bg-off-black/10 dark:bg-off-white/10 mb-[clamp(0.5rem,1.5vw,0.75rem)] brutalist-pulse' />
+                  {/* Content skeleton */}
+                  <div className='h-[clamp(3.5rem,9vw,4rem)] w-full bg-off-black/10 dark:bg-off-white/10 mb-[clamp(0.5rem,1.5vw,0.75rem)] brutalist-pulse' />
+                  {/* Tags skeleton */}
+                  <div className='flex gap-[clamp(0.5rem,1.5vw,0.75rem)] mt-[clamp(0.75rem,2vw,1rem)]'>
+                    <div className='h-[clamp(1.25rem,3vw,1.5rem)] w-[clamp(4.5rem,11vw,5rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                    <div className='h-[clamp(1.25rem,3vw,1.5rem)] w-[clamp(3.5rem,9vw,4rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                  </div>
+                  {/* Date skeleton */}
+                  <div className='h-[clamp(0.875rem,2.2vw,1rem)] w-[clamp(5rem,12vw,6rem)] bg-off-black/10 dark:bg-off-white/10 mt-[clamp(0.5rem,1.5vw,0.75rem)] brutalist-pulse' />
                 </div>
-                <div className='h-4 w-24 bg-off-black/10 dark:bg-off-white/10 mt-3 rounded' />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            /* Table view skeleton */
+            <div className='w-full'>
+              <table className='w-full text-left table-auto'>
+                <thead className='border-b-2 border-accent-black dark:border-off-white/20'>
+                  <tr>
+                    <th className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                      <div className='h-[clamp(0.875rem,2vw,1rem)] w-[clamp(3rem,8vw,4rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                    </th>
+                    <th className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                      <div className='h-[clamp(0.875rem,2vw,1rem)] w-[clamp(4rem,10vw,5rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                    </th>
+                    <th className='hidden sm:table-cell px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                      <div className='h-[clamp(0.875rem,2vw,1rem)] w-[clamp(8rem,20vw,10rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                    </th>
+                    <th className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                      <div className='h-[clamp(0.875rem,2vw,1rem)] w-[clamp(5rem,12vw,6rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                    </th>
+                    <th className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                      <div className='h-[clamp(0.875rem,2vw,1rem)] w-[clamp(4rem,10vw,5rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <tr key={idx} className='border-b border-gray-200 dark:border-off-white/10'>
+                      <td className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                        <div className='h-[clamp(1.25rem,3vw,1.5rem)] w-[clamp(1.25rem,3vw,1.5rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse mx-auto' />
+                      </td>
+                      <td className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                        <div className='h-[clamp(1rem,2.5vw,1.25rem)] w-[clamp(6rem,15vw,8rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                      </td>
+                      <td className='hidden sm:table-cell px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                        <div className='h-[clamp(3rem,7.5vw,3.5rem)] w-full bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                      </td>
+                      <td className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                        <div className='h-[clamp(1.25rem,3vw,1.5rem)] w-[clamp(5rem,12vw,6rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                      </td>
+                      <td className='px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)]'>
+                        <div className='h-[clamp(0.875rem,2.2vw,1rem)] w-[clamp(4rem,10vw,5rem)] bg-off-black/10 dark:bg-off-white/10 brutalist-pulse' />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -132,39 +245,34 @@ const NoteList: React.FC<NoteListProps> = ({
     return (
       <NoteListEmpty
         onFocusNoteInput={onFocusNoteInput}
-        onOpenInstructions={onOpenInstructions}
+        onOpenHelp={onOpenHelp}
       />
     );
   }
 
   return (
     <div>
-      <NoteListHeader viewMode={viewMode} setViewMode={setViewMode} />
+      <NoteListHeader />
 
       <NoteListFilters
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        showSortOptions={showSortOptions}
-        setShowSortOptions={setShowSortOptions}
+        isSortMenuOpen={isSortMenuOpen}
+        setIsSortMenuOpen={setIsSortMenuOpen}
         isEditMode={isEditMode}
         setIsEditMode={setIsEditMode}
-              sortMode={sortMode}
-              onSortChange={mode => {
-                if (mode === 'title') {
-                  setSortKey('title');
-                  setSortDirection('asc');
-                } else {
-                  setSortKey('date');
-                  setSortDirection(mode === 'recent' ? 'desc' : 'asc');
-                }
-              }}
-            />
+        sortMode={sortMode}
+        onSortChange={handleSortModeChange}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        hasActiveFilters={hasActiveFilters}
+        onResetFilters={onResetFilters}
+        onDeleteAll={onDeleteAll}
+        notesCount={sortedNotes.length}
+      />
 
       <div className='border-t-2 border-accent-black dark:border-off-white/20 pt-4'>
-        <NoteListActiveTags
-          activeTags={activeTags}
-          onClearTags={onClearTags}
-        />
+        <NoteListActiveTags activeTags={activeTags} onClearTags={onClearTags} />
 
         {sortedNotes.length === 0 ? (
           <section className='relative mx-auto w-full max-w-3xl overflow-hidden rounded-lg border-2 border-accent-black dark:border-off-white/20 bg-off-white/80 p-8 text-center dark:bg-off-black/60 sm:p-10'>
@@ -203,12 +311,14 @@ const NoteList: React.FC<NoteListProps> = ({
             {viewMode === 'grid' && (
               <NoteListGrid
                 notes={sortedNotes}
-                    onDeleteNote={onDeleteNote}
-                    onEditNote={onEditNote}
-                    activeTags={activeTags}
-                    onTagClick={onTagClick}
-                    showDelete={isEditMode}
-                  />
+                onDeleteNote={onDeleteNote}
+                onEditNote={onEditNote}
+                activeTags={activeTags}
+                onTagClick={onTagClick}
+                isEditMode={isEditMode}
+                isSelected={isSelected}
+                onToggleSelection={toggleSelection}
+              />
             )}
 
             {viewMode === 'table' && (
@@ -222,10 +332,24 @@ const NoteList: React.FC<NoteListProps> = ({
                 sortKey={sortKey}
                 sortDirection={sortDirection}
                 onSort={handleSort}
+                isSelected={isSelected}
+                onToggleSelection={toggleSelection}
               />
             )}
           </>
         )}
+        <BulkActionBar
+          selectedCount={selectedCount}
+          totalCount={sortedNotes.length}
+          onDeleteSelected={handleDeleteSelected}
+          onDeleteAll={onDeleteAll}
+          onSelectAll={handleSelectAll}
+          onDeselectAll={deselectAll}
+          allSelected={allSelected}
+          isEditMode={isEditMode}
+          isDeleting={isDeleting}
+          setIsEditMode={setIsEditMode}
+        />
       </div>
     </div>
   );

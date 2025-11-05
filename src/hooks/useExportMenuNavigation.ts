@@ -1,11 +1,13 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, type MutableRefObject, type RefObject } from 'react';
+
+import { hasOpenModals } from '../utils/modalStack';
 
 interface UseExportMenuNavigationProps {
   isExpanded: boolean;
-  menuRef: React.RefObject<HTMLDivElement>;
-  menuItemRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>;
+  menuRef: RefObject<HTMLDivElement>;
+  menuItemRefs: MutableRefObject<(HTMLButtonElement | null)[]>;
   exportOptionsCount: number;
-  buttonRef: React.RefObject<HTMLButtonElement>;
+  buttonRef: RefObject<HTMLButtonElement>;
   onClose: () => void;
 }
 
@@ -22,6 +24,7 @@ export const useExportMenuNavigation = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isExpanded) {
+        if (hasOpenModals()) return;
         onClose();
         focusedIndexRef.current = null;
         buttonRef.current?.focus();

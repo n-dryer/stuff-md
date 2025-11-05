@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, type RefObject } from 'react';
 
 interface UseExportMenuPositionProps {
   isExpanded: boolean;
-  buttonRef: React.RefObject<HTMLButtonElement>;
-  menuRef: React.RefObject<HTMLDivElement>;
+  buttonRef: RefObject<HTMLButtonElement>;
+  menuRef: RefObject<HTMLDivElement>;
   exportOptionsCount: number;
 }
 
@@ -17,7 +17,7 @@ export const useExportMenuPosition = ({
     top?: number;
     bottom?: number;
     right: number;
-  }>({ right: 0, bottom: 100 });
+  }>({ right: 0, top: 0 });
 
   const updateMenuPlacement = useCallback(() => {
     if (!buttonRef.current) {
@@ -30,45 +30,36 @@ export const useExportMenuPosition = ({
       menuRef.current?.offsetHeight ?? exportOptionsCount * 52;
     const spaceAbove = buttonRect.top;
     const spaceBelow = viewportHeight - buttonRect.bottom;
+    const margin = 16;
 
     const right = window.innerWidth - buttonRect.right;
 
-    // Prefer 'up' placement for footer button
-    if (spaceAbove >= estimatedMenuHeight + 24) {
+    if (spaceBelow >= estimatedMenuHeight + margin) {
       setMenuPosition({
-        bottom: viewportHeight - buttonRect.top + 24,
-        right: right,
-        top: undefined,
-      });
-      return;
-    }
-
-    if (
-      spaceBelow >= estimatedMenuHeight + 24 &&
-      spaceAbove < estimatedMenuHeight + 24
-    ) {
-      setMenuPosition({
-        top: buttonRect.bottom + 16,
-        right: right,
+        top: buttonRect.bottom + margin,
+        right,
         bottom: undefined,
       });
       return;
     }
 
-    const isInFooter = buttonRect.bottom > viewportHeight * 0.7;
-    if (isInFooter || spaceAbove > spaceBelow) {
+    if (spaceAbove >= estimatedMenuHeight + margin) {
       setMenuPosition({
-        bottom: viewportHeight - buttonRect.top + 24,
-        right: right,
+        bottom: viewportHeight - buttonRect.top + margin,
+        right,
         top: undefined,
       });
-    } else {
-      setMenuPosition({
-        top: buttonRect.bottom + 16,
-        right: right,
-        bottom: undefined,
-      });
+      return;
     }
+
+    setMenuPosition({
+      top: Math.min(
+        Math.max(8, buttonRect.bottom + margin),
+        viewportHeight - estimatedMenuHeight - 8
+      ),
+      right,
+      bottom: undefined,
+    });
   }, [exportOptionsCount, buttonRef, menuRef]);
 
   useEffect(() => {

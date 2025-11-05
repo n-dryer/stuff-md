@@ -10,6 +10,7 @@ import {
   InputProps,
   InstructionProps,
   MetadataProps,
+  HelpProps,
 } from '../types/mainLayout';
 import InstructionsButton from './InstructionsButton';
 import LogoutButton from './LogoutButton';
@@ -19,6 +20,7 @@ import NoteInputSection from './NoteInputSection';
 import NoteList from './NoteList';
 import NoteListErrorBoundary from './NoteListErrorBoundary';
 import Sidebar from './Sidebar';
+import SidebarHelpButton from './SidebarHelpButton';
 import SidebarToggle from './SidebarToggle';
 
 interface MainLayoutProps
@@ -28,13 +30,16 @@ interface MainLayoutProps
     ViewProps,
     InputProps,
     InstructionProps,
-    MetadataProps {}
+    MetadataProps,
+    HelpProps {}
 
 const MainLayout: React.FC<MainLayoutProps> = ({
   notes,
   isNotesLoading,
   requestDeleteNote,
+  onDeleteNotes,
   setEditingNote,
+  isDeleting,
   searchQuery,
   setSearchQuery,
   debouncedSearchQuery,
@@ -58,6 +63,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   setShowInstructions,
   instructionsButtonRef,
   logout,
+  onDeleteAll,
+  isHelpOpen,
+  setShowHelp,
 }) => {
   const sidebarId = 'primary-sidebar';
   const { isSidebarCollapsed, toggleSidebar } = useSidebarCollapse();
@@ -77,15 +85,24 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     setShowInstructions(true);
   }, [setShowInstructions]);
 
+  const handleOpenHelp = useCallback(() => {
+    setShowHelp(true);
+  }, [setShowHelp]);
+
   const handleResetFilters = useCallback(() => {
     setSearchQuery('');
     handleClearTags();
     setActiveCategory('ALL');
   }, [handleClearTags, setActiveCategory, setSearchQuery]);
 
-  const sidebarToggleContainerClasses = `flex-shrink-0 w-full flex items-center justify-end mt-4 pt-4 pb-6 ${
-    isSidebarCollapsed ? 'pl-3 pr-4' : 'pl-6 pr-3'
-  }`;
+  const sidebarControlsContainerClasses = `
+    flex-shrink-0 w-full flex flex-col gap-3 mt-4 pt-4 pb-6
+    ${isSidebarCollapsed ? 'px-3 items-center' : 'px-6 items-stretch'}
+  `;
+
+  const sidebarToggleWrapperClasses = isSidebarCollapsed
+    ? 'self-center'
+    : 'self-end';
 
   const instructionsControl = (
     <InstructionsButton
@@ -123,12 +140,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           />
         </div>
 
-        <div className={sidebarToggleContainerClasses}>
-          <SidebarToggle
-            isSidebarCollapsed={isSidebarCollapsed}
-            onToggle={toggleSidebar}
-            sidebarId={sidebarId}
+        <div className={sidebarControlsContainerClasses}>
+          <SidebarHelpButton
+            isCollapsed={isSidebarCollapsed}
+            onOpenHelp={handleOpenHelp}
+            isHelpOpen={isHelpOpen}
           />
+          <div className={sidebarToggleWrapperClasses}>
+            <SidebarToggle
+              isSidebarCollapsed={isSidebarCollapsed}
+              onToggle={toggleSidebar}
+              sidebarId={sidebarId}
+            />
+          </div>
         </div>
       </aside>
 
@@ -149,6 +173,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               isLoading={isNotesLoading}
               activeCategory={activeCategory}
               onDeleteNote={requestDeleteNote}
+              onDeleteNotes={onDeleteNotes}
               viewMode={viewMode}
               setViewMode={setViewMode}
               activeTags={activeTags}
@@ -159,8 +184,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
               setSearchQuery={setSearchQuery}
               debouncedSearchQuery={debouncedSearchQuery}
               onFocusNoteInput={handleFocusNoteInput}
-              onOpenInstructions={handleOpenInstructions}
+              onOpenHelp={handleOpenHelp}
               onResetFilters={handleResetFilters}
+              onDeleteAll={onDeleteAll}
+              isDeleting={isDeleting}
             />
           </NoteListErrorBoundary>
         </main>
@@ -178,10 +205,10 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 
         <MainLayoutFooter
           isSidebarCollapsed={isSidebarCollapsed}
-          notes={notes}
           isDarkMode={isDarkMode}
           onToggleDarkMode={toggleDarkMode}
           instructionsControl={instructionsControl}
+          notes={notes}
         />
       </div>
     </div>

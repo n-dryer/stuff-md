@@ -21,6 +21,7 @@ interface ExportButtonsProps {
 const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
   const [error, setError] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -57,6 +58,8 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
     exportFn: () => void | Promise<void>,
     errorMessage: string
   ): Promise<void> => {
+    if (isExporting) return;
+    setIsExporting(true);
     try {
       setError(null);
       await exportFn();
@@ -66,6 +69,8 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
       const sanitizedMessage = sanitizeErrorMessage(normalizedError);
       setError(sanitizedMessage || errorMessage);
       logError('Export error:', err);
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -107,7 +112,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
   }, [isExpanded, handleClose]);
 
   const buttonClasses =
-    'uppercase font-bold text-xs sm:text-sm md:text-base text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white hover:font-black focus:font-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 whitespace-nowrap';
+    'uppercase font-bold text-xs sm:text-sm md:text-base text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white hover:font-black focus:font-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 whitespace-nowrap min-h-[44px]';
 
   return (
     <div
@@ -128,11 +133,13 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
         menuPosition={menuPosition}
         exportOptions={exportOptions}
         onExport={handleExport}
+        isExporting={isExporting}
       />
 
       <BrutalistTooltip
-        text='Export your notes in TXT, JSON, or ZIP format'
+        text='Export notes'
         position='top'
+        forcePreferredPosition
       >
         <button
           ref={buttonRef}

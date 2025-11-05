@@ -11,11 +11,14 @@ export const computeTooltipPosition = (
   tooltipHeight: number,
   preferredPosition: Placement,
   docWidth: number,
-  docHeight: number
+  docHeight: number,
+  forcePreferredPosition = false
 ): Coords => {
-  const placements: Placement[] = Array.from(
-    new Set<Placement>([preferredPosition, 'top', 'bottom', 'right', 'left'])
-  );
+  const placements: Placement[] = forcePreferredPosition
+    ? [preferredPosition]
+    : Array.from(
+        new Set<Placement>([preferredPosition, 'top', 'bottom', 'right', 'left'])
+      );
 
   const computeForPlacement = (placement: Placement) => {
     switch (placement) {

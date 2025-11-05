@@ -6,7 +6,9 @@ export interface NoteManagementProps {
   notes: Note[];
   isNotesLoading: boolean;
   requestDeleteNote: (noteId: string) => void;
+  onDeleteNotes: (noteIds: string[]) => void;
   setEditingNote: (note: Note | null) => void;
+  isDeleting?: boolean;
 }
 
 export interface SearchProps {
@@ -48,4 +50,10 @@ export interface InstructionProps {
 
 export interface MetadataProps {
   logout: () => void;
+  onDeleteAll: () => void;
+}
+
+export interface HelpProps {
+  isHelpOpen: boolean;
+  setShowHelp: (show: boolean) => void;
 }

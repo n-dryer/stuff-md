@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { useDebounce } from '../hooks/useDebounce';
+import { hasOpenModals } from '../utils/modalStack';
 import BrutalistSpinner from './BrutalistSpinner';
 import MarkdownRenderer from './MarkdownRenderer';
 
@@ -15,6 +16,9 @@ interface NoteInputProps {
 }
 
 const NOTE_MAX_LENGTH = 100000;
+const COLLAPSED_TEXTAREA_HEIGHT = 136;
+const FOCUSED_TEXTAREA_HEIGHT = 192;
+const MIN_EXPANDED_TEXTAREA_HEIGHT = 240;
 
 const NoteInput: React.FC<NoteInputProps> = ({
   value,
@@ -27,9 +31,11 @@ const NoteInput: React.FC<NoteInputProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
-  const debouncedValue = useDebounce(value, 1000);
+  const debouncedValue = useDebounce(value, 500);
   const isInitialMount = useRef(true);
   const justSavedRef = useRef(false);
+  const [showDraftSaved, setShowDraftSaved] = useState(false);
+  const hasFocusedInitially = useRef(false);
 
   const handleSave = useCallback(() => {
     if (value.trim() && !isSaving) {
@@ -70,8 +76,14 @@ const NoteInput: React.FC<NoteInputProps> = ({
       }
 
       // Escape: exit preview or blur/clear input
+      // Respect modal stack - only handle if no modals are open
       if (e.key === 'Escape') {
+        // Always respect modals - let modal system handle escape first
+        if (hasOpenModals()) {
+          return;
+        }
         e.preventDefault();
+        e.stopPropagation();
         if (isPreview) {
           setIsPreview(false);
         } else {
@@ -108,71 +120,150 @@ const NoteInput: React.FC<NoteInputProps> = ({
       !isSaving &&
       !justSavedRef.current
     ) {
+      // Show inline indicator immediately when draft is saved
+      setShowDraftSaved(true);
       onDraftSaved?.();
+
+      // Hide after shorter duration for inline indicator
+      const timer = setTimeout(() => {
+        setShowDraftSaved(false);
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    } else {
+      setShowDraftSaved(false);
     }
   }, [debouncedValue, isPreview, isSaving, onDraftSaved]);
+
+  // Initial focus on mount (when user first accesses the app)
+  useEffect(() => {
+    if (!hasFocusedInitially.current && inputRef.current && !isPreview) {
+      const timer = setTimeout(() => {
+        if (inputRef.current && !hasFocusedInitially.current) {
+          inputRef.current.focus();
+          setIsFocused(true);
+          hasFocusedInitially.current = true;
+        }
+      }, 300); // Small delay to ensure layout is complete
+      return () => clearTimeout(timer);
+    }
+  }, [inputRef, isPreview]);
 
   useEffect(() => {
     const textarea = inputRef.current;
     if (!textarea || isPreview) return;
 
     const hasContent = value.trim() !== '';
-    const baseHeight = 48; // in px
-    const minExpandedHeight = 96; // in px
+    const baseHeight =
+      isFocused || hasContent
+        ? FOCUSED_TEXTAREA_HEIGHT
+        : COLLAPSED_TEXTAREA_HEIGHT;
 
     if (isFocused || hasContent) {
       textarea.style.height = `${baseHeight}px`;
-      setTimeout(() => {
+      window.requestAnimationFrame(() => {
         const scrollHeight = textarea.scrollHeight;
-        textarea.style.height = `${Math.max(scrollHeight, minExpandedHeight)}px`;
-      }, 0);
+        const newHeight = Math.max(scrollHeight, MIN_EXPANDED_TEXTAREA_HEIGHT);
+        textarea.style.height = `${newHeight}px`;
+      });
     } else {
       textarea.style.height = `${baseHeight}px`;
     }
   }, [isFocused, value, inputRef, isPreview]);
 
-  const showPrompt = value.trim() === '' && !isSaving && !isPreview;
   const placeholderText =
     'Type your note. Saved to Google Drive, organized by AI. Enter saves.';
 
+  const containerWidthClasses = isFocused
+    ? 'max-w-[calc(100%_-_1rem)] sm:max-w-[calc(100%_-_1.25rem)] md:max-w-[min(100%,70ch)] lg:max-w-[min(100%,78ch)] xl:max-w-[min(100%,84ch)]'
+    : 'max-w-[calc(100%_-_1.5rem)] sm:max-w-[calc(100%_-_2rem)] md:max-w-[min(100%,64ch)] lg:max-w-[min(100%,72ch)] xl:max-w-[min(100%,80ch)]';
+
+  const containerScaleClasses =
+    isFocused && !isPreview
+      ? 'md:scale-[1.01] sm:scale-[1.008] scale-[1.004]'
+      : 'scale-100';
+
+  const handleContainerMouseDown = useCallback(
+    (event: React.MouseEvent<HTMLDivElement>) => {
+      if (isPreview) {
+        return;
+      }
+
+      const textarea = inputRef.current;
+      if (!textarea) {
+        return;
+      }
+
+      if (event.target === textarea) {
+        return;
+      }
+
+      event.preventDefault();
+      textarea.focus();
+    },
+    [inputRef, isPreview]
+  );
+
   return (
-    <div className='relative flex w-full min-w-0 items-start sm:items-center gap-2 sm:gap-3 md:gap-4'>
-      <span
-        aria-hidden='true'
-        className={`absolute top-2 sm:top-3 md:top-4 left-0 font-mono text-xs sm:text-sm md:text-base text-gray-400 dark:text-gray-500 select-none transition-opacity duration-150 pointer-events-none ${
-          showPrompt ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        &gt;
-      </span>
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+    <div
+      onMouseDown={handleContainerMouseDown}
+      className={`relative flex w-full min-w-0 items-start gap-2 sm:gap-3 md:gap-4 transition-all duration-300 ease-in-out origin-left will-change-transform ${containerWidthClasses} ${containerScaleClasses} ${
+        isPreview ? '' : 'cursor-text'
+      }`}
+    >
       {isPreview ? (
         <div className='flex-grow min-w-0 bg-transparent text-sm sm:text-base font-mono leading-relaxed break-words whitespace-pre-wrap overflow-y-auto transition-all duration-150 min-h-[48px] py-3 pr-2'>
           <MarkdownRenderer content={value || 'No preview.'} />
         </div>
       ) : (
-        <textarea
-          id='note-input'
-          name='note'
-          ref={inputRef}
-          value={value}
-          onChange={onChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          placeholder={placeholderText}
-          className={`flex-grow min-w-0 max-w-full w-full bg-transparent focus:outline-none text-sm sm:text-base placeholder:text-xs sm:placeholder:text-sm placeholder-gray-400 dark:placeholder-gray-500 font-mono leading-relaxed resize-none overflow-y-hidden transition-all duration-150 px-3 sm:px-4 md:px-5 py-2 sm:py-3 md:py-4 placeholder:overflow-hidden placeholder:text-ellipsis placeholder:whitespace-nowrap ${
-            showPrompt ? 'pl-6 sm:pl-8 md:pl-10' : ''
-          }`}
-          disabled={isSaving}
-          rows={1}
-          maxLength={NOTE_MAX_LENGTH}
-        />
-      )}
-
-      <div className='flex flex-col items-end flex-shrink-0 sm:ml-2 min-w-0'>
-        <div className='h-8 flex items-center justify-end'>
-          {isSaving && <BrutalistSpinner />}
+        <div className='relative flex-grow min-w-0 max-w-full w-full'>
+          <textarea
+            id='note-input'
+            name='note'
+            ref={inputRef}
+            value={value}
+            onChange={onChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+            placeholder={placeholderText}
+            className='w-full bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:outline-none text-sm sm:text-base placeholder:text-sm sm:placeholder:text-base placeholder-gray-400 dark:placeholder-gray-500 font-mono leading-relaxed resize-none overflow-y-hidden transition-[height,padding,background-color,color] duration-250 ease-in-out px-4 sm:px-5 md:px-6 py-3.5 sm:py-5 md:py-6'
+            disabled={isSaving}
+            rows={1}
+            maxLength={NOTE_MAX_LENGTH}
+          />
         </div>
-      </div>
+      )}
+      {/* Spinner positioned at top-center of input area, horizontally centered like toasts (same parent level) */}
+      {isSaving && (
+        <div className='absolute top-3.5 sm:top-5 md:top-6 left-0 right-0 flex justify-center z-20 pointer-events-none transition-opacity duration-200 ease-in-out'>
+          <BrutalistSpinner />
+        </div>
+      )}
+      {showDraftSaved && !isSaving && (
+        <div className='absolute -top-8 left-0 right-0 flex justify-center z-10 pointer-events-none'>
+          <div className='inline-flex items-center gap-1.5 px-2 py-1 bg-off-white dark:bg-brutal-gray border border-accent-black/30 dark:border-off-white/30 text-xs font-mono font-bold text-accent-black/60 dark:text-off-white/60 uppercase tracking-wider'>
+            <svg
+              width='12'
+              height='12'
+              viewBox='0 0 16 16'
+              fill='none'
+              xmlns='http://www.w3.org/2000/svg'
+              className='flex-shrink-0'
+              aria-hidden='true'
+            >
+              <path
+                d='M13.3333 4L6 11.3333L2.66667 8'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+              />
+            </svg>
+            <span>Draft saved</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
