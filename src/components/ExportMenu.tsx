@@ -4,7 +4,7 @@ import BrutalistSpinner from './BrutalistSpinner';
 
 interface ExportMenuProps {
   isExpanded: boolean;
-  menuRef: React.RefObject<HTMLDivElement>;
+  menuRef: React.RefObject<HTMLDivElement | null>;
   menuItemRefs: React.MutableRefObject<(HTMLButtonElement | null)[]>;
   menuPosition: {
     top?: number;

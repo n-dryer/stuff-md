@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import { useDebounce } from '../hooks/useDebounce';
-import { hasOpenModals } from '../utils/modalStack';
+import { useNoteInputKeyboard } from '../hooks/useNoteInputKeyboard';
+import { useNoteInputResize } from '../hooks/useNoteInputResize';
 import BrutalistSpinner from './BrutalistSpinner';
 import MarkdownRenderer from './MarkdownRenderer';
 
@@ -10,15 +11,12 @@ interface NoteInputProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSave: () => void;
   isSaving: boolean;
-  inputRef: React.RefObject<HTMLTextAreaElement>;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
   onRequestClearOrBlur: () => void;
   onDraftSaved?: () => void;
 }
 
 const NOTE_MAX_LENGTH = 100000;
-const COLLAPSED_TEXTAREA_HEIGHT = 136;
-const FOCUSED_TEXTAREA_HEIGHT = 192;
-const MIN_EXPANDED_TEXTAREA_HEIGHT = 240;
 
 const NoteInput: React.FC<NoteInputProps> = ({
   value,
@@ -47,61 +45,13 @@ const NoteInput: React.FC<NoteInputProps> = ({
     }
   }, [value, isSaving, onSave]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-      const modifierKey = isMac ? e.metaKey : e.ctrlKey;
-
-      if (modifierKey && e.shiftKey && e.key.toLowerCase() === 'p') {
-        e.preventDefault();
-        setIsPreview(!isPreview);
-        return;
-      }
-
-      if (!isPreview && !modifierKey && e.key === 'Enter') {
-        if (e.shiftKey) {
-          return;
-        }
-        e.preventDefault();
-        handleSave();
-        return;
-      }
-
-      if (modifierKey && e.key === 'Enter') {
-        e.preventDefault();
-        handleSave();
-        return;
-      }
-
-      if (e.key === 'Escape') {
-        if (hasOpenModals()) {
-          return;
-        }
-        e.preventDefault();
-        e.stopPropagation();
-        if (isPreview) {
-          setIsPreview(false);
-        } else {
-          onRequestClearOrBlur();
-        }
-      }
-    };
-
-    const input = inputRef.current;
-    if (isPreview) {
-      window.addEventListener('keydown', handleKeyDown);
-    } else {
-      input?.addEventListener('keydown', handleKeyDown);
-    }
-
-    return () => {
-      if (isPreview) {
-        window.removeEventListener('keydown', handleKeyDown);
-      } else {
-        input?.removeEventListener('keydown', handleKeyDown);
-      }
-    };
-  }, [handleSave, isPreview, inputRef, onRequestClearOrBlur, setIsPreview]);
+  useNoteInputKeyboard({
+    inputRef,
+    isPreview,
+    setIsPreview,
+    onSave: handleSave,
+    onRequestClearOrBlur,
+  });
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -125,6 +75,7 @@ const NoteInput: React.FC<NoteInputProps> = ({
       return () => clearTimeout(timer);
     } else {
       setShowDraftSaved(false);
+      return undefined;
     }
   }, [debouncedValue, isPreview, isSaving, onDraftSaved]);
 
@@ -136,30 +87,15 @@ const NoteInput: React.FC<NoteInputProps> = ({
     }
   }, [inputRef, isPreview]);
 
-  useEffect(() => {
-    const textarea = inputRef.current;
-    if (!textarea || isPreview) return;
-
-    const hasContent = value.trim() !== '';
-    const baseHeight =
-      isFocused || hasContent
-        ? FOCUSED_TEXTAREA_HEIGHT
-        : COLLAPSED_TEXTAREA_HEIGHT;
-
-    if (isFocused || hasContent) {
-      textarea.style.height = `${baseHeight}px`;
-      window.requestAnimationFrame(() => {
-        const scrollHeight = textarea.scrollHeight;
-        const newHeight = Math.max(scrollHeight, MIN_EXPANDED_TEXTAREA_HEIGHT);
-        textarea.style.height = `${newHeight}px`;
-      });
-    } else {
-      textarea.style.height = `${baseHeight}px`;
-    }
-  }, [isFocused, value, inputRef, isPreview]);
+  useNoteInputResize({
+    inputRef,
+    isFocused,
+    value,
+    isPreview,
+  });
 
   const placeholderText =
-    'Type your note. Saved to Google Drive, organized by AI. Enter saves.';
+    'Type your note. Saved to Google Drive, organized by AI. Press Enter or Cmd/Ctrl + Enter to save.';
 
   const containerWidthClasses = isFocused
     ? 'max-w-[calc(100%_-_1rem)] sm:max-w-[calc(100%_-_1.25rem)] md:max-w-[min(100%,70ch)] lg:max-w-[min(100%,78ch)] xl:max-w-[min(100%,84ch)]'

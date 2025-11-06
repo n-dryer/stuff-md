@@ -6,7 +6,6 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button: React.FC<ButtonProps> = ({ children, className, variant = 'default', disabled, ...props }) => {
-  // Common classes for a refined brutalist look with subtle transitions
   const baseClasses = `
     uppercase px-6 py-3 text-base font-mono font-normal border-2 border-accent-black cursor-pointer
     focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-accent-black focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black
@@ -41,7 +40,6 @@ const Button: React.FC<ButtonProps> = ({ children, className, variant = 'default
     );
   }
 
-  // Default button: "Border Extrude" effect for secondary/destructive actions.
   return (
     <button
       className={`

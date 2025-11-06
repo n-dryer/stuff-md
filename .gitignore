@@ -74,6 +74,12 @@ coverage/
 # TypeScript
 *.tsbuildinfo
 
+# Generated Data Connect files
+src/dataconnect-generated/
+
+# Cursor IDE
+.cursor/
+
 # Temporary files
 *.tmp
 *.temp
@@ -82,7 +88,6 @@ coverage/
 .tmp/
 
 # Package manager lock files 
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

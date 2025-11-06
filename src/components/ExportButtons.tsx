@@ -109,6 +109,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
         document.removeEventListener('mousedown', handleClickOutside);
       };
     }
+    return undefined;
   }, [isExpanded, handleClose]);
 
   const buttonClasses =

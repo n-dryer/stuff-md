@@ -1,37 +1,44 @@
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { handleError } from '../utils/errorHandler';
 
 interface UseLogoutConfirmationProps {
   logout: () => Promise<void>;
   displayFeedback: (
+    type: 'success' | 'error',
     message: string,
-    type: 'success' | 'error' | 'info'
+    duration?: number
   ) => void;
+  setConfirmLogoutOpen: (open: boolean) => void;
 }
 
-export function useLogoutConfirmation({
+export const useLogoutConfirmation = ({
   logout,
   displayFeedback,
-}: UseLogoutConfirmationProps) {
-  const [confirmLogoutOpen, setConfirmLogoutOpen] = useState(false);
-
+  setConfirmLogoutOpen,
+}: UseLogoutConfirmationProps) => {
   const requestLogout = useCallback(() => {
     setConfirmLogoutOpen(true);
-  }, []);
+  }, [setConfirmLogoutOpen]);
 
   const cancelLogout = useCallback(() => {
     setConfirmLogoutOpen(false);
-  }, []);
+  }, [setConfirmLogoutOpen]);
 
   const confirmLogout = useCallback(async () => {
-    setConfirmLogoutOpen(false);
-    await logout();
-    displayFeedback('Logged out.', 'success');
-  }, [logout, displayFeedback]);
+    try {
+      await logout();
+      displayFeedback('success', 'You have been logged out.');
+    } catch (error) {
+      handleError(
+        error,
+        displayFeedback,
+        'Logout failed. Please try again.',
+        'useLogoutConfirmation:confirmLogout'
+      );
+    } finally {
+      setConfirmLogoutOpen(false);
+    }
+  }, [logout, displayFeedback, setConfirmLogoutOpen]);
 
-  return {
-    confirmLogoutOpen,
-    requestLogout,
-    cancelLogout,
-    confirmLogout,
-  };
-}
+  return { requestLogout, cancelLogout, confirmLogout };
+};

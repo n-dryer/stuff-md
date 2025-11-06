@@ -1,52 +1,38 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./hooks/**/*.{js,ts,jsx,tsx}",
-    "./services/**/*.{js,ts,jsx,tsx}",
-    "./utils/**/*.{js,ts,jsx,tsx}",
-    "./App.tsx",
-    "./index.tsx",
-  ],
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['IBM Plex Mono', 'monospace'],
-        mono: ['IBM Plex Mono', 'monospace'],
-      },
       colors: {
-        'off-white': '#F8F8F8',
+        'off-white': '#F5F5F5',
         'off-black': '#1A1A1A',
-        'light-gray': '#CCCCCC',
         'accent-black': '#000000',
-        'destructive-red': '#FF0000',
-        'brutal-gray': '#222222',
-        'accent-yellow': '#FFFF00',
+        'brutal-gray': '#333333',
+        'accent-red': '#FF4136',
+        'accent-yellow': '#FFDC00',
+        'accent-green': '#2ECC40',
+        'accent-blue': '#0074D9',
+        'accent-orange': '#FF851B',
+        'accent-purple': '#B10DC9',
+        'light-gray': '#AAAAAA',
+        'destructive-red': '#D32F2F',
+        'success-green': '#388E3C',
       },
-      boxShadow: {
-        'brutalist': '4px 4px 0px rgba(0,0,0,1)',
-        'brutalist-up': '-2px -2px 0px rgba(0,0,0,1)',
-        'brutalist-dark': '4px 4px 0px #F8F8F8',
+      fontFamily: {
+        sans: ['"Inter", sans-serif'],
+        mono: ['"Roboto Mono", monospace'],
       },
       borderWidth: {
-        '5': '5px',
+        3: '3px',
+        5: '5px',
+        6: '6px',
       },
-      textDecorationThickness: {
-        '4': '4px',
-        '6': '6px',
+      boxShadow: {
+        brutal: '4px 4px 0px #1A1A1A',
+        'brutal-dark': '4px 4px 0px #F5F5F5',
       },
-      underlineOffset: {
-        '4': '4px',
-        '8': '8px',
-        '10': '10px',
-      },
-      animation: {
-        'brutalist-pulse': 'brutalist-pulse 1.5s ease-in-out infinite',
-      },
-    }
+    },
   },
-  plugins: [require('@tailwindcss/line-clamp')],
-}
+  plugins: [],
+};

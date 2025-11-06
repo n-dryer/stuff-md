@@ -86,7 +86,7 @@ export const authorizedFetch = async (
           };
           try {
             errorBody = (await clonedResponse.json()) as typeof errorBody;
-          } catch (jsonError) {
+          } catch {
             throw new Error('Failed to parse error response');
           }
           if (errorBody.error?.message) {

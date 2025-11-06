@@ -24,14 +24,21 @@ const ACCESS_TOKEN_KEY = 'stuffmd.gdrive_access_token';
  */
 function normalizeAuthError(error: unknown): AuthError {
   // If it's already an AuthError, return it
-  if (error && typeof error === 'object' && 'code' in error && 'message' in error) {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'code' in error &&
+    'message' in error
+  ) {
     return error as AuthError;
   }
-  
+
   // Convert regular Error to AuthError-like object
   const errorMessage = error instanceof Error ? error.message : String(error);
   return {
-    code: errorMessage.includes('Missing required env') ? 'config/missing-env' : 'auth/unknown-error',
+    code: errorMessage.includes('Missing required env')
+      ? 'config/missing-env'
+      : 'auth/unknown-error',
     message: errorMessage,
     name: 'AuthError',
   } as AuthError;
@@ -99,6 +106,7 @@ export function useAuth() {
       setIsLoading(false);
       setAuthInitialized(true);
     }
+    return undefined;
   }, [accessToken, authInitialized]);
 
   const login = useCallback(async () => {

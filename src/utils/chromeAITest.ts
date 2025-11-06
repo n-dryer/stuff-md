@@ -17,6 +17,7 @@
 
 import { checkChromeAIAvailability } from '../services/ai/chromeAI';
 import { getAICategorization } from '../services/aiService';
+import { logDebug, logError, logWarning } from './logger';
 
 /**
  * Test Chrome AI availability and basic functionality
@@ -28,12 +29,18 @@ export const testChromeAIAvailability = async (): Promise<{
   aiExists: boolean;
   error?: string;
 }> => {
-  const result = {
+  const result: {
+    available: boolean;
+    status: 'readily' | 'after-download' | 'no';
+    windowExists: boolean;
+    aiExists: boolean;
+    error?: string;
+  } = {
     available: false,
-    status: 'no' as const,
+    status: 'no',
     windowExists: typeof window !== 'undefined',
     aiExists: false,
-    error: undefined as string | undefined,
+    error: undefined,
   };
 
   try {
@@ -50,8 +57,9 @@ export const testChromeAIAvailability = async (): Promise<{
       return result;
     }
 
-    result.status = await checkChromeAIAvailability();
-    result.available = result.status !== 'no';
+    const availability = await checkChromeAIAvailability();
+    result.status = availability;
+    result.available = availability !== 'no';
 
     if (!result.available) {
       result.error = `Chrome AI availability returned: ${result.status}`;
@@ -89,8 +97,8 @@ export const testChromeAICategorization = async (
   };
 }> => {
   try {
-    console.log('[Chrome AI Test] Starting categorization test...');
-    console.log('[Chrome AI Test] Test content:', testContent);
+    logDebug('[Chrome AI Test] Starting categorization test...');
+    logDebug('[Chrome AI Test] Test content:', testContent);
 
     const result = await getAICategorization(testContent);
 
@@ -137,8 +145,8 @@ export const testChromeAICategorization = async (
 
     const allValid = Object.values(validation).every(v => v === true);
 
-    console.log('[Chrome AI Test] Categorization result:', result);
-    console.log('[Chrome AI Test] Validation:', validation);
+    logDebug('[Chrome AI Test] Categorization result:', result);
+    logDebug('[Chrome AI Test] Validation:', validation);
 
     return {
       success: allValid,
@@ -150,7 +158,7 @@ export const testChromeAICategorization = async (
     };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('[Chrome AI Test] Error:', error);
+    logError('[Chrome AI Test] Error:', error);
     return {
       success: false,
       error: errorMessage,
@@ -166,10 +174,10 @@ export const testChromeAI = async (): Promise<{
   categorization: Awaited<ReturnType<typeof testChromeAICategorization>>;
   overall: 'pass' | 'fail' | 'partial';
 }> => {
-  console.log('=== Chrome AI Validation Test ===');
+  logDebug('=== Chrome AI Validation Test ===');
 
   const availability = await testChromeAIAvailability();
-  console.log('Availability test:', availability);
+  logDebug('Availability test:', availability);
 
   let categorization = {
     success: false,
@@ -178,9 +186,9 @@ export const testChromeAI = async (): Promise<{
 
   if (availability.available) {
     categorization = await testChromeAICategorization();
-    console.log('Categorization test:', categorization);
+    logDebug('Categorization test:', categorization);
   } else {
-    console.warn('Skipping categorization test - Chrome AI not available');
+    logWarning('Skipping categorization test - Chrome AI not available');
     categorization.error = 'Chrome AI not available';
   }
 
@@ -191,8 +199,8 @@ export const testChromeAI = async (): Promise<{
         ? 'fail'
         : 'partial';
 
-  console.log('=== Test Complete ===');
-  console.log('Overall result:', overall);
+  logDebug('=== Test Complete ===');
+  logDebug('Overall result:', overall);
 
   return {
     availability,

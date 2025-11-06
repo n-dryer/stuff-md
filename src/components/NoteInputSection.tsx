@@ -1,11 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import NoteInput from './NoteInput';
-import NoteInputCoachmark from './NoteInputCoachmark';
-import { useLocalStorage } from '../hooks/useLocalStorage';
 
 interface NoteInputSectionProps {
   isSidebarCollapsed: boolean;
-  noteInputRef: React.RefObject<HTMLTextAreaElement>;
+  noteInputRef: React.RefObject<HTMLTextAreaElement | null>;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSave: () => void;
@@ -25,29 +23,11 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
   onDraftSaved,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [hasShownCoachmark, setHasShownCoachmark] = useLocalStorage<boolean>(
-    'stuffmd.coachmark.noteInput.dismissed',
-    false
-  );
-  const [showCoachmark, setShowCoachmark] = useState(false);
-
-  useEffect(() => {
-    if (!hasShownCoachmark && containerRef.current && noteInputRef.current) {
-      // Small delay to ensure layout is complete
-      const timer = setTimeout(() => {
-        setShowCoachmark(true);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [hasShownCoachmark, noteInputRef]);
-
-  const handleCoachmarkDismiss = () => {
-    setShowCoachmark(false);
-    setHasShownCoachmark(true);
-  };
 
   return (
-    <div className={`flex-shrink-0 border-t-2 border-accent-black dark:border-off-white/20 relative ${isSaving ? 'pointer-events-none' : ''}`}>
+    <div
+      className={`flex-shrink-0 border-t-2 border-accent-black dark:border-off-white/20 relative ${isSaving ? 'pointer-events-none' : ''}`}
+    >
       <div
         className={`${
           isSidebarCollapsed
@@ -70,13 +50,6 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
               onDraftSaved={onDraftSaved}
             />
           </div>
-          {showCoachmark && (
-            <NoteInputCoachmark
-              inputRef={noteInputRef}
-              containerRef={containerRef}
-              onDismiss={handleCoachmarkDismiss}
-            />
-          )}
         </div>
       </div>
     </div>

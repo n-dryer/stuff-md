@@ -1,6 +1,7 @@
-import React, { Component, type ErrorInfo, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 import ErrorDisplay from './ErrorDisplay';
+import { logError } from '../utils/logger';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -29,7 +30,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
     };
   }
 
-  public static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+  public static getDerivedStateFromError(
+    error: Error
+  ): Partial<ErrorBoundaryState> {
     return {
       hasError: true,
       error,
@@ -38,12 +41,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log error to error reporting service (e.g., Sentry) in production
-    if (import.meta.env.DEV || process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
-    } else {
-      // TODO: Add error reporting service integration
-      // Example: Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } });
-    }
+    logError('ErrorBoundary caught an error:', { error, errorInfo });
+    // Error reporting service integration can be added here for production
+    // Example: Sentry.captureException(error, { contexts: { react: { componentStack: errorInfo.componentStack } } });
 
     this.setState({
       error,
@@ -65,30 +65,29 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         return this.props.fallback;
       }
 
-      const errorMessage = this.state.error?.message || 'An unexpected error occurred.';
+      const errorMessage =
+        this.state.error?.message || 'An unexpected error occurred.';
 
       return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-off-white dark:bg-off-black">
-          <div className="max-w-md w-full">
-            <ErrorDisplay
-              message={errorMessage}
-              onDismiss={this.handleReset}
-            />
-            {(import.meta.env.DEV || process.env.NODE_ENV === 'development') && this.state.errorInfo && (
-              <details className="mt-4 p-4 border-2 border-accent-black dark:border-off-white/50 bg-off-white dark:bg-off-black">
-                <summary className="font-mono text-xs uppercase cursor-pointer mb-2">
-                  Error Details (Development Only)
-                </summary>
-                <pre className="text-xs overflow-auto font-mono text-off-black/60 dark:text-off-white/60">
-                  {this.state.error?.stack}
-                  {'\n\n'}
-                  {this.state.errorInfo.componentStack}
-                </pre>
-              </details>
-            )}
+        <div className='min-h-screen flex items-center justify-center p-4 bg-off-white dark:bg-off-black'>
+          <div className='max-w-md w-full'>
+            <ErrorDisplay message={errorMessage} onDismiss={this.handleReset} />
+            {(import.meta.env.DEV || process.env.NODE_ENV === 'development') &&
+              this.state.errorInfo && (
+                <details className='mt-4 p-4 border-2 border-accent-black dark:border-off-white/50 bg-off-white dark:bg-off-black'>
+                  <summary className='font-mono text-xs uppercase cursor-pointer mb-2'>
+                    Error Details (Development Only)
+                  </summary>
+                  <pre className='text-xs overflow-auto font-mono text-off-black/60 dark:text-off-white/60'>
+                    {this.state.error?.stack}
+                    {'\n\n'}
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                </details>
+              )}
             <button
               onClick={this.handleReset}
-              className="mt-4 uppercase text-sm font-bold text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white transition-colors"
+              className='mt-4 uppercase text-sm font-bold text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white transition-colors'
             >
               [RETRY]
             </button>

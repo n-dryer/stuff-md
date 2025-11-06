@@ -16,7 +16,14 @@ interface InstructionsModalProps {
 }
 
 const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
-  ({ isVisible, onClose, onSave, initialInstructions, initialMode = 'custom', lastCustomInstructions = '' }) => {
+  ({
+    isVisible,
+    onClose,
+    onSave,
+    initialInstructions,
+    initialMode = 'custom',
+    lastCustomInstructions = '',
+  }) => {
     const [instructions, setInstructions] = useState(initialInstructions);
     const [mode, setMode] = useState<'default' | 'custom'>('custom');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -50,6 +57,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
         const timer = window.setTimeout(() => textareaRef.current?.focus(), 10);
         return () => clearTimeout(timer);
       }
+      return undefined;
     }, [isVisible, mode]);
 
     useEffect(() => {
@@ -96,16 +104,32 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
       []
     );
 
-    const shouldEnableSave = mode === 'custom' ? hasChanges : hasExistingCustom && mode === 'default';
-    const shouldShowActions = mode === 'custom' || (mode === 'default' && hasExistingCustom);
+    const shouldEnableSave =
+      mode === 'custom' ? hasChanges : hasExistingCustom && mode === 'default';
+    const shouldShowActions =
+      mode === 'custom' || (mode === 'default' && hasExistingCustom);
 
     if (!isVisible) {
       return null;
     }
 
+    const backdropRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+      if (isVisible && backdropRef.current) {
+        // Focus backdrop to ensure keyboard events work
+        const focusTimer = setTimeout(() => {
+          backdropRef.current?.focus();
+        }, 0);
+        return () => clearTimeout(focusTimer);
+      }
+      return undefined;
+    }, [isVisible]);
+
     return (
       // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
       <div
+        ref={backdropRef}
         className='fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-stretch justify-center px-0 py-0 z-50 sm:items-center sm:px-4'
         onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
@@ -115,17 +139,11 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
         aria-labelledby='instructions-modal-title'
         aria-describedby='instructions-description'
       >
-        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div
           ref={modalRef}
           className='relative flex h-full max-h-[100svh] w-full flex-col overflow-hidden bg-off-white dark:bg-brutal-gray border-0 border-accent-black font-mono uppercase modal-enter sm:h-auto sm:max-w-4xl sm:rounded-[1.5rem] sm:border-2 sm:px-2 lg:max-w-3xl'
           onClick={event => event.stopPropagation()}
-          onKeyDown={event => {
-            // Stop propagation for keyboard events to prevent backdrop from closing modal
-            if (event.key === 'Escape') {
-              event.stopPropagation();
-            }
-          }}
         >
           <header className='sticky top-0 z-10 flex items-center justify-between border-b border-accent-black/15 dark:border-off-white/20 px-5 py-4 bg-off-white dark:bg-brutal-gray sm:static sm:px-8 sm:py-6'>
             <h2
@@ -160,7 +178,10 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
                     setMode(next);
                     if (next === 'custom') {
                       const norm = sanitizedInitialInstructions.trim();
-                      if (norm === SYSTEM_INSTRUCTION.trim() && lastCustomInstructions) {
+                      if (
+                        norm === SYSTEM_INSTRUCTION.trim() &&
+                        lastCustomInstructions
+                      ) {
                         setInstructions(lastCustomInstructions.slice(0, 2000));
                       }
                     }
@@ -181,7 +202,11 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
 
           {shouldShowActions && (
             <footer className='sticky bottom-0 z-10 flex items-center gap-x-4 px-5 py-4 bg-off-white dark:bg-brutal-gray sm:static sm:px-8 sm:py-6'>
-              <Button onClick={handleSave} variant='fill' disabled={!shouldEnableSave}>
+              <Button
+                onClick={handleSave}
+                variant='fill'
+                disabled={!shouldEnableSave}
+              >
                 SAVE
               </Button>
               <Button onClick={onClose} variant='default'>

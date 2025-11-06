@@ -25,7 +25,7 @@ const EditNoteModal: React.FC<EditNoteModalProps> = React.memo(
     const { handleBackdropClick, handleBackdropKeyDown } = useModalInteraction({
       isOpen,
       onClose,
-      modalRef,
+      modalRef: modalRef as React.RefObject<HTMLElement>,
     });
 
     useEffect(() => {
@@ -58,6 +58,26 @@ const EditNoteModal: React.FC<EditNoteModalProps> = React.memo(
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          // Command+Return: insert line break when textarea is focused (standard behavior)
+          if (
+            textareaRef.current &&
+            document.activeElement === textareaRef.current
+          ) {
+            e.preventDefault();
+            const textarea = textareaRef.current;
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const newContent =
+              content.substring(0, start) + '\n' + content.substring(end);
+            setContent(newContent);
+            // Restore cursor position after the newline
+            setTimeout(() => {
+              textarea.focus();
+              textarea.setSelectionRange(start + 1, start + 1);
+            }, 0);
+            return;
+          }
+          // Command+Enter: save when textarea is not focused
           e.preventDefault();
           if (content.trim() && content !== originalContent && !isSaving) {
             handleSave();

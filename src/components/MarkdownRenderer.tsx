@@ -18,6 +18,18 @@ type DOMPurifyLike = {
   sanitize: (dirty: string, config?: unknown) => string;
 };
 
+// Simple HTML escape function for use before libraries load
+const escapeHtml = (text: string): string => {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+};
+
 const loadMarkdownLibs = async () => {
   if (!markedModule || !dompurifyModule) {
     const [marked, dompurify] = await Promise.all([
@@ -58,14 +70,6 @@ const loadMarkdownLibs = async () => {
   };
 };
 
-const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   content,
   className,
@@ -95,6 +99,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
 
     // Show content as escaped plain text until libraries are loaded (safe)
     if (!libs) {
+      // Escape HTML manually until libraries are loaded
       return escapeHtml(content);
     }
 
@@ -118,7 +123,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       });
     } catch (error) {
       logError('Failed to render markdown:', error);
-      return escapeHtml(content);
+      return libs.DOMPurify.sanitize(content, { ALLOWED_TAGS: [] });
     }
   }, [content, libs]);
 

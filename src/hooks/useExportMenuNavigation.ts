@@ -1,13 +1,18 @@
-import { useEffect, useRef, type MutableRefObject, type RefObject } from 'react';
+import {
+  useEffect,
+  useRef,
+  type MutableRefObject,
+  type RefObject,
+} from 'react';
 
 import { hasOpenModals } from '../utils/modalStack';
 
 interface UseExportMenuNavigationProps {
   isExpanded: boolean;
-  menuRef: RefObject<HTMLDivElement>;
+  menuRef: RefObject<HTMLDivElement | null>;
   menuItemRefs: MutableRefObject<(HTMLButtonElement | null)[]>;
   exportOptionsCount: number;
-  buttonRef: RefObject<HTMLButtonElement>;
+  buttonRef: RefObject<HTMLButtonElement | null>;
   onClose: () => void;
 }
 
@@ -35,6 +40,7 @@ export const useExportMenuNavigation = ({
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
+    return undefined;
   }, [isExpanded, onClose, buttonRef]);
 
   useEffect(() => {
@@ -66,6 +72,7 @@ export const useExportMenuNavigation = ({
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
     }
+    return undefined;
   }, [isExpanded, exportOptionsCount, menuItemRefs]);
 
   useEffect(() => {
@@ -108,6 +115,7 @@ export const useExportMenuNavigation = ({
       window.addEventListener('keydown', handleTab);
       return () => window.removeEventListener('keydown', handleTab);
     }
+    return undefined;
   }, [isExpanded, menuRef]);
 
   return { focusedIndexRef };

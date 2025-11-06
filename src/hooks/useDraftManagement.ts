@@ -5,8 +5,9 @@ interface UseDraftManagementProps {
   openClearDraftModal: () => void;
   closeClearDraftModal: () => void;
   displayFeedback: (
+    type: 'success' | 'error',
     message: string,
-    type: 'success' | 'error' | 'info'
+    duration?: number
   ) => void;
 }
 
@@ -30,7 +31,7 @@ export function useDraftManagement({
     setDraft('');
     closeClearDraftModal();
     noteInputRef.current?.blur();
-    displayFeedback('Draft cleared.', 'info');
+    displayFeedback('success', 'Draft cleared.');
   };
 
   return {

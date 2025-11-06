@@ -1,5 +1,4 @@
 interface RateLimiterOptions {
-  minInterval: number;
   maxCalls: number;
   windowMs: number;
 }
@@ -8,52 +7,36 @@ interface CallRecord {
   timestamp: number;
 }
 
-export function rateLimit<T extends (...args: unknown[]) => Promise<unknown>>(
-  fn: T,
-  options: Partial<RateLimiterOptions> = {}
-): T {
-  const {
-    minInterval = 1000,
-    maxCalls = 10,
-    windowMs = 60000,
-  } = options;
+export class RateLimiter {
+  private readonly options: RateLimiterOptions;
+  private callHistory: CallRecord[] = [];
 
-  let lastCallTime = 0;
-  const callHistory: CallRecord[] = [];
+  constructor(options: Partial<RateLimiterOptions> = {}) {
+    this.options = {
+      maxCalls: options.maxCalls ?? 10,
+      windowMs: options.windowMs ?? 60000,
+    };
+  }
 
-  return ((...args: Parameters<T>) => {
+  public check(): void {
     const now = Date.now();
+    const windowStart = now - this.options.windowMs;
 
-    // Remove old entries outside the time window
-    const windowStart = now - windowMs;
-    while (callHistory.length > 0 && callHistory[0].timestamp < windowStart) {
-      callHistory.shift();
-    }
+    this.callHistory = this.callHistory.filter(
+      record => record.timestamp >= windowStart
+    );
 
-    // Check if we've exceeded the maximum number of calls in the window
-    if (callHistory.length >= maxCalls) {
-      const oldestCall = callHistory[0];
-      const waitTime = oldestCall.timestamp + windowMs - now;
+    if (this.callHistory.length >= this.options.maxCalls) {
+      const oldestCall = this.callHistory[0];
+      const waitTime = oldestCall.timestamp + this.options.windowMs - now;
       throw new Error(
-        `Rate limit exceeded. Please wait ${Math.ceil(waitTime / 1000)} seconds before trying again.`
+        `Rate limit exceeded. Please wait ${Math.ceil(
+          waitTime / 1000
+        )} seconds.`
       );
     }
 
-    // Check minimum interval between calls
-    const timeSinceLastCall = now - lastCallTime;
-    if (timeSinceLastCall < minInterval) {
-      const waitTime = minInterval - timeSinceLastCall;
-      throw new Error(
-        `Please wait ${Math.ceil(waitTime / 1000)} seconds before trying again.`
-      );
-    }
-
-    // Record this call
-    lastCallTime = now;
-    callHistory.push({ timestamp: now });
-
-    // Execute the function
-    return fn(...args);
-  }) as T;
+    this.callHistory.push({ timestamp: now });
+  }
 }
 

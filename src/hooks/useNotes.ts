@@ -1,386 +1,85 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-
-import { getAICategorization } from '../services/aiService';
-import { driveService } from '../services/googleDriveService';
-import { findOrCreateAppFolder } from '../services/drive/folderOperations';
+import { useCallback } from 'react';
 import { Note } from '../types';
-import { toError } from '../utils/typeGuards';
-import {
-  validateNoteContent,
-  validateCustomInstructions,
-} from '../utils/inputValidation';
+import { useNotesQuery } from './notes/useNotesQuery';
+import { useNoteMutations } from './notes/useNoteMutations';
+import { useAICategorizationFlow } from './notes/useAICategorizationFlow';
+import { validateNoteContent } from '../utils/inputValidation';
+import { getAICategorization } from '../services/aiService';
+import { processAIResult } from './useAICategorization';
 import { logError } from '../utils/logger';
-import { generateTempId, createOptimisticNote } from '../utils/noteHelpers';
-import {
-  withOptimisticAdd,
-  withOptimisticUpdate,
-  withOptimisticDelete,
-} from '../utils/optimisticUpdates';
-import { useAICategorization, processAIResult } from './useAICategorization';
 
 export function useNotes(accessToken: string | null) {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const { applyAICategorization } = useAICategorization();
+  const { notes, setNotes, isLoading, error, refetch } =
+    useNotesQuery(accessToken);
+  const onError = useCallback((_e: Error) => {
+    // No-op here; consumers already read `error` from query hook if needed.
+    // Kept to satisfy optimistic helpers' error handler.
+  }, []);
+  const { saveNote, updateNote, deleteNote, deleteNotesByIds } =
+    useNoteMutations(accessToken, notes, setNotes, onError, refetch);
+  const { regenerateNote } = useAICategorizationFlow(updateNote);
 
-  const fetchNotes = useCallback(
-    async (signal?: AbortSignal): Promise<void> => {
-      if (!accessToken) return;
-      setIsLoading(true);
-      setError(null);
-      try {
-        const fetchedNotes = await driveService.fetchNotes(accessToken, signal);
-        if (!signal?.aborted) {
-          setNotes(fetchedNotes);
-        }
-      } catch (err) {
-        if (signal?.aborted) return;
-        logError('Failed to fetch notes:', err);
-        setError(toError(err));
-      } finally {
-        if (!signal?.aborted) {
-          setIsLoading(false);
-        }
-      }
-    },
-    [accessToken]
-  );
-
-  useEffect(() => {
-    // Cancel any in-flight requests when accessToken changes
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-
-    if (accessToken) {
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-
-      // Pre-fetch folder ID to have it ready for saves
-      // This runs in parallel with fetchNotes to avoid blocking
-      findOrCreateAppFolder(accessToken, controller.signal).catch(err => {
-        // Log but don't throw - folder will be fetched on first save if this fails
-        logError('Failed to pre-fetch folder ID:', err);
-      });
-
-      fetchNotes(controller.signal);
-    } else {
-      setNotes([]);
-      setIsLoading(false);
-    }
-
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-    };
-  }, [accessToken, fetchNotes]);
-
-  const saveNote = useCallback(
+  const saveNoteWithAI = useCallback(
     async (
       content: string,
       customInstructions: string
     ): Promise<Omit<Note, 'id'>> => {
-      if (!accessToken) {
-        throw new Error('Access token is required.');
-      }
-
-      // Validate inputs
       const validatedContent = validateNoteContent(content);
-      const validatedInstructions = validateCustomInstructions(
-        customInstructions || ''
-      );
-
-      setError(null);
-
-      const tempId = generateTempId();
-      const tempTitle = validatedContent.slice(0, 100).trim() || 'Untitled';
-      const optimisticNote = createOptimisticNote(
-        tempId,
-        validatedContent,
-        tempTitle
-      );
-
-      const { applyOptimistic, rollback } = withOptimisticAdd(
-        notes,
-        optimisticNote,
-        setNotes,
-        error => {
-          setError(error);
-        }
-      );
-
-      applyOptimistic();
-
-      try {
-        const savedNote = await driveService.saveNote(accessToken, {
-          name: optimisticNote.name,
-          content: validatedContent,
-          title: tempTitle,
-          summary: 'Processing...',
-          date: optimisticNote.date,
-          categoryPath: ['Misc'],
-          tags: ['misc'],
-          aiGenerated: null,
-        });
-
-        setNotes(prev =>
-          prev.map(note => (note.id === tempId ? savedNote : note))
-        );
-
-        applyAICategorization(
-          accessToken,
-          savedNote.id,
-          validatedContent,
-          validatedInstructions,
-          updates => {
-            setNotes(prev =>
-              prev.map(note =>
-                note.id === savedNote.id ? { ...note, ...updates } : note
-              )
-            );
+      const noteData: Omit<Note, 'id'> = {
+        name: validatedContent.slice(0, 100).trim() || 'Untitled',
+        content: validatedContent,
+        title: validatedContent.slice(0, 100).trim() || 'Untitled',
+        summary: 'Processing...',
+        date: new Date().toISOString(),
+        categoryPath: ['Misc'],
+        tags: ['misc'],
+        aiGenerated: null,
+      };
+      
+      // Create the note first with placeholder data
+      const createdNote = await saveNote(noteData);
+      
+      // Then asynchronously call AI service to generate title, summary, tags, and categoryPath
+      getAICategorization(validatedContent, customInstructions)
+        .then((aiResult) => {
+          if (aiResult) {
+            const processed = processAIResult(aiResult, validatedContent);
+            if (processed) {
+              // Update the note with AI-generated data
+              updateNote(createdNote.id, processed).catch((error) => {
+                logError('Failed to update note with AI categorization:', error);
+              });
+            }
           }
-        ).catch(err => {
-          logError('AI categorization failed:', err);
+        })
+        .catch((error) => {
+          logError('AI categorization failed:', error);
+          // Note remains with default Misc category and placeholder data
         });
-
-        return {
-          name: savedNote.name,
-          content: validatedContent,
-          title: tempTitle,
-          summary: 'Processing...',
-          date: savedNote.date,
-          categoryPath: ['Misc'],
-          tags: ['misc'],
-          aiGenerated: null,
-        };
-      } catch (err) {
-        rollback(err);
-        const error = toError(err);
-        throw error;
-      }
+      
+      return noteData;
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [accessToken, applyAICategorization]
-  );
-
-  const updateNote = useCallback(
-    async (noteId: string, updates: Partial<Note>): Promise<void> => {
-      if (!accessToken) {
-        throw new Error('Access token is required.');
-      }
-      setError(null);
-
-      // Ensure notes always have at least the "misc" tag
-      const finalUpdates = { ...updates };
-      if (finalUpdates.tags !== undefined && finalUpdates.tags.length === 0) {
-        finalUpdates.tags = ['misc'];
-        // Also ensure Misc category exists if tags are empty
-        if (
-          !finalUpdates.categoryPath ||
-          finalUpdates.categoryPath.length === 0
-        ) {
-          finalUpdates.categoryPath = ['Misc'];
-        }
-      }
-
-      const { applyOptimistic, rollback } = withOptimisticUpdate(
-        notes,
-        noteId,
-        finalUpdates,
-        setNotes,
-        error => {
-          setError(error);
-        },
-        fetchNotes
-      );
-
-      applyOptimistic();
-
-      try {
-        await driveService.updateNote(accessToken, noteId, finalUpdates);
-      } catch (err) {
-        await rollback(err);
-        const error = toError(err);
-        throw error;
-      }
-    },
-    [accessToken, fetchNotes, notes]
-  );
-
-  // Track regeneration attempts per note to prevent abuse
-  const regenerationAttempts = useRef<
-    Map<string, { count: number; lastAttempt: number }>
-  >(new Map());
-  const MAX_REGENERATIONS_PER_NOTE = 10; // Max regenerations per note per hour
-  const REGENERATION_WINDOW_MS = 3600000; // 1 hour
-
-  const regenerateNote = useCallback(
-    async (
-      note: Note,
-      newContent: string,
-      customInstructions: string
-    ): Promise<void> => {
-      if (!accessToken) {
-        throw new Error('Access token is required.');
-      }
-
-      // Check if content has actually changed
-      if (note.content.trim() === newContent.trim() && note.aiGenerated) {
-        // Content unchanged and already has AI categorization - skip regeneration
-        if (import.meta.env.DEV) {
-          console.log(
-            '[useNotes] Skipping regeneration - content unchanged and already categorized'
-          );
-        }
-        return;
-      }
-
-      // Check regeneration rate limit for this specific note
-      const now = Date.now();
-      const noteAttempts = regenerationAttempts.current.get(note.id);
-      if (noteAttempts) {
-        // Reset if window has passed
-        if (now - noteAttempts.lastAttempt > REGENERATION_WINDOW_MS) {
-          noteAttempts.count = 0;
-        }
-
-        // Check if limit exceeded
-        if (noteAttempts.count >= MAX_REGENERATIONS_PER_NOTE) {
-          throw new Error(
-            `Rate limit exceeded: Maximum ${MAX_REGENERATIONS_PER_NOTE} regenerations per hour for this note. Please wait before trying again.`
-          );
-        }
-
-        noteAttempts.count += 1;
-        noteAttempts.lastAttempt = now;
-      } else {
-        regenerationAttempts.current.set(note.id, {
-          count: 1,
-          lastAttempt: now,
-        });
-      }
-
-      // Validate inputs
-      const validatedContent = validateNoteContent(newContent);
-      const validatedInstructions = validateCustomInstructions(
-        customInstructions || ''
-      );
-
-      setError(null);
-      try {
-        const aiResult = await getAICategorization(
-          validatedContent,
-          validatedInstructions
-        );
-        if (aiResult) {
-          const processedUpdates = processAIResult(aiResult, validatedContent);
-          if (processedUpdates) {
-            const updates: Partial<Note> = {
-              content: validatedContent,
-              ...processedUpdates,
-            };
-            await updateNote(note.id, updates);
-          } else {
-            await updateNote(note.id, { content: validatedContent });
-          }
-        } else {
-          logError(
-            'AI categorization failed during note update. Saving content only.'
-          );
-          await updateNote(note.id, { content: validatedContent });
-        }
-      } catch (err) {
-        const error = toError(err);
-        setError(error);
-        throw error;
-      }
-    },
-    [accessToken, updateNote]
+    [saveNote, updateNote]
   );
 
   const deleteTagFromNote = useCallback(
     async (noteId: string, tagToDelete: string): Promise<void> => {
-      if (!accessToken) return;
-      const noteToUpdate = notes.find(note => note.id === noteId);
-      if (!noteToUpdate) return;
-
-      const updatedTags = noteToUpdate.tags.filter(tag => tag !== tagToDelete);
+      const target = notes.find(n => n.id === noteId);
+      if (!target) return;
+      const updatedTags = target.tags.filter(t => t !== tagToDelete);
       await updateNote(noteId, { tags: updatedTags });
     },
-    [accessToken, notes, updateNote]
-  );
-
-  const deleteNote = useCallback(
-    async (noteId: string): Promise<void> => {
-      if (!accessToken) {
-        throw new Error('Access token is required.');
-      }
-      setError(null);
-
-      const { applyOptimistic, rollback } = withOptimisticDelete(
-        notes,
-        [noteId],
-        setNotes,
-        error => {
-          setError(error);
-        }
-      );
-
-      const deletedNotes = applyOptimistic();
-
-      try {
-        await driveService.deleteNote(accessToken, noteId);
-      } catch (err) {
-        rollback(deletedNotes, err);
-        const error = toError(err);
-        throw error;
-      }
-    },
-    [accessToken, notes]
-  );
-
-  const deleteNotesByIds = useCallback(
-    async (noteIds: string[]): Promise<void> => {
-      if (!accessToken) {
-        throw new Error('Access token is required.');
-      }
-      setError(null);
-
-      const { applyOptimistic, rollback } = withOptimisticDelete(
-        notes,
-        noteIds,
-        setNotes,
-        error => {
-          setError(error);
-        }
-      );
-
-      const deletedNotes = applyOptimistic();
-
-      try {
-        await Promise.all(
-          noteIds.map(id => driveService.deleteNote(accessToken, id))
-        );
-      } catch (err) {
-        rollback(deletedNotes, err);
-        const error = toError(err);
-        throw error;
-      }
-    },
-    [accessToken, notes]
+    [notes, updateNote]
   );
 
   return {
     notes,
     isLoading,
     error,
-    fetchNotes,
-    saveNote,
+    fetchNotes: refetch,
+    saveNote: saveNoteWithAI,
     updateNote,
-    regenerateNote,
+    regenerateNote: regenerateNote,
     deleteTagFromNote,
     deleteNote,
     deleteNotesByIds,

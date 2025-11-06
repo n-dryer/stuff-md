@@ -1,7 +1,6 @@
-import React, { useCallback, useRef, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { Note } from '../types';
 import { logError } from '../utils/logger';
-import { rateLimit } from '../utils/rateLimiter';
 
 interface UseNoteHandlersProps {
   accessToken: string | null;
@@ -10,7 +9,6 @@ interface UseNoteHandlersProps {
     content: string,
     customInstructions: string
   ) => Promise<Omit<Note, 'id'>>;
-  deleteNote: (noteId: string) => Promise<void>;
   regenerateNote: (
     note: Note,
     newContent: string,
@@ -18,12 +16,12 @@ interface UseNoteHandlersProps {
   ) => Promise<void>;
   customInstructions: string;
   displayFeedback: (
+    type: 'success' | 'error',
     message: string,
-    type: 'success' | 'error' | 'info'
+    duration?: number
   ) => void;
-  noteInputRef: React.RefObject<HTMLTextAreaElement>;
+  noteInputRef: React.RefObject<HTMLTextAreaElement | null>;
   setDraft: (draft: string) => void;
-  setNoteToDelete: (noteId: string | null) => void;
   setShowNoteSavedToast: (show: boolean) => void;
 }
 
@@ -31,67 +29,26 @@ export const useNoteHandlers = ({
   accessToken,
   draft,
   saveNote,
-  deleteNote,
   regenerateNote,
   customInstructions,
   displayFeedback,
   noteInputRef,
   setDraft,
-  setNoteToDelete,
   setShowNoteSavedToast,
 }: UseNoteHandlersProps) => {
-  const saveNoteRef = useRef(saveNote);
-  const deleteNoteRef = useRef(deleteNote);
-  const regenerateNoteRef = useRef(regenerateNote);
-
-  saveNoteRef.current = saveNote;
-  deleteNoteRef.current = deleteNote;
-  regenerateNoteRef.current = regenerateNote;
-
-  const saveLimiter = useMemo(
-    () =>
-      rateLimit(
-        (...args) => saveNoteRef.current(...args),
-        { minInterval: 300, maxCalls: 10, windowMs: 60000 }
-      ),
-    []
-  );
-
-  const deleteLimiter = useMemo(
-    () =>
-      rateLimit(
-        (...args) => deleteNoteRef.current(...args),
-        { minInterval: 500, maxCalls: 20, windowMs: 60000 }
-      ),
-    []
-  );
-
-  const updateLimiter = useMemo(
-    () =>
-      rateLimit(
-        (...args) => regenerateNoteRef.current(...args),
-        { minInterval: 2000, maxCalls: 5, windowMs: 60000 }
-      ),
-    []
-  );
-
   const handleSaveNote = useCallback(async () => {
     if (!accessToken || !draft.trim()) return;
 
     try {
-      await saveLimiter(draft, customInstructions);
+      await saveNote(draft, customInstructions);
       setDraft('');
       if (noteInputRef.current) {
         noteInputRef.current.style.height = 'auto';
       }
       setShowNoteSavedToast(true);
     } catch (error) {
-      if (error instanceof Error && error.message.includes('Rate limit')) {
-        displayFeedback(error.message, 'error');
-      } else {
-        logError('Error saving note:', error);
-        displayFeedback('Failed to save note.', 'error');
-      }
+      logError('Error saving note:', error);
+      displayFeedback('error', 'Failed to save note.');
     }
   }, [
     accessToken,
@@ -101,49 +58,24 @@ export const useNoteHandlers = ({
     noteInputRef,
     setDraft,
     setShowNoteSavedToast,
-    saveLimiter,
+    saveNote,
   ]);
-
-  const handleConfirmDelete = useCallback(
-    async (noteToDelete: string | null) => {
-      if (!noteToDelete) return;
-      try {
-        await deleteLimiter(noteToDelete);
-        displayFeedback('Note deleted.', 'success');
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('Rate limit')) {
-          displayFeedback(error.message, 'error');
-        } else {
-          logError('Failed to delete note:', error);
-          displayFeedback('Failed to delete note.', 'error');
-        }
-      } finally {
-        setNoteToDelete(null);
-      }
-    },
-    [setNoteToDelete, displayFeedback, deleteLimiter]
-  );
 
   const handleUpdateAndRecategorizeNote = useCallback(
     async (note: Note, newContent: string) => {
       try {
-        await updateLimiter(note, newContent, customInstructions);
-        displayFeedback('Note updated.', 'success');
+        await regenerateNote(note, newContent, customInstructions);
+        displayFeedback('success', 'Note updated.');
       } catch (error) {
-        if (error instanceof Error && error.message.includes('Rate limit')) {
-          displayFeedback(error.message, 'error');
-        } else {
-          logError('Failed to update note:', error);
-          displayFeedback('Failed to update note.', 'error');
-        }
+        logError('Failed to update note:', error);
+        displayFeedback('error', 'Failed to update note.');
       }
     },
-    [customInstructions, displayFeedback, updateLimiter]
+    [customInstructions, displayFeedback, regenerateNote]
   );
 
   return {
     handleSaveNote,
-    handleConfirmDelete,
     handleUpdateAndRecategorizeNote,
   };
 };

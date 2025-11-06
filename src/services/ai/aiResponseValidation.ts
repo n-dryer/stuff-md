@@ -1,5 +1,5 @@
 import { AICategorizationResult } from '../../types';
-import { SchemaError } from '../aiService';
+import { SchemaError } from './errors';
 
 /**
  * Validate and parse AI response
@@ -62,19 +62,6 @@ export const validateAndParseResponse = (
     );
   }
 
-  // Validate tag format (each tag should be 1-2 words)
-  const invalidTags = candidate.tags.filter(tag => {
-    const str = String(tag).trim();
-    if (str.length === 0) return true;
-    const words = str.split(/\s+/);
-    return words.length > 2;
-  });
-  if (invalidTags.length > 0) {
-    throw new SchemaError(
-      `Tags must be 1-2 words each, found tags with more words: ${invalidTags.join(', ')}`
-    );
-  }
-
   // Normalize tags: lowercase, trim, deduplicate, validate format (max 2 words)
   const normalizedTags = Array.from(
     new Set(
@@ -88,7 +75,12 @@ export const validateAndParseResponse = (
           if (tag.length === 0) return false;
           // Validate tag format: max 2 words
           const words = tag.split(/\s+/);
-          return words.length <= 2;
+          if (words.length > 2) {
+            throw new SchemaError(
+              `Tags must be 1-2 words each, found tag with more words: ${tag}`
+            );
+          }
+          return true;
         })
     )
   ).slice(0, 5);

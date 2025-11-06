@@ -1,11 +1,6 @@
 import { authorizedFetch } from './apiHelpers';
 import { logError } from '../../utils/logger';
 
-// Clear folder cache on auth error, as it might be stale across logins.
-export const onAuthError = () => {
-  clearFolderCache();
-};
-
 const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3';
 const APP_FOLDER_NAME = 'STUFF.MD Notes';
 const APP_FOLDER_QUERY = `name='${APP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;

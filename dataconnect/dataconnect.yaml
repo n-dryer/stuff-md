@@ -1,5 +1,5 @@
 specVersion: 'v1'
-serviceId: 'stuff'
+serviceId: 'stuff' # Change to your Firebase Data Connect service ID
 location: 'us-east4'
 schema:
   source: './schema'
@@ -7,7 +7,7 @@ schema:
     postgresql:
       database: 'fdcdb'
       cloudSql:
-        instanceId: 'stuff-fdc'
+        instanceId: 'your-instance-id' # Replace with your Firebase Data Connect instance ID
         # schemaValidation: "STRICT"     # STRICT mode makes Postgres schema match Data Connect exactly.
         # schemaValidation: "COMPATIBLE" # COMPATIBLE mode makes Postgres schema compatible with Data Connect.
 connectorDirs: [] # Add your connector directories here if needed

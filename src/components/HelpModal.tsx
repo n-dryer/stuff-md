@@ -19,6 +19,8 @@ const HelpModal: React.FC<HelpModalProps> = ({
     modalRef,
   });
 
+  const backdropRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!isOpen || typeof document === 'undefined') {
       return undefined;
@@ -36,7 +38,13 @@ const HelpModal: React.FC<HelpModalProps> = ({
       style.paddingRight = `${scrollbarGap}px`;
     }
 
+    // Focus backdrop to ensure keyboard events work
+    const focusTimer = setTimeout(() => {
+      backdropRef.current?.focus();
+    }, 0);
+
     return () => {
+      clearTimeout(focusTimer);
       style.overflow = previousOverflow;
       style.paddingRight = previousPaddingRight;
     };
@@ -49,6 +57,7 @@ const HelpModal: React.FC<HelpModalProps> = ({
   return (
     // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
+      ref={backdropRef}
       className='fixed inset-0 z-50 flex items-stretch justify-center bg-off-black/30 backdrop-blur-sm px-0 py-0 dark:bg-off-black/50 sm:items-center sm:px-4'
       onClick={handleBackdropClick}
       onKeyDown={handleBackdropKeyDown}
@@ -59,16 +68,11 @@ const HelpModal: React.FC<HelpModalProps> = ({
       id='help-modal'
       tabIndex={-1}
     >
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         ref={modalRef}
         className='relative flex h-full max-h-[100svh] w-full flex-col overflow-hidden border-0 border-accent-black bg-off-white font-mono uppercase shadow-lg modal-enter dark:border-off-white/40 dark:bg-brutal-gray sm:h-auto sm:max-w-4xl sm:border-2 sm:rounded-[1.5rem]'
         onClick={event => event.stopPropagation()}
-        onKeyDown={event => {
-          if (event.key === 'Escape') {
-            event.stopPropagation();
-          }
-        }}
       >
         <header className='flex items-center justify-between border-b border-accent-black/15 px-5 py-4 dark:border-off-white/20 dark:bg-brutal-gray sm:px-8 sm:py-6'>
           <h2

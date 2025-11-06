@@ -5,7 +5,7 @@ import { SYSTEM_INSTRUCTION } from '../services/aiService';
 interface InstructionsButtonProps {
   customInstructions: string;
   onOpenInstructions: () => void;
-  instructionsButtonRef: React.RefObject<HTMLButtonElement>;
+  instructionsButtonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 const InstructionsButton: React.FC<InstructionsButtonProps> = ({
@@ -39,7 +39,9 @@ const InstructionsButton: React.FC<InstructionsButtonProps> = ({
         title={buttonTitle}
         aria-label={`AI rules ${instructionsStatus}. ${instructionsTooltipText}`}
       >
-        <span className='whitespace-nowrap'>[AI RULES: {instructionsStatus}]</span>
+        <span className='whitespace-nowrap'>
+          [AI RULES: {instructionsStatus}]
+        </span>
       </button>
     </BrutalistTooltip>
   );

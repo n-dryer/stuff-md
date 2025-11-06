@@ -1,5 +1,5 @@
 import { logError, logWarning } from '../../utils/logger';
-import { TimeoutError } from '../aiService';
+import { withTimeout } from '../../utils/asyncUtils';
 
 // The API key for fallback Gemini API (only needed when Chrome built-in AI unavailable)
 const apiKey: string | undefined = import.meta.env.VITE_GEMINI_API_KEY as
@@ -79,27 +79,6 @@ const validateApiKey = (): boolean => {
  */
 export const isApiKeyConfigured = (): boolean => {
   return validateApiKey();
-};
-
-// Promise timeout helper
-const withTimeout = async <T>(
-  promise: Promise<T>,
-  timeoutMs: number
-): Promise<T> => {
-  let timeoutId: number | undefined;
-  return await Promise.race<T>([
-    promise,
-    new Promise<T>((_, reject) => {
-      timeoutId = window.setTimeout(
-        () => reject(new TimeoutError('AI request timed out')),
-        timeoutMs
-      );
-    }),
-  ]).finally(() => {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
-  });
 };
 
 /**

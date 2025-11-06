@@ -1,7 +1,8 @@
 import { Note } from '../types';
-import { logError } from './logger';
 
-// Type for Drive API file metadata
+/**
+ * Google Drive file structure from the API
+ */
 export interface DriveFile {
   id: string;
   name: string;
@@ -11,75 +12,83 @@ export interface DriveFile {
     summary?: string;
     categoryPath?: string;
     tags?: string;
+    date?: string;
     aiGenerated?: string;
-    isStuffMdNote?: string;
   };
 }
 
 /**
- * Safely parses a JSON string, returning a default value if parsing fails
- * @param jsonString The JSON string to parse
- * @param defaultValue The default value to return if parsing fails
- * @returns The parsed value or the default value
- */
-export const safeJsonParse = <T>(
-  jsonString: string | null | undefined,
-  defaultValue: T
-): T => {
-  if (!jsonString) return defaultValue;
-  try {
-    return JSON.parse(jsonString) as T;
-  } catch (e) {
-    logError('Failed to parse JSON from Drive appProperties', e);
-    return defaultValue;
-  }
-};
-
-/**
- * Converts a Google Drive file with its content to a Note object
- * @param file The Drive file metadata
- * @param content The file content (markdown)
- * @returns A Note object
+ * Convert a Google Drive file to a Note
  */
 export const driveFileToNote = (file: DriveFile, content: string): Note => {
-  const parsedTags = safeJsonParse<string[]>(file.appProperties?.tags, []);
-  // Ensure every note has at least the "misc" tag
-  const tags = parsedTags.length === 0 ? ['misc'] : parsedTags;
-
+  const appProps = file.appProperties || {};
+  
+  // Parse categoryPath and tags from appProperties
+  let categoryPath: string[] = ['Misc'];
+  let tags: string[] = [];
+  
+  if (appProps.categoryPath) {
+    try {
+      categoryPath = JSON.parse(appProps.categoryPath);
+      if (!Array.isArray(categoryPath) || categoryPath.length === 0) {
+        categoryPath = ['Misc'];
+      }
+    } catch {
+      categoryPath = ['Misc'];
+    }
+  }
+  
+  if (appProps.tags) {
+    try {
+      tags = JSON.parse(appProps.tags);
+      if (!Array.isArray(tags)) {
+        tags = [];
+      }
+    } catch {
+      tags = [];
+    }
+  }
+  
+  // Parse AI generated data
+  let aiGenerated: Note['aiGenerated'] = null;
+  if (appProps.aiGenerated) {
+    try {
+      aiGenerated = JSON.parse(appProps.aiGenerated);
+    } catch {
+      aiGenerated = null;
+    }
+  }
+  
   return {
     id: file.id,
     name: file.name,
-    content: content,
-    date: file.createdTime,
-    title: file.appProperties?.title || 'Untitled',
-    summary: file.appProperties?.summary || '',
-    categoryPath: safeJsonParse<string[]>(file.appProperties?.categoryPath, [
-      'Misc',
-    ]),
-    tags: tags,
-    aiGenerated: safeJsonParse<Note['aiGenerated']>(
-      file.appProperties?.aiGenerated,
-      null
-    ),
+    title: appProps.title || file.name,
+    content,
+    summary: appProps.summary || '',
+    categoryPath,
+    tags,
+    date: appProps.date || file.createdTime,
+    aiGenerated,
   };
 };
 
 /**
- * Converts note metadata to Google Drive app properties format
- * @param noteData The note data to convert
- * @returns An object with string values for Drive app properties
+ * Convert a Note to Google Drive appProperties
  */
-export const noteToAppProperties = (
-  noteData: Partial<Note>
-): { [key: string]: string | null } => {
-  const properties: { [key: string]: string | null } = {};
-  if (noteData.title) properties.title = noteData.title;
-  if (noteData.summary) properties.summary = noteData.summary;
-  if (noteData.categoryPath)
-    properties.categoryPath = JSON.stringify(noteData.categoryPath);
-  if (noteData.tags) properties.tags = JSON.stringify(noteData.tags);
-  if (noteData.aiGenerated)
-    properties.aiGenerated = JSON.stringify(noteData.aiGenerated);
-  properties.isStuffMdNote = 'true';
-  return properties;
+export const noteToAppProperties = (note: Omit<Note, 'id'> | Note): DriveFile['appProperties'] => {
+  return {
+    title: note.title,
+    summary: note.summary,
+    categoryPath: JSON.stringify(note.categoryPath),
+    tags: JSON.stringify(note.tags),
+    date: note.date,
+    aiGenerated: note.aiGenerated ? JSON.stringify(note.aiGenerated) : undefined,
+  };
+};
+
+/**
+ * Validate and parse a note from Drive file
+ */
+export const validateAndParseNote = (file: DriveFile, content: string): Note => {
+  return driveFileToNote(file, content);
 };

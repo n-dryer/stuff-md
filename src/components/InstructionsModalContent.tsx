@@ -6,7 +6,7 @@ interface InstructionsModalContentProps {
   mode: 'default' | 'custom';
   instructions: string;
   setInstructions: (instructions: string) => void;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 const PREVIEW_LENGTH = 200;

@@ -2,8 +2,8 @@ import { useState, useCallback, useEffect, type RefObject } from 'react';
 
 interface UseExportMenuPositionProps {
   isExpanded: boolean;
-  buttonRef: RefObject<HTMLButtonElement>;
-  menuRef: RefObject<HTMLDivElement>;
+  buttonRef: RefObject<HTMLButtonElement | null>;
+  menuRef: RefObject<HTMLDivElement | null>;
   exportOptionsCount: number;
 }
 

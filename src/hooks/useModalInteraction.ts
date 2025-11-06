@@ -15,8 +15,8 @@ const ESCAPE_PROTECTED_SELECTOR =
 interface UseModalInteractionOptions {
   isOpen: boolean;
   onClose: () => void;
-  modalRef: React.RefObject<HTMLElement>;
-  triggerRef?: React.RefObject<HTMLElement>;
+  modalRef: React.RefObject<HTMLElement | null>;
+  triggerRef?: React.RefObject<HTMLElement | null>;
 }
 
 export const useModalInteraction = ({

@@ -7,7 +7,7 @@ interface SortDropdownMenuProps {
   selectedSort: SortMode;
   onSelect: (mode: SortMode) => void;
   onRequestClose: () => void;
-  menuRef: React.RefObject<HTMLDivElement>;
+  menuRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const SORT_OPTIONS: Array<{ key: SortMode; label: string }> = [

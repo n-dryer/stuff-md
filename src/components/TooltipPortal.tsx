@@ -6,7 +6,7 @@ interface TooltipPortalProps {
   text: string;
   coords: Coords;
   id: string;
-  tooltipRef: React.RefObject<HTMLDivElement>;
+  tooltipRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const TooltipPortal: React.FC<TooltipPortalProps> = ({

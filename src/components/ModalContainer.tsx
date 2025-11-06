@@ -1,184 +1,179 @@
-import React, { Suspense, lazy } from 'react';
-import ErrorBoundary from './ErrorBoundary';
-import ModalErrorFallback from './ModalErrorFallback';
-import ModalLoadingFallback from './ModalLoadingFallback';
+import React from 'react';
+import ConfirmationModal from './ConfirmationModal';
+import EditNoteModal from './EditNoteModal';
+import InstructionsModal from './InstructionsModal';
+import HelpModal from './HelpModal';
+import ReauthModal from './ReauthModal';
+import {
+  useModalStateContext,
+  useModalActions,
+} from '../contexts/ModalContext';
+import { useUIStateContext, useUIActions } from '../contexts/UIContext';
 import { Note } from '../types';
-import { SYSTEM_INSTRUCTION } from '../services/aiService';
-
-const ConfirmationModal = lazy(() => import('./ConfirmationModal'));
-const EditNoteModal = lazy(() => import('./EditNoteModal'));
-const InstructionsModal = lazy(() => import('./InstructionsModal'));
-const ReauthModal = lazy(() => import('./ReauthModal'));
-const HelpModal = lazy(() => import('./HelpModal'));
 
 interface ModalContainerProps {
-  noteToDelete: string | null;
-  setNoteToDelete: (noteId: string | null) => void;
-  handleConfirmDelete: () => Promise<void>;
-  isClearDraftModalOpen: boolean;
+  handleConfirmDelete: () => void;
   handleConfirmClearDraft: () => void;
-  closeClearDraftModal: () => void;
-  editingNote: Note | null;
-  closeEditModal: () => void;
   handleUpdateAndRecategorizeNote: (
     note: Note,
     newContent: string
   ) => Promise<void>;
-  showInstructions: boolean;
-  setShowInstructions: (show: boolean) => void;
-  saveInstructions: (instructions: string) => void;
-  customInstructions: string;
-  lastCustomInstructions?: string;
-  showHelp: boolean;
-  setShowHelp: (show: boolean) => void;
-  showRegenerateConfirmation: boolean;
-  confirmRegenerate: () => void;
-  cancelRegenerate: () => void;
-  showReauthModal: boolean;
   handleReconnect: () => Promise<void>;
   logout: () => Promise<void>;
-  closeReauthModal: () => void;
-  confirmLogoutOpen: boolean;
   confirmLogout: () => Promise<void>;
   cancelLogout: () => void;
-  isDeleteAllModalOpen: boolean;
-  handleConfirmDeleteAll: () => Promise<void>;
-  closeDeleteAllModal: () => void;
-  isDeleteSelectedModalOpen: boolean;
-  notesToDelete: string[] | null;
-  handleConfirmDeleteSelected: () => Promise<void>;
-  closeDeleteSelectedModal: () => void;
-  isDeleting?: boolean;
+  handleConfirmDeleteAll: () => void;
+  handleConfirmDeleteSelected: () => void;
+  isDeleting: boolean;
 }
 
 const ModalContainer: React.FC<ModalContainerProps> = ({
-  noteToDelete,
-  setNoteToDelete,
   handleConfirmDelete,
-  isClearDraftModalOpen,
   handleConfirmClearDraft,
-  closeClearDraftModal,
-  editingNote,
-  closeEditModal,
   handleUpdateAndRecategorizeNote,
-  showInstructions,
-  setShowInstructions,
-  saveInstructions,
-  customInstructions,
-  lastCustomInstructions,
-  showHelp,
-  setShowHelp,
-  showRegenerateConfirmation,
-  confirmRegenerate,
-  cancelRegenerate,
-  showReauthModal,
   handleReconnect,
   logout,
-  closeReauthModal,
-  confirmLogoutOpen,
   confirmLogout,
   cancelLogout,
-  isDeleteAllModalOpen,
   handleConfirmDeleteAll,
-  closeDeleteAllModal,
-  isDeleteSelectedModalOpen,
-  notesToDelete,
   handleConfirmDeleteSelected,
-  closeDeleteSelectedModal,
-  isDeleting = false,
+  isDeleting,
 }) => {
+  const {
+    noteToDelete,
+    notesToDelete,
+    editingNote,
+    isClearDraftModalOpen,
+    showReauthModal,
+    isDeleteAllModalOpen,
+    isDeleteSelectedModalOpen,
+    showInstructions,
+    showHelp,
+    showRegenerateConfirmation,
+    confirmLogoutOpen,
+  } = useModalStateContext();
+  const {
+    setNoteToDelete,
+    closeEditModal,
+    closeClearDraftModal,
+    setShowInstructions,
+    setShowHelp,
+    closeReauthModal,
+    closeDeleteAllModal,
+    closeDeleteSelectedModal,
+  } = useModalActions();
+  const { customInstructions, lastCustomInstructions } = useUIStateContext();
+  const { saveInstructions } = useUIActions();
+
   return (
     <>
-      <Suspense fallback={<ModalLoadingFallback />}>
-        <ErrorBoundary fallback={<ModalErrorFallback />}>
-          <ConfirmationModal
-            isOpen={!!noteToDelete}
-            onConfirm={handleConfirmDelete}
-            onCancel={() => setNoteToDelete(null)}
-            title='CONFIRM DELETION'
-            message='Are you sure you want to delete this note? This action cannot be undone.'
-            isDeleting={isDeleting}
-          />
-          <ConfirmationModal
-            isOpen={isClearDraftModalOpen}
-            onConfirm={handleConfirmClearDraft}
-            onCancel={closeClearDraftModal}
-            title='CLEAR DRAFT'
-            message='Are you sure you want to discard your current draft?'
-            confirmLabel='CLEAR'
-            confirmTone='default'
-          />
-          <EditNoteModal
-            isOpen={!!editingNote}
-            note={editingNote}
-            onClose={closeEditModal}
-            onSave={handleUpdateAndRecategorizeNote}
-            onRequestDelete={setNoteToDelete}
-            isDeleting={isDeleting}
-          />
-          <InstructionsModal
-            isVisible={showInstructions}
-            onClose={() => setShowInstructions(false)}
-            onSave={saveInstructions}
-            initialInstructions={customInstructions}
-            initialMode={
-              !customInstructions || customInstructions === SYSTEM_INSTRUCTION
-                ? 'default'
-                : 'custom'
+      {noteToDelete && (
+        <ConfirmationModal
+          isOpen={!!noteToDelete}
+          onCancel={() => setNoteToDelete(null)}
+          onConfirm={handleConfirmDelete}
+          title='Delete Note'
+          message='Are you sure you want to delete this note? This action cannot be undone.'
+          confirmLabel='Delete'
+          confirmTone='destructive'
+          isDeleting={isDeleting}
+        />
+      )}
+      {isClearDraftModalOpen && (
+        <ConfirmationModal
+          isOpen={isClearDraftModalOpen}
+          onCancel={closeClearDraftModal}
+          onConfirm={handleConfirmClearDraft}
+          title='Clear Draft'
+          message='Are you sure you want to clear the draft? The content will be permanently lost.'
+          confirmLabel='Clear'
+          confirmTone='destructive'
+        />
+      )}
+      {editingNote && (
+        <EditNoteModal
+          isOpen={!!editingNote}
+          onClose={closeEditModal}
+          note={editingNote}
+          onSave={handleUpdateAndRecategorizeNote}
+          onRequestDelete={(noteId: string) => {
+            const note = editingNote;
+            if (note && note.id === noteId) {
+              setNoteToDelete(note);
             }
-            lastCustomInstructions={lastCustomInstructions}
-          />
-          <ReauthModal
-            isOpen={showReauthModal}
-            onReconnect={handleReconnect}
-            onLogout={logout}
-            onClose={closeReauthModal}
-          />
-          <HelpModal
-            isOpen={showHelp}
-            onClose={() => setShowHelp(false)}
-            onOpenInstructions={() => setShowInstructions(true)}
-          />
-          <ConfirmationModal
-            isOpen={showRegenerateConfirmation}
-            onConfirm={confirmRegenerate}
-            onCancel={cancelRegenerate}
-            title='INSTRUCTIONS CHANGED'
-            message='Your AI instructions have been updated. New notes will use these instructions. Existing notes will not be automatically regenerated to prevent excessive API usage. You can manually regenerate individual notes if needed.'
-            confirmLabel='SAVE INSTRUCTIONS'
-            confirmTone='default'
-          />
-        </ErrorBoundary>
-      </Suspense>
-      <ConfirmationModal
-        isOpen={confirmLogoutOpen}
-        onConfirm={confirmLogout}
-        onCancel={cancelLogout}
-        title='LOGOUT'
-        message='Are you sure you want to log out?'
-        confirmLabel='LOGOUT'
-        confirmTone='default'
-      />
-      <ConfirmationModal
-        isOpen={isDeleteAllModalOpen}
-        onConfirm={handleConfirmDeleteAll}
-        onCancel={closeDeleteAllModal}
-        title='CONFIRM DELETION'
-        message='Are you sure you want to delete all notes? This action cannot be undone.'
-        confirmLabel='DELETE ALL'
-        confirmTone='destructive'
-        isDeleting={isDeleting}
-      />
-      <ConfirmationModal
-        isOpen={isDeleteSelectedModalOpen}
-        onConfirm={handleConfirmDeleteSelected}
-        onCancel={closeDeleteSelectedModal}
-        title='CONFIRM DELETION'
-        message={`Are you sure you want to delete ${notesToDelete?.length || 0} selected note${(notesToDelete?.length || 0) > 1 ? 's' : ''}? This action cannot be undone.`}
-        confirmLabel='DELETE SELECTED'
-        confirmTone='destructive'
-        isDeleting={isDeleting}
-      />
+          }}
+          isDeleting={isDeleting}
+        />
+      )}
+      {showInstructions && (
+        <InstructionsModal
+          isVisible={showInstructions}
+          onClose={() => setShowInstructions(false)}
+          onSave={saveInstructions}
+          initialInstructions={customInstructions}
+          lastCustomInstructions={lastCustomInstructions}
+        />
+      )}
+      {showHelp && (
+        <HelpModal
+          isOpen={showHelp}
+          onClose={() => setShowHelp(false)}
+          onOpenInstructions={() => setShowInstructions(true)}
+        />
+      )}
+      {showRegenerateConfirmation && (
+        <ConfirmationModal
+          isOpen={showRegenerateConfirmation}
+          onCancel={() => {}}
+          onConfirm={() => {}}
+          title='Confirm Regeneration'
+          message='AI regeneration is experimental. Results may not be perfect. Proceed?'
+          confirmLabel='Regenerate'
+        />
+      )}
+      {showReauthModal && (
+        <ReauthModal
+          isOpen={showReauthModal}
+          onClose={closeReauthModal}
+          onReconnect={handleReconnect}
+          onLogout={logout}
+        />
+      )}
+      {confirmLogoutOpen && (
+        <ConfirmationModal
+          isOpen={confirmLogoutOpen}
+          onCancel={cancelLogout}
+          onConfirm={confirmLogout}
+          title='Confirm Logout'
+          message='Are you sure you want to log out?'
+          confirmLabel='Logout'
+          confirmTone='destructive'
+        />
+      )}
+      {isDeleteAllModalOpen && (
+        <ConfirmationModal
+          isOpen={isDeleteAllModalOpen}
+          onCancel={closeDeleteAllModal}
+          onConfirm={handleConfirmDeleteAll}
+          title='Delete All Notes'
+          message='Are you sure you want to delete all notes? This action cannot be undone.'
+          confirmLabel='Delete All'
+          confirmTone='destructive'
+          isDeleting={isDeleting}
+        />
+      )}
+      {isDeleteSelectedModalOpen && (
+        <ConfirmationModal
+          isOpen={isDeleteSelectedModalOpen}
+          onCancel={closeDeleteSelectedModal}
+          onConfirm={handleConfirmDeleteSelected}
+          title={`Delete ${notesToDelete.length} Notes`}
+          message={`Are you sure you want to delete ${notesToDelete.length} notes? This action cannot be undone.`}
+          confirmLabel='Delete Selected'
+          confirmTone='destructive'
+          isDeleting={isDeleting}
+        />
+      )}
     </>
   );
 };

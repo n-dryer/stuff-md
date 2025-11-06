@@ -86,9 +86,7 @@ const SegmentedControl: React.FC<SegmentedControlProps> = ({
                 : ''
             } ${
               isActive
-                ? option.value === 'default'
                   ? 'bg-accent-black text-off-white dark:bg-off-white dark:text-off-black hover:bg-accent-black/90 dark:hover:bg-off-white/90'
-                  : 'bg-accent-black text-off-white dark:bg-off-white dark:text-off-black hover:bg-accent-black/90 dark:hover:bg-off-white/90'
                 : 'bg-off-white text-off-black dark:bg-brutal-gray dark:text-off-white hover:bg-accent-black/10 hover:text-accent-black dark:hover:bg-off-white/10 dark:hover:text-off-white'
             }`}
             onClick={() => onChange(option.value)}

@@ -4,7 +4,7 @@ type ModalId = symbol;
 
 interface ModalRegistration {
   id: ModalId;
-  modalRef: RefObject<HTMLElement>;
+  modalRef: RefObject<HTMLElement | null>;
 }
 
 const modalStack: ModalRegistration[] = [];
@@ -12,7 +12,9 @@ const modalStack: ModalRegistration[] = [];
 export const generateModalId = (): ModalId => Symbol('modal');
 
 export const registerModal = (registration: ModalRegistration) => {
-  const existingIndex = modalStack.findIndex(({ id }) => id === registration.id);
+  const existingIndex = modalStack.findIndex(
+    ({ id }) => id === registration.id
+  );
 
   if (existingIndex >= 0) {
     modalStack.splice(existingIndex, 1);
@@ -22,7 +24,7 @@ export const registerModal = (registration: ModalRegistration) => {
 };
 
 export const unregisterModal = (id: ModalId) => {
-  const index = modalStack.findIndex((modal) => modal.id === id);
+  const index = modalStack.findIndex(modal => modal.id === id);
 
   if (index >= 0) {
     modalStack.splice(index, 1);

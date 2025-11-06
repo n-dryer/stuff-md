@@ -8,6 +8,7 @@ import {
 } from '../utils/driveHelpers';
 import { authorizedFetch, AuthError, RateLimitError } from './drive/apiHelpers';
 import { findOrCreateAppFolder } from './drive/folderOperations';
+import { INoteStorageService } from './INoteStorageService';
 
 // Re-export error types for compatibility
 export { AuthError, RateLimitError };
@@ -17,20 +18,16 @@ const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3';
 const NOTE_FILE_QUERY_TPL = `'--FOLDER-ID--' in parents and mimeType='text/markdown' and trashed=false`;
 const NOTE_FIELDS = 'id, name, createdTime, appProperties';
 
-export const driveService = {
-  fetchNotes: async (
-    accessToken: string,
-    signal?: AbortSignal
-  ): Promise<Note[]> => {
-    const folderId = await findOrCreateAppFolder(accessToken, signal);
+class GoogleDriveService implements INoteStorageService {
+  public async getAllNotes(accessToken: string): Promise<Note[]> {
+    const folderId = await findOrCreateAppFolder(accessToken);
     const query = NOTE_FILE_QUERY_TPL.replace('--FOLDER-ID--', folderId);
-    
+
     const listResponse = await authorizedFetch(
       accessToken,
       `${DRIVE_API_URL}/files?q=${encodeURIComponent(query)}&fields=files(${NOTE_FIELDS})&orderBy=createdTime desc`,
       {},
-      true,
-      signal
+      true
     );
     if (!listResponse.ok) throw new Error('Failed to list notes from Drive.');
     let listResult: { files?: DriveFile[] };
@@ -49,28 +46,26 @@ export const driveService = {
           accessToken,
           `${DRIVE_API_URL}/files/${file.id}?alt=media`,
           {},
-          true,
-          signal
+          true
         );
         if (!contentResponse.ok) {
-            logError(`Failed to fetch content for note ${file.id}`);
-            return null;
+          logError(`Failed to fetch content for note ${file.id}`);
+          return null;
         }
         const content = await contentResponse.text();
         return driveFileToNote(file, content);
       }
     );
 
-    const results = await withConcurrencyLimit(fetchTasks, 5, signal);
+    const results = await withConcurrencyLimit(fetchTasks, 5);
     return results.filter((n): n is Note => n !== null);
-  },
+  }
 
-  saveNote: async (
+  public async createNote(
     accessToken: string,
-    noteData: Omit<Note, 'id'>,
-    signal?: AbortSignal
-  ): Promise<Note> => {
-    const folderId = await findOrCreateAppFolder(accessToken, signal);
+    noteData: Omit<Note, 'id'>
+  ): Promise<Note> {
+    const folderId = await findOrCreateAppFolder(accessToken);
     const metadata = {
       name: noteData.name,
       mimeType: 'text/markdown',
@@ -90,19 +85,18 @@ export const driveService = {
       noteData.content,
       `--${boundary}--`,
     ].join('\r\n');
-    
+
     const res = await authorizedFetch(
       accessToken,
       `${DRIVE_UPLOAD_URL}/files?uploadType=multipart`,
       {
         method: 'POST',
         headers: {
-            'Content-Type': `multipart/related; boundary=${boundary}`,
+          'Content-Type': `multipart/related; boundary=${boundary}`,
         },
         body: multipartRequestBody,
       },
-      true,
-      signal
+      true
     );
 
     if (!res.ok) {
@@ -117,30 +111,31 @@ export const driveService = {
       throw new Error('Invalid response format from Google Drive API.');
     }
     return driveFileToNote(createdFile, noteData.content);
-  },
+  }
 
-  updateNote: async (
+  public async updateNote(
     accessToken: string,
     noteId: string,
-    updates: Partial<Note>,
-    signal?: AbortSignal
-  ): Promise<void> => {
-    const { content, ...metadataFields } = updates;
+    noteData: Partial<Note>
+  ): Promise<Note> {
+    const { content, ...metadataFields } = noteData;
 
     if (Object.keys(metadataFields).length > 0) {
+      // Get the existing note from Drive to merge with partial updates
+      const existingNote = await this.getFileMetadata(accessToken, noteId);
+      const mergedNote = { ...existingNote, ...metadataFields };
       const metadataUpdate = {
-        appProperties: noteToAppProperties(metadataFields),
+        appProperties: noteToAppProperties(mergedNote),
       };
       const metadataResponse = await authorizedFetch(
         accessToken,
         `${DRIVE_API_URL}/files/${noteId}`,
         {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(metadataUpdate),
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(metadataUpdate),
         },
-        true,
-        signal
+        true
       );
       if (!metadataResponse.ok)
         throw new Error(
@@ -153,35 +148,81 @@ export const driveService = {
         accessToken,
         `${DRIVE_UPLOAD_URL}/files/${noteId}?uploadType=media`,
         {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'text/markdown' },
-            body: content,
+          method: 'PATCH',
+          headers: { 'Content-Type': 'text/markdown' },
+          body: content,
         },
-        true,
-        signal
+        true
       );
       if (!contentResponse.ok)
         throw new Error(
           `Failed to update note content: ${await contentResponse.text()}`
         );
     }
-  },
+    return this.getFileMetadata(accessToken, noteId);
+  }
 
-  deleteNote: async (
-    accessToken: string,
-    noteId: string,
-    signal?: AbortSignal
-  ): Promise<void> => {
-    const deleteResponse = await authorizedFetch(
+  public async deleteNote(accessToken: string, noteId: string): Promise<void> {
+    await authorizedFetch(
       accessToken,
       `${DRIVE_API_URL}/files/${noteId}`,
       {
         method: 'DELETE',
       },
-      true,
-      signal
+      true
     );
-    if (!deleteResponse.ok)
-      throw new Error('Failed to delete note from Drive.');
-  },
-};
+  }
+
+  public async deleteNotesByIds(
+    accessToken: string,
+    noteIds: string[]
+  ): Promise<void> {
+    for (const noteId of noteIds) {
+      await this.deleteFile(accessToken, noteId);
+    }
+  }
+
+  private async getFileMetadata(
+    accessToken: string,
+    fileId: string
+  ): Promise<Note> {
+    const fileResponse = await authorizedFetch(
+      accessToken,
+      `${DRIVE_API_URL}/files/${fileId}?fields=id,name,createdTime,appProperties`,
+      {},
+      true
+    );
+    if (!fileResponse.ok) {
+      throw new Error(
+        `Failed to get file metadata for ${fileId}: ${await fileResponse.text()}`
+      );
+    }
+    const file: DriveFile = await fileResponse.json();
+    const contentResponse = await authorizedFetch(
+      accessToken,
+      `${DRIVE_API_URL}/files/${file.id}?alt=media`,
+      {},
+      true
+    );
+    if (!contentResponse.ok) {
+      throw new Error(
+        `Failed to get content for ${file.id}: ${await contentResponse.text()}`
+      );
+    }
+    const content = await contentResponse.text();
+    return driveFileToNote(file, content);
+  }
+
+  private async deleteFile(accessToken: string, fileId: string): Promise<void> {
+    await authorizedFetch(
+      accessToken,
+      `${DRIVE_API_URL}/files/${fileId}`,
+      {
+        method: 'DELETE',
+      },
+      true
+    );
+  }
+}
+
+export const googleDriveService = new GoogleDriveService();

@@ -55,7 +55,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = React.memo(
       confirmTone === 'destructive' || isLogoutButton
         ? `${responsiveButtonClasses} ${redHoverEffect}`
         : responsiveButtonClasses;
-    const cancelButtonClasses = `${responsiveButtonClasses} !bg-off-white !text-off-black dark:!bg-off-black dark:!text-off-white`;
+    const cancelButtonClasses = `${responsiveButtonClasses} !bg-off-white !text-off-black !border-accent-black dark:!bg-off-black dark:!text-off-white dark:!border-off-white/80`;
 
     return (
       // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions

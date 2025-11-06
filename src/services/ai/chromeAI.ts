@@ -1,6 +1,7 @@
 import { logError, logDebug } from '../../utils/logger';
-import { BrowserAPIError, TimeoutError } from '../aiService';
+import { BrowserAPIError } from './errors';
 import { formatSchemaDescription } from './utils';
+import { withTimeout as promiseWithTimeout } from '../../utils/asyncUtils';
 
 // Chrome Built-in AI API types (Prompt API)
 type ChromeAISession = {
@@ -12,27 +13,6 @@ type ChromeAISession = {
 const REQUEST_TIMEOUT_MS: number = Number(
   import.meta.env.VITE_GEMINI_TIMEOUT_MS ?? 20000
 );
-
-// Promise timeout helper
-const withTimeout = async <T>(
-  promise: Promise<T>,
-  timeoutMs: number
-): Promise<T> => {
-  let timeoutId: number | undefined;
-  return await Promise.race<T>([
-    promise,
-    new Promise<T>((_, reject) => {
-      timeoutId = window.setTimeout(
-        () => reject(new TimeoutError('AI request timed out')),
-        timeoutMs
-      );
-    }),
-  ]).finally(() => {
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
-  });
-};
 
 /**
  * Check Chrome built-in AI availability
@@ -55,7 +35,6 @@ export const checkChromeAIAvailability = async (): Promise<
     logDebug(`[Chrome AI] Availability check returned: ${availability}`);
     return availability;
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
     logError('Failed to check Chrome AI availability:', error);
     return 'no';
   }
@@ -147,7 +126,7 @@ export const useChromeBuiltInAI = async (
     const fullPrompt = `${systemInstruction}\n\n${prompt}\n\nCRITICAL REQUIREMENTS:\n- The summary field MUST be exactly 100-300 characters (2-4 sentences). This is mandatory.\n- The summary must be informative and substantive, capturing key points from the content.\n- Never return a summary shorter than 100 characters or longer than 300 characters.\n\nIMPORTANT: Respond with valid JSON only, matching this exact schema structure:\n${schemaDescription}\n\nDo not include any text before or after the JSON. Return only the JSON object.`;
 
     logDebug('[Chrome AI] Sending prompt to session...');
-    const response = await withTimeout(
+    const response = await promiseWithTimeout(
       session.prompt(fullPrompt),
       REQUEST_TIMEOUT_MS
     );

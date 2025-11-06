@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { IconSearch } from './Icons';
 import BrutalistTooltip from './BrutalistTooltip';
 import SortDropdownMenu from './SortDropdownMenu';
@@ -41,8 +35,8 @@ const NoteListFilters: React.FC<NoteListFiltersProps> = ({
   setViewMode,
   hasActiveFilters,
   onResetFilters,
-  onDeleteAll,
-  notesCount,
+  onDeleteAll: _onDeleteAll,
+  notesCount: _notesCount,
 }) => {
   const sortButtonRef = useRef<HTMLButtonElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);

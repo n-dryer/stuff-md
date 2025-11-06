@@ -37,7 +37,7 @@ export interface InputProps {
   setDraft: (content: string) => void;
   handleSaveNote: () => void;
   isSaving: boolean;
-  noteInputRef: React.RefObject<HTMLTextAreaElement>;
+  noteInputRef: React.RefObject<HTMLTextAreaElement | null>;
   onRequestClearOrBlur: () => void;
   onDraftSaved: () => void;
 }
@@ -45,7 +45,7 @@ export interface InputProps {
 export interface InstructionProps {
   customInstructions: string;
   setShowInstructions: (show: boolean) => void;
-  instructionsButtonRef: React.RefObject<HTMLButtonElement>;
+  instructionsButtonRef: React.RefObject<HTMLButtonElement | null>;
 }
 
 export interface MetadataProps {
