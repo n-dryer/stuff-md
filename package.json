@@ -42,12 +42,12 @@
   },
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated",
-    "@google/genai": "^1.27.0",
+    "@google/genai": "^1.29.0",
     "@tabler/icons-react": "^3.35.0",
     "dompurify": "^3.1.6",
     "firebase": "^12.4.0",
     "jszip": "^3.10.1",
-    "marked": "^13.0.2",
+    "marked": "^16.4.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
