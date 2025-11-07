@@ -11,7 +11,7 @@ const Feedback: React.FC<FeedbackProps> = ({ message, type }) => {
   const colorClass = type === 'error' ? 'text-off-black' : 'text-light-gray';
 
   return (
-    <div className="px-6 pb-4 text-sm">
+    <div className='px-6 pb-4 text-sm'>
       <p className={colorClass}>{message}</p>
     </div>
   );

@@ -5,7 +5,7 @@ import {
   revertOptimisticUpdate,
 } from '../../utils/optimisticUpdates';
 import { googleDriveService } from '../../services/googleDriveService';
-import { handleError } from '../../utils/errorHandler';
+import { logError } from '../../utils/logger';
 
 export function useNoteMutations(
   accessToken: string | null,
@@ -35,12 +35,8 @@ export function useNoteMutations(
       } catch (error) {
         revertOptimisticUpdate(undo);
         onError(error as Error);
-        handleError(
-          error,
-          () => {},
-          'Failed to save note.',
-          'useNoteMutations:saveNote'
-        );
+        // Log error but don't display here - let the caller handle display
+        logError('Failed to save note:', error);
         throw error;
       }
     },
@@ -68,12 +64,8 @@ export function useNoteMutations(
       } catch (error) {
         revertOptimisticUpdate(undo);
         onError(error as Error);
-        handleError(
-          error,
-          () => {},
-          'Failed to update note.',
-          'useNoteMutations:updateNote'
-        );
+        // Log error but don't display here - let the caller handle display
+        logError('Failed to update note:', error);
         throw error;
       }
     },
@@ -94,12 +86,8 @@ export function useNoteMutations(
       } catch (error) {
         revertOptimisticUpdate(undo);
         onError(error as Error);
-        handleError(
-          error,
-          () => {},
-          'Failed to delete note.',
-          'useNoteMutations:deleteNote'
-        );
+        // Log error but don't display here - let the caller handle display
+        logError('Failed to delete note:', error);
         throw error;
       }
     },
@@ -120,12 +108,8 @@ export function useNoteMutations(
       } catch (error) {
         revertOptimisticUpdate(undo);
         onError(error as Error);
-        handleError(
-          error,
-          () => {},
-          'Failed to delete notes.',
-          'useNoteMutations:deleteNotesByIds'
-        );
+        // Log error but don't display here - let the caller handle display
+        logError('Failed to delete notes:', error);
         throw error;
       }
     },

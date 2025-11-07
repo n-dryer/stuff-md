@@ -6,10 +6,10 @@
     "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
-  "description": "A minimalist, AI-powered notepad that saves notes to Google Drive",
+  "description": "A minimalist, AI-powered organizer that saves your stuff to Google Drive",
   "keywords": [
-    "notepad",
-    "notes",
+    "organizer",
+    "stuff",
     "google-drive",
     "ai",
     "productivity",

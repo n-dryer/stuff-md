@@ -22,11 +22,11 @@ export interface DriveFile {
  */
 export const driveFileToNote = (file: DriveFile, content: string): Note => {
   const appProps = file.appProperties || {};
-  
+
   // Parse categoryPath and tags from appProperties
   let categoryPath: string[] = ['Misc'];
   let tags: string[] = [];
-  
+
   if (appProps.categoryPath) {
     try {
       categoryPath = JSON.parse(appProps.categoryPath);
@@ -37,7 +37,7 @@ export const driveFileToNote = (file: DriveFile, content: string): Note => {
       categoryPath = ['Misc'];
     }
   }
-  
+
   if (appProps.tags) {
     try {
       tags = JSON.parse(appProps.tags);
@@ -48,7 +48,7 @@ export const driveFileToNote = (file: DriveFile, content: string): Note => {
       tags = [];
     }
   }
-  
+
   // Parse AI generated data
   let aiGenerated: Note['aiGenerated'] = null;
   if (appProps.aiGenerated) {
@@ -58,7 +58,7 @@ export const driveFileToNote = (file: DriveFile, content: string): Note => {
       aiGenerated = null;
     }
   }
-  
+
   return {
     id: file.id,
     name: file.name,
@@ -75,20 +75,27 @@ export const driveFileToNote = (file: DriveFile, content: string): Note => {
 /**
  * Convert a Note to Google Drive appProperties
  */
-export const noteToAppProperties = (note: Omit<Note, 'id'> | Note): DriveFile['appProperties'] => {
+export const noteToAppProperties = (
+  note: Omit<Note, 'id'> | Note
+): DriveFile['appProperties'] => {
   return {
     title: note.title,
     summary: note.summary,
     categoryPath: JSON.stringify(note.categoryPath),
     tags: JSON.stringify(note.tags),
     date: note.date,
-    aiGenerated: note.aiGenerated ? JSON.stringify(note.aiGenerated) : undefined,
+    aiGenerated: note.aiGenerated
+      ? JSON.stringify(note.aiGenerated)
+      : undefined,
   };
 };
 
 /**
  * Validate and parse a note from Drive file
  */
-export const validateAndParseNote = (file: DriveFile, content: string): Note => {
+export const validateAndParseNote = (
+  file: DriveFile,
+  content: string
+): Note => {
   return driveFileToNote(file, content);
 };

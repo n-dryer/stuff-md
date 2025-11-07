@@ -31,4 +31,3 @@ const NoteListActiveTags: React.FC<NoteListActiveTagsProps> = ({
 };
 
 export default NoteListActiveTags;
-

@@ -1,6 +1,6 @@
 /**
  * AI Service Prompts
- * 
+ *
  * System instructions and prompt templates for AI categorization.
  */
 
@@ -62,4 +62,3 @@ What NOT to do (negative examples):
 - Bad: Summary: "This is a note about React hooks" (too brief, only 35 chars, just restatement, doesn't meet 100-300 char requirement)
 - Bad: Summary: "React hooks tutorial." (too short, only 20 chars, must be 100-300 chars with 2-4 sentences)
 - Good: Summary: "A comprehensive tutorial covering React hooks fundamentals, focusing on useState for state management and useEffect for side effects in functional components. Explains best practices and common patterns for effective React development." (185 chars, informative, 2-4 sentences)`;
-

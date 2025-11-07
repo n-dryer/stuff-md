@@ -26,7 +26,6 @@ const formatRelativeTime = (dateString: string): string => {
   return 'JUST NOW';
 };
 
-
 interface DateDisplayProps {
   date: string;
 }
@@ -34,9 +33,12 @@ interface DateDisplayProps {
 const DateDisplay: React.FC<DateDisplayProps> = React.memo(({ date }) => {
   const dateObj = new Date(date);
   const isValidDate = !isNaN(dateObj.getTime());
-  
+
   return (
-    <span className="font-mono text-xs text-off-black/60 dark:text-off-white/60 flex-shrink-0 whitespace-nowrap" title={isValidDate ? dateObj.toLocaleString() : 'Invalid date'}>
+    <span
+      className='font-mono text-xs text-off-black/60 dark:text-off-white/60 flex-shrink-0 whitespace-nowrap'
+      title={isValidDate ? dateObj.toLocaleString() : 'Invalid date'}
+    >
       {formatRelativeTime(date)}
     </span>
   );

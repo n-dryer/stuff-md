@@ -23,11 +23,12 @@ import ToastContainer from './components/ToastContainer';
 import ModalContainer from './components/ModalContainer';
 import { Note } from './types';
 import { containsURL } from './utils/textUtils';
-import { handleError } from './utils/errorHandler';
 import {
-  useModalActions,
-  useModalStateContext,
-} from './contexts/ModalContext';
+  handleError,
+  normalizeError,
+  sanitizeErrorMessage,
+} from './utils/errorHandler';
+import { useModalActions, useModalStateContext } from './contexts/ModalContext';
 import { useUIStateContext, useUIActions } from './contexts/UIContext';
 
 const App: React.FC = () => {
@@ -41,12 +42,8 @@ const App: React.FC = () => {
     deleteNotesByIds,
     regenerateNote,
   } = useNotes(accessToken);
-  const {
-    feedback,
-    activeTags,
-    customInstructions,
-    viewMode,
-  } = useUIStateContext();
+  const { feedback, activeTags, customInstructions, viewMode } =
+    useUIStateContext();
   const {
     displayFeedback,
     handleTagClick,
@@ -55,11 +52,7 @@ const App: React.FC = () => {
     clearFeedback,
   } = useUIActions();
 
-  const {
-    noteToDelete,
-    notesToDelete,
-    showHelp,
-  } = useModalStateContext();
+  const { noteToDelete, notesToDelete, showHelp } = useModalStateContext();
   const {
     requestDeleteNote,
     requestDeleteNotes,
@@ -116,8 +109,6 @@ const App: React.FC = () => {
     customInstructions,
     displayFeedback,
     noteInputRef,
-    setDraft,
-    setShowNoteSavedToast,
   });
 
   useEffect(() => {
@@ -139,10 +130,27 @@ const App: React.FC = () => {
     setIsSaving(true);
     try {
       await handleSaveNoteBase();
+      setDraft('');
+      setShowNoteSavedToast(true);
+    } catch (error) {
+      const normalizedError = normalizeError(error);
+      const errorMessage = sanitizeErrorMessage(normalizedError);
+      displayFeedback(
+        'error',
+        errorMessage || 'Failed to save note. Please try again.'
+      );
     } finally {
       setIsSaving(false);
     }
-  }, [draft, accessToken, isSaving, handleSaveNoteBase]);
+  }, [
+    draft,
+    accessToken,
+    isSaving,
+    handleSaveNoteBase,
+    setDraft,
+    setShowNoteSavedToast,
+    displayFeedback,
+  ]);
 
   const {
     handleConfirmDelete,
@@ -160,7 +168,6 @@ const App: React.FC = () => {
     isDeleting,
     setIsDeleting,
   });
-
 
   const handleReconnect = async () => {
     await login();

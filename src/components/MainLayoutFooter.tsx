@@ -2,23 +2,22 @@ import React from 'react';
 import BrutalistTooltip from './BrutalistTooltip';
 import ThemeToggle from './ThemeToggle';
 import ExportButtons from './ExportButtons';
+import { useUIStateContext } from '../contexts/UIContext';
 import { Note } from '../types';
 
 interface MainLayoutFooterProps {
   isSidebarCollapsed: boolean;
-  isDarkMode: boolean;
-  onToggleDarkMode: () => void;
   instructionsControl: React.ReactNode;
   notes: Note[];
 }
 
 const MainLayoutFooter: React.FC<MainLayoutFooterProps> = ({
   isSidebarCollapsed,
-  isDarkMode,
-  onToggleDarkMode,
   instructionsControl,
   notes,
 }) => {
+  const { theme } = useUIStateContext();
+  const isDarkMode = theme === 'dark';
   const themeToggleTooltip = isDarkMode
     ? 'Switch to Light mode'
     : 'Switch to Dark mode';
@@ -50,10 +49,7 @@ const MainLayoutFooter: React.FC<MainLayoutFooterProps> = ({
                 <div className='inline-flex flex-shrink-0 whitespace-nowrap'>
                   <BrutalistTooltip text={themeToggleTooltip} position='top'>
                     <div className='flex justify-center flex-shrink-0 whitespace-nowrap'>
-                      <ThemeToggle
-                        isDarkMode={isDarkMode}
-                        onToggle={onToggleDarkMode}
-                      />
+                      <ThemeToggle />
                     </div>
                   </BrutalistTooltip>
                 </div>

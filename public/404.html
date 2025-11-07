@@ -17,11 +17,21 @@
         pathSegments[pathSegments.length - 1] === '404.html' ||
         !pathSegments.includes(repoName)
       ) {
-        window.location.replace(basePath + '/index.html' + window.location.search + window.location.hash);
+        window.location.replace(
+          basePath +
+            '/index.html' +
+            window.location.search +
+            window.location.hash
+        );
       } else {
         // Otherwise, try to serve index.html for the current path
         // This handles deep links in SPAs
-        window.location.replace(basePath + '/index.html' + window.location.search + window.location.hash);
+        window.location.replace(
+          basePath +
+            '/index.html' +
+            window.location.search +
+            window.location.hash
+        );
       }
     </script>
   </head>

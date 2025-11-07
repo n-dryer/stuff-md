@@ -26,10 +26,7 @@ export const createFallbackCategorization = (
 
   // Basic keyword-based category detection
   const categoryMap = new Map<string, { category: string; icon: string }>([
-    [
-      'programming',
-      { category: 'Programming', icon: 'code' },
-    ],
+    ['programming', { category: 'Programming', icon: 'code' }],
     ['shopping', { category: 'Personal', icon: 'shopping-cart' }],
     ['link', { category: 'Links', icon: 'link' }],
   ]);

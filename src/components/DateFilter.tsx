@@ -6,7 +6,11 @@ interface DateFilterProps {
   className?: string;
 }
 
-const DateFilter: React.FC<DateFilterProps> = ({ sortMode, onSortChange, className = '' }) => {
+const DateFilter: React.FC<DateFilterProps> = ({
+  sortMode,
+  onSortChange,
+  className = '',
+}) => {
   const options = [
     { label: 'MOST RECENT', value: 'recent' as const },
     { label: 'OLDEST', value: 'oldest' as const },

@@ -32,8 +32,8 @@ const SidebarToggle: React.FC<SidebarToggleProps> = ({
 
   const sidebarToggleIconClasses = `${
     isSidebarCollapsed
-      ? `${sidebarChevronBaseClasses} rotate-0 -translate-x-[1px] group-hover:scale-110 motion-reduce:transform-none`
-      : `${sidebarChevronBaseClasses} rotate-180 group-hover:scale-110 motion-reduce:transform-none`
+      ? `${sidebarChevronBaseClasses} rotate-180 -translate-x-[1px] group-hover:scale-110 motion-reduce:transform-none`
+      : `${sidebarChevronBaseClasses} rotate-0 group-hover:scale-110 motion-reduce:transform-none`
   }`;
 
   return (

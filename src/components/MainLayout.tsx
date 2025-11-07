@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 
-import { useDarkMode } from '../hooks/useDarkMode';
 import { useSidebarCollapse } from '../hooks/useSidebarCollapse';
 import {
   NoteManagementProps,
@@ -69,7 +68,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   const sidebarId = 'primary-sidebar';
   const { isSidebarCollapsed, toggleSidebar } = useSidebarCollapse();
-  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
   const handleFocusNoteInput = useCallback(() => {
     if (noteInputRef.current) {
@@ -201,12 +199,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           isSaving={isSaving}
           onRequestClearOrBlur={onRequestClearOrBlur}
           onDraftSaved={onDraftSaved}
+          onOpenInstructions={handleOpenInstructions}
         />
 
         <MainLayoutFooter
           isSidebarCollapsed={isSidebarCollapsed}
-          isDarkMode={isDarkMode}
-          onToggleDarkMode={toggleDarkMode}
           instructionsControl={instructionsControl}
           notes={notes}
         />

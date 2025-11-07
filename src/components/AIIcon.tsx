@@ -6,7 +6,10 @@ interface AIIconProps {
   'aria-label'?: string;
 }
 
-const AIIcon: React.FC<AIIconProps> = ({ className, 'aria-label': ariaLabel }) => {
+const AIIcon: React.FC<AIIconProps> = ({
+  className,
+  'aria-label': ariaLabel,
+}) => {
   return (
     <TablerIconSparkles
       className={className}
@@ -18,4 +21,3 @@ const AIIcon: React.FC<AIIconProps> = ({ className, 'aria-label': ariaLabel }) =
 };
 
 export default AIIcon;
-

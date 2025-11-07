@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   // Set base path for GitHub Pages project repository
   // Repository: n-dryer/stuff-md -> Deploys to: https://n-dryer.github.io/stuff-md/
   const base = '/stuff-md/';
-  
+
   return {
     base,
     plugins: [react()],
@@ -23,24 +23,24 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
-      }
+      },
     },
     build: {
       minify: 'terser',
       terserOptions: {
         compress: {
-          drop_console: true, 
-          drop_debugger: true, 
-          pure_funcs: ['console.log', 'console.info', 'console.debug'], 
-          passes: 2, 
+          drop_console: true,
+          drop_debugger: true,
+          pure_funcs: ['console.log', 'console.info', 'console.debug'],
+          passes: 2,
         },
         format: {
-          comments: false, 
+          comments: false,
         },
       },
-      cssMinify: true, 
-      sourcemap: false, 
-      chunkSizeWarningLimit: 1000, 
+      cssMinify: true,
+      sourcemap: false,
+      chunkSizeWarningLimit: 1000,
       rollupOptions: {
         output: {
           manualChunks: (id): string | undefined => {
@@ -68,13 +68,22 @@ export default defineConfig(({ mode }) => {
               }
               return 'vendor';
             }
-            if (id.includes('/src/components/NoteList.tsx') || id.includes('\\src\\components\\NoteList.tsx')) {
+            if (
+              id.includes('/src/components/NoteList.tsx') ||
+              id.includes('\\src\\components\\NoteList.tsx')
+            ) {
               return 'note-list';
             }
-            if (id.includes('/src/components/MainLayout.tsx') || id.includes('\\src\\components\\MainLayout.tsx')) {
+            if (
+              id.includes('/src/components/MainLayout.tsx') ||
+              id.includes('\\src\\components\\MainLayout.tsx')
+            ) {
               return 'main-layout';
             }
-            if (id.includes('/src/components/MarkdownRenderer.tsx') || id.includes('\\src\\components\\MarkdownRenderer.tsx')) {
+            if (
+              id.includes('/src/components/MarkdownRenderer.tsx') ||
+              id.includes('\\src\\components\\MarkdownRenderer.tsx')
+            ) {
               return 'markdown-renderer';
             }
             return undefined;

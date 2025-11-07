@@ -48,7 +48,7 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
     isClearDraftModalOpen: false,
     showReauthModal: false,
     isDeleteAllModalOpen: false,
-isDeleteSelectedModalOpen: false,
+    isDeleteSelectedModalOpen: false,
     showInstructions: false,
     showHelp: false,
     showRegenerateConfirmation: false,
@@ -107,8 +107,7 @@ isDeleteSelectedModalOpen: false,
   );
 
   const openDeleteSelectedModal = useCallback(
-    () =>
-      setModalState(prev => ({ ...prev, isDeleteSelectedModalOpen: true })),
+    () => setModalState(prev => ({ ...prev, isDeleteSelectedModalOpen: true })),
     []
   );
 
@@ -123,7 +122,8 @@ isDeleteSelectedModalOpen: false,
   );
 
   const setShowInstructions = useCallback(
-    (show: boolean) => setModalState(prev => ({ ...prev, showInstructions: show })),
+    (show: boolean) =>
+      setModalState(prev => ({ ...prev, showInstructions: show })),
     []
   );
 

@@ -27,7 +27,7 @@ const escapeHtml = (text: string): string => {
     '"': '&quot;',
     "'": '&#039;',
   };
-  return text.replace(/[&<>"']/g, (m) => map[m]);
+  return text.replace(/[&<>"']/g, m => map[m]);
 };
 
 const loadMarkdownLibs = async () => {
@@ -116,8 +116,26 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       return libs.DOMPurify.sanitize(rawHtml, {
         ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel|sms):)/i,
         ALLOWED_TAGS: [
-          'p', 'br', 'strong', 'em', 'u', 's', 'code', 'pre', 'blockquote',
-          'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'a', 'img'
+          'p',
+          'br',
+          'strong',
+          'em',
+          'u',
+          's',
+          'code',
+          'pre',
+          'blockquote',
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+          'ul',
+          'ol',
+          'li',
+          'a',
+          'img',
         ],
         ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class'],
       });

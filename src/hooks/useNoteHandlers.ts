@@ -21,8 +21,6 @@ interface UseNoteHandlersProps {
     duration?: number
   ) => void;
   noteInputRef: React.RefObject<HTMLTextAreaElement | null>;
-  setDraft: (draft: string) => void;
-  setShowNoteSavedToast: (show: boolean) => void;
 }
 
 export const useNoteHandlers = ({
@@ -33,43 +31,27 @@ export const useNoteHandlers = ({
   customInstructions,
   displayFeedback,
   noteInputRef,
-  setDraft,
-  setShowNoteSavedToast,
 }: UseNoteHandlersProps) => {
   const handleSaveNote = useCallback(async () => {
     if (!accessToken || !draft.trim()) return;
 
     try {
-      await saveNote(draft, customInstructions);
-      setDraft('');
+      const result = await saveNote(draft, customInstructions);
       if (noteInputRef.current) {
         noteInputRef.current.style.height = 'auto';
       }
-      setShowNoteSavedToast(true);
+      return result;
     } catch (error) {
       logError('Error saving note:', error);
-      displayFeedback('error', 'Failed to save note.');
+      // Don't display a generic error message here.
+      // Let the specific error from the service layer propagate.
+      throw error;
     }
-  }, [
-    accessToken,
-    draft,
-    customInstructions,
-    displayFeedback,
-    noteInputRef,
-    setDraft,
-    setShowNoteSavedToast,
-    saveNote,
-  ]);
+  }, [displayFeedback]);
 
   const handleUpdateAndRecategorizeNote = useCallback(
     async (note: Note, newContent: string) => {
-      try {
-        await regenerateNote(note, newContent, customInstructions);
-        displayFeedback('success', 'Note updated.');
-      } catch (error) {
-        logError('Failed to update note:', error);
-        displayFeedback('error', 'Failed to update note.');
-      }
+      await handleSaveNote(note, newContent, true);
     },
     [customInstructions, displayFeedback, regenerateNote]
   );

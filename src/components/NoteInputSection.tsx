@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import NoteInput from './NoteInput';
+import Button from './Button';
 
 interface NoteInputSectionProps {
   isSidebarCollapsed: boolean;
@@ -10,6 +11,7 @@ interface NoteInputSectionProps {
   isSaving: boolean;
   onRequestClearOrBlur: () => void;
   onDraftSaved?: () => void;
+  onOpenInstructions: () => void;
 }
 
 const NoteInputSection: React.FC<NoteInputSectionProps> = ({
@@ -21,6 +23,7 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
   isSaving,
   onRequestClearOrBlur,
   onDraftSaved,
+  onOpenInstructions,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -39,7 +42,7 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
           ref={containerRef}
           className={`${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[320px]'} pointer-events-auto`}
         >
-          <div className='w-full px-2 sm:px-3 md:px-4 lg:px-5 py-3 sm:py-4 md:py-5 lg:py-6 flex justify-start'>
+          <div className='w-full px-2 sm:px-3 md:px-4 lg:px-5 py-3 sm:py-4 md:py-5 lg:py-6 flex flex-col sm:flex-row justify-start items-stretch sm:items-start gap-3 sm:gap-4'>
             <NoteInput
               inputRef={noteInputRef}
               value={value}
@@ -48,7 +51,16 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
               isSaving={isSaving}
               onRequestClearOrBlur={onRequestClearOrBlur}
               onDraftSaved={onDraftSaved}
+              onOpenInstructions={onOpenInstructions}
             />
+            <Button
+              variant='fill'
+              onClick={onSave}
+              disabled={!value.trim() || isSaving}
+              className='flex-shrink-0 w-full sm:w-auto'
+            >
+              Add Stuff
+            </Button>
           </div>
         </div>
       </div>

@@ -25,23 +25,23 @@ body {
 /* Theme variables - using design tokens */
 :root {
   --tooltip-bg: #000000; /* accent-black */
-  --tooltip-fg: #F8F8F8; /* off-white */
+  --tooltip-fg: #f8f8f8; /* off-white */
 
-  --toast-bg: #F8F8F8; /* off-white */
+  --toast-bg: #f8f8f8; /* off-white */
   --toast-fg: #000000; /* accent-black */
   --toast-border: #000000; /* accent-black */
   --toast-success: #16a34a; /* green-600 - semantic color, keeping as is */
-  --toast-error: #FF0000; /* destructive-red */
+  --toast-error: #ff0000; /* destructive-red */
   --toast-info: #2563eb; /* blue-600 - semantic color, keeping as is */
 }
 
 .dark {
-  --tooltip-bg: #F8F8F8; /* off-white */
+  --tooltip-bg: #f8f8f8; /* off-white */
   --tooltip-fg: #000000; /* accent-black */
 
   --toast-bg: #222222; /* brutal-gray */
-  --toast-fg: #F8F8F8; /* off-white */
-  --toast-border: #F8F8F8; /* off-white */
+  --toast-fg: #f8f8f8; /* off-white */
+  --toast-border: #f8f8f8; /* off-white */
 }
 
 /* Custom animations from index.html */
@@ -171,7 +171,7 @@ input {
 }
 
 .markdown-content blockquote {
-  border-left: 4px solid #CCCCCC; /* light-gray */
+  border-left: 4px solid #cccccc; /* light-gray */
   padding-left: 1em;
   margin-left: 0;
   color: rgba(0, 0, 0, 0.4); /* accent-black with opacity */
@@ -305,9 +305,9 @@ input {
   font-weight: 500;
   font-size: 14px;
   line-height: 1;
-  color: #F8F8F8; /* off-white */
-  background-color: #1A1A1A; /* off-black */
-  border: 1px solid #1A1A1A; /* off-black */
+  color: #f8f8f8; /* off-white */
+  background-color: #1a1a1a; /* off-black */
+  border: 1px solid #1a1a1a; /* off-black */
   border-radius: 4px;
   padding: 10px 24px;
   min-height: 48px;
@@ -355,19 +355,19 @@ input {
 /* Google Sign-In Button - Dark Mode (White Button) */
 /* Note: Google branding requires specific colors, some values kept for compliance */
 .dark .google-signin-button {
-  background-color: #F8F8F8; /* off-white */
-  border-color: #CCCCCC; /* light-gray */
-  color: #1A1A1A; /* off-black */
+  background-color: #f8f8f8; /* off-white */
+  border-color: #cccccc; /* light-gray */
+  color: #1a1a1a; /* off-black */
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .dark .google-signin-button:hover {
-  background-color: #FFFFFF; /* pure white for hover per Google spec */
+  background-color: #ffffff; /* pure white for hover per Google spec */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .dark .google-signin-button:active {
-  background-color: #F0F0F0; /* slightly off white */
+  background-color: #f0f0f0; /* slightly off white */
   transform: scale(0.99);
 }
 

@@ -6,7 +6,11 @@ interface CharCounterProps {
   className?: string;
 }
 
-const CharCounter: React.FC<CharCounterProps> = ({ valueLength, max, className = '' }) => {
+const CharCounter: React.FC<CharCounterProps> = ({
+  valueLength,
+  max,
+  className = '',
+}) => {
   const isOverLimit = max > 0 && valueLength > max;
   const isNearLimit = max > 0 && valueLength / max >= 0.9;
 

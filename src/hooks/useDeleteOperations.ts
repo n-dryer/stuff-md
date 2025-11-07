@@ -39,12 +39,12 @@ export const useDeleteOperations = ({
       setIsDeleting(true);
       try {
         await deleteNote(noteToDelete.id);
-        displayFeedback('success', 'Note deleted.');
+        displayFeedback('success', 'Item deleted.');
       } catch (error) {
         handleError(
           error,
           displayFeedback,
-          'Failed to delete note.',
+          'Failed to delete item.',
           'useDeleteOperations:handleConfirmDelete'
         );
       } finally {
@@ -68,12 +68,12 @@ export const useDeleteOperations = ({
     try {
       const allNoteIds = notes.map(n => n.id);
       await deleteNotesByIds(allNoteIds);
-      displayFeedback('success', 'All notes have been deleted.');
+      displayFeedback('success', 'All items have been deleted.');
     } catch (error) {
       handleError(
         error,
         displayFeedback,
-        'Failed to delete all notes.',
+        'Failed to delete all items.',
         'useDeleteOperations:handleConfirmDeleteAll'
       );
     } finally {
@@ -95,12 +95,12 @@ export const useDeleteOperations = ({
     setIsDeleting(true);
     try {
       await deleteNotesByIds(notesToDelete);
-      displayFeedback('success', `${notesToDelete.length} notes deleted.`);
+      displayFeedback('success', `${notesToDelete.length} items deleted.`);
     } catch (error) {
       handleError(
         error,
         displayFeedback,
-        'Failed to delete selected notes.',
+        'Failed to delete selected items.',
         'useDeleteOperations:handleConfirmDeleteSelected'
       );
     } finally {

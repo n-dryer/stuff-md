@@ -105,25 +105,32 @@ const HelpModal: React.FC<HelpModalProps> = ({
                   CAPTURE
                 </h3>
                 <p className='text-sm leading-relaxed text-off-black/75 dark:text-off-white/75'>
-                  Compose at the bottom; every note lands in Drive automatically.
+                  Compose at the bottom; every item lands in Drive
+                  automatically.
                 </p>
                 <ul className='space-y-2 text-sm leading-relaxed text-off-black/70 dark:text-off-white/70 list-disc list-inside'>
-                  <li>Save with the button or <span className='font-semibold'>⌘Enter / Ctrl+Enter</span>.</li>
+                  <li>
+                    Save with the button or{' '}
+                    <span className='font-semibold'>⌘↩</span>.
+                  </li>
                   <li>AI tags and categorizes on save.</li>
                   <li>Empty drafts show a warning before saving.</li>
                 </ul>
               </div>
               <div className='space-y-4'>
                 <h3 className='text-xs font-black tracking-[0.35em] text-accent-black/80 dark:text-off-white/80'>
-                  FIND NOTES
+                  FIND STUFF
                 </h3>
                 <p className='text-sm leading-relaxed text-off-black/75 dark:text-off-white/75'>
                   Everything is searchable and filterable.
                 </p>
                 <ul className='space-y-2 text-sm leading-relaxed text-off-black/70 dark:text-off-white/70 list-disc list-inside'>
-                  <li>Jump to search with <span className='font-semibold'>⌘K / Ctrl+K</span>.</li>
+                  <li>
+                    Jump to search with{' '}
+                    <span className='font-semibold'>⌘K</span>.
+                  </li>
                   <li>Click tags to toggle filters.</li>
-                  <li>Clear filters from the note list toolbar.</li>
+                  <li>Clear filters from the stuff list toolbar.</li>
                 </ul>
               </div>
             </section>
@@ -147,7 +154,7 @@ const HelpModal: React.FC<HelpModalProps> = ({
                   AI CONTROLS
                 </h3>
                 <p className='text-sm leading-relaxed text-off-black/75 dark:text-off-white/75'>
-                  Tune how notes get classified. Need more control?{' '}
+                  Tune how stuff gets classified. Need more control?{' '}
                   <button
                     type='button'
                     onClick={() => {
@@ -160,24 +167,36 @@ const HelpModal: React.FC<HelpModalProps> = ({
                   </button>
                 </p>
                 <ul className='space-y-2 text-sm leading-relaxed text-off-black/70 dark:text-off-white/70 list-disc list-inside'>
-                  <li>Use the footer toggle marked <span className='font-semibold'>[DEFAULT]</span>.</li>
-                  <li>Saved changes apply to new notes immediately.</li>
-                  <li>Revert to the built-in instructions whenever you like.</li>
+                  <li>
+                    Use the footer toggle marked{' '}
+                    <span className='font-semibold'>[DEFAULT]</span>.
+                  </li>
+                  <li>Saved changes apply to new stuff immediately.</li>
+                  <li>
+                    Revert to the built-in instructions whenever you like.
+                  </li>
                 </ul>
               </div>
             </section>
 
             <div className='rounded-xl border border-accent-black/20 bg-off-white/80 px-5 py-4 text-sm font-bold uppercase tracking-[0.24em] text-off-black/70 shadow-sm dark:border-off-white/15 dark:bg-off-black/50 dark:text-off-white/70 sm:text-base sm:px-6 sm:py-5'>
-              <div className='flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-center sm:gap-8'>
-                <span>SHORTCUTS</span>
-                <span className='font-normal tracking-[0.08em] text-off-black/65 dark:text-off-white/65'>
-                  ⌘K / Ctrl+K — search
+              <div className='flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-center'>
+                <span className='whitespace-nowrap'>SHORTCUTS</span>
+                <span className='whitespace-nowrap font-normal tracking-[0.08em] text-off-black/65 dark:text-off-white/65'>
+                  <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
+                    ⏎
+                  </kbd>{' '}
+                  - New Line
                 </span>
-                <span className='font-normal tracking-[0.08em] text-off-black/65 dark:text-off-white/65'>
-                  ⌘S / Ctrl+S — save
-                </span>
-                <span className='font-normal tracking-[0.08em] text-off-black/65 dark:text-off-white/65'>
-                  ⌘Enter / Ctrl+Enter — submit
+                <span className='whitespace-nowrap font-normal tracking-[0.08em] text-off-black/65 dark:text-off-white/65'>
+                  <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
+                    ⌘
+                  </kbd>{' '}
+                  +{' '}
+                  <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
+                    ↩
+                  </kbd>{' '}
+                  - Add Stuff
                 </span>
               </div>
             </div>

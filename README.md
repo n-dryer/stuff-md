@@ -1,17 +1,17 @@
 # STUFF.MD
 
-A notepad that saves to Google Drive. Notes are automatically categorized by AI.
+A notepad that saves to Google Drive. All of your stuff is automatically categorized by AI.
 
 🌐 **Live Demo:** [https://n-dryer.github.io/stuff-md](https://n-dryer.github.io/stuff-md)
 
 ## What It Does
 
-You type notes. They get saved to your Google Drive. AI categorizes them in the background. That's it.
+You type stuff. It gets saved to your Google Drive. AI categorizes it in the background. That's it.
 
 ## Features
 
-- Saves notes directly to your Google Drive
-- AI automatically categorizes and tags notes
+- Saves your stuff directly to your Google Drive
+- AI automatically categorizes and tags your stuff
 - Search and filter by content, category, tags, or date
 - Grid and table view modes
 - Export as TXT, JSON, or ZIP
@@ -40,7 +40,7 @@ Get your Firebase config from the [Firebase Console](https://console.firebase.go
 
 ### Google Drive API Setup (Required)
 
-The app saves all notes to your personal Google Drive. You must enable the Google Drive API in your Google Cloud project.
+The app saves all your stuff to your personal Google Drive. You must enable the Google Drive API in your Google Cloud project.
 
 1. **Go to Google Cloud Console:** Navigate to the [Google Cloud Console](https://console.cloud.google.com/).
 2. **Select your Firebase project.**
@@ -58,7 +58,7 @@ The app saves all notes to your personal Google Drive. You must enable the Googl
 
 **Current Implementation:** Google Drive is the only supported storage backend.
 
-All notes are stored in your personal Google Drive in a dedicated folder named **"STUFF.MD Notes"**, which is created automatically.
+All your stuff is stored in your personal Google Drive in a dedicated folder named **"STUFF.MD Items"**, which is created automatically.
 
 - **Privacy**: The app uses a restricted scope (`drive.file`) that only allows it to access files it creates. It **cannot** see or access any of your other files in Google Drive.
 - **User Ownership**: Your data stays in your own Google Drive account. This project does not use any external databases.
@@ -112,6 +112,7 @@ If you don't want to set up origin trial tokens, you can use the Gemini API as a
    - Copy your API key (starts with `AIza...`)
 
 2. **Add to `.env.local`:**
+
    ```env
    VITE_GEMINI_API_KEY=your_api_key_here
    ```
@@ -129,9 +130,9 @@ All data is stored in your Google Drive. No server, no database. Client-side onl
 
 ## Usage
 
-Type in the input area and press Enter. Notes are saved immediately and categorized automatically.
+Type in the input area and press Enter. Your stuff is saved immediately and categorized automatically.
 
-Click on any note to edit. Save with Cmd/Ctrl + Enter, delete with confirmation, or cancel with ESC.
+Click on any item to edit. Save with Cmd/Ctrl + Enter, delete with confirmation, or cancel with ESC.
 
 ## Tech Stack
 

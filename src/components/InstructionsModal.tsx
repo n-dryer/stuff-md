@@ -49,8 +49,8 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
         return;
       }
       setInstructions(sanitizedInitialInstructions);
-      setMode(initialMode);
-    }, [initialMode, isVisible, sanitizedInitialInstructions]);
+      setMode('default');
+    }, [isVisible, sanitizedInitialInstructions]);
 
     useEffect(() => {
       if (isVisible && mode === 'custom') {
@@ -167,7 +167,7 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
                 id='instructions-description'
                 className='text-sm sm:text-base text-off-black/80 dark:text-off-white/80 leading-relaxed tracking-wide normal-case'
               >
-                These instructions guide how the AI categorizes every new note.
+                These instructions guide how the AI categorizes every new item.
               </p>
               <div className='flex flex-1 flex-col gap-4 sm:gap-6'>
                 <SegmentedControl
