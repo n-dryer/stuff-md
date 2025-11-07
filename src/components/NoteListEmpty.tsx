@@ -10,11 +10,13 @@ const renderPatternBackdrop = () => (
   <>
     <div
       aria-hidden='true'
-      className='absolute inset-0 pointer-events-none opacity-50 bg-[length:28px_28px] bg-[radial-gradient(circle_at_1px_1px,_rgba(28,28,28,0.08)_1px,_transparent_0)] dark:hidden'
+      className='absolute inset-0 pointer-events-none opacity-50 bg-[length:theme(spacing.grid-pattern-size)_theme(spacing.grid-pattern-size)] bg-[radial-gradient(circle_at_1px_1px,_rgba(28,28,28,0.08)_1px,_transparent_0)] dark:hidden'
+      // Note: rgba(28,28,28,0.08) in gradient matches off-black/8 opacity from tailwind.config.js
     />
     <div
       aria-hidden='true'
-      className='absolute inset-0 hidden pointer-events-none opacity-40 dark:block bg-[length:28px_28px] bg-[radial-gradient(circle_at_1px_1px,_rgba(240,240,240,0.18)_1px,_transparent_0)]'
+      className='absolute inset-0 hidden pointer-events-none opacity-40 dark:block bg-[length:theme(spacing.grid-pattern-size)_theme(spacing.grid-pattern-size)] bg-[radial-gradient(circle_at_1px_1px,_rgba(240,240,240,0.18)_1px,_transparent_0)]'
+      // Note: rgba(240,240,240,0.18) in gradient matches off-white/18 opacity from tailwind.config.js
     />
   </>
 );
@@ -24,11 +26,11 @@ const NoteListEmpty: React.FC<NoteListEmptyProps> = ({
   onOpenHelp,
 }) => {
   return (
-    <section className='relative isolate mx-auto w-full max-w-[min(66rem,calc(100vw-1rem))] overflow-hidden rounded-[1.75rem] border-2 border-accent-black bg-off-white/90 px-[clamp(1.15rem,2vw+0.85rem,3.25rem)] py-[clamp(2.5rem,3.2vw+1.5rem,5.25rem)] text-center shadow-sm dark:border-off-white/20 dark:bg-off-black/60 sm:px-[clamp(1.5rem,2.2vw+1.2rem,3.75rem)]'>
+    <section className='relative isolate mx-auto w-full max-w-[min(66rem,calc(100vw-1rem))] overflow-hidden rounded-radius-modal-large border-2 border-accent-black bg-off-white/90 px-[clamp(1.15rem,2vw+0.85rem,3.25rem)] py-[clamp(2.5rem,3.2vw+1.5rem,5.25rem)] text-center shadow-sm dark:border-off-white/20 dark:bg-off-black/60 sm:px-[clamp(1.5rem,2.2vw+1.2rem,3.75rem)]'>
       {renderPatternBackdrop()}
       <div className='relative grid gap-[clamp(1.75rem,3.5vw+1rem,3.75rem)] text-center md:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] md:items-start md:text-left'>
         <div className='flex flex-col items-center gap-[clamp(1.35rem,2.5vw+0.9rem,2.5rem)] text-pretty md:items-start'>
-          <h3 className='text-balance text-[clamp(1.65rem,3.25vw+0.9rem,2.9rem)] font-black uppercase tracking-[0.12em] text-accent-black dark:text-off-white sm:tracking-[0.18em] xl:tracking-[0.26em]'>
+          <h3 className='text-balance text-[clamp(1.65rem,3.25vw+0.9rem,2.9rem)] font-black uppercase tracking-normal text-accent-black dark:text-off-white sm:tracking-wide xl:tracking-ultra'>
             ADD YOUR STUFF
           </h3>
           <p className='max-w-[52ch] text-[clamp(0.92rem,1.1vw+0.58rem,1.18rem)] leading-relaxed text-off-black/70 dark:text-off-white/70 sm:text-[clamp(0.98rem,1vw+0.65rem,1.25rem)]'>
@@ -56,7 +58,7 @@ const NoteListEmpty: React.FC<NoteListEmptyProps> = ({
             </Button>
           </div>
         </div>
-        <p className='text-[clamp(0.75rem,0.5vw+0.68rem,0.95rem)] uppercase tracking-[0.2em] text-off-black/55 dark:text-off-white/55 md:col-span-2 md:justify-self-start md:text-left md:text-pretty flex flex-wrap items-center gap-x-2 gap-y-1'>
+        <p className='text-[clamp(0.75rem,0.5vw+0.68rem,0.95rem)] uppercase tracking-wider text-off-black/55 dark:text-off-white/55 md:col-span-2 md:justify-self-start md:text-left md:text-pretty flex flex-wrap items-center gap-x-2 gap-y-1'>
           <span className='whitespace-nowrap'>
             <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
               ⏎

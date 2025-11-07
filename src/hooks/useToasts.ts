@@ -3,6 +3,7 @@ import { useUIActions } from '../contexts/UIContext';
 
 export const useToasts = () => {
   const [showNoteSavedToast, setShowNoteSavedToast] = useState(false);
+  const [showNoteEditedToast, setShowNoteEditedToast] = useState(false);
   const { displayFeedback } = useUIActions();
 
   const showNoteSavedToastCallback = useCallback(() => {
@@ -16,6 +17,8 @@ export const useToasts = () => {
   return {
     showNoteSavedToast,
     setShowNoteSavedToast,
+    showNoteEditedToast,
+    setShowNoteEditedToast,
     handleDraftSavedToast,
     showNoteSavedToastCallback,
   };

@@ -35,7 +35,18 @@ export const checkChromeAIAvailability = async (): Promise<
     logDebug(`[Chrome AI] Availability check returned: ${availability}`);
     return availability;
   } catch (error) {
-    logError('Failed to check Chrome AI availability:', error);
+    // Handle version-related errors gracefully
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    if (
+      errorMessage.includes('version not supported') ||
+      errorMessage.includes('Version')
+    ) {
+      logDebug(
+        '[Chrome AI] Chrome version not supported by origin trial, will use fallback'
+      );
+    } else {
+      logError('Failed to check Chrome AI availability:', error);
+    }
     return 'no';
   }
 };
@@ -55,7 +66,17 @@ export const createChromeAISession =
       logDebug('[Chrome AI] Session created successfully');
       return session as unknown as ChromeAISession;
     } catch (error) {
-      logError('Failed to create Chrome AI session:', error);
+      // Handle version-related errors gracefully
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      if (
+        errorMessage.includes('version not supported') ||
+        errorMessage.includes('Version')
+      ) {
+        logDebug('[Chrome AI] Chrome version not supported, will use fallback');
+      } else {
+        logError('Failed to create Chrome AI session:', error);
+      }
       return null;
     }
   };
@@ -80,12 +101,15 @@ export const useChromeBuiltInAI = async (
     logDebug('[Chrome AI] Availability check returned "no"');
     logDebug('[Chrome AI] Possible reasons:');
     logDebug('  - Not using Chrome browser');
-    logDebug('  - Chrome version < 138 (for extensions)');
+    logDebug(
+      '  - Chrome version < 138 (for extensions) or beta version not supported by origin trial'
+    );
     logDebug('  - Origin trial not enrolled (for web usage)');
     logDebug('  - Chrome AI flags not enabled');
     logDebug('  - Gemini Nano model not available');
+    logDebug('  - Chrome beta versions may not be supported by origin trial');
     throw new BrowserAPIError(
-      'Chrome built-in AI is not available. Ensure you are using Chrome 138+ with built-in AI enabled, or enroll in the origin trial for web usage.'
+      'Chrome built-in AI is not available. The app will automatically use Gemini API fallback if configured. Ensure you are using Chrome 138+ stable with built-in AI enabled, or configure VITE_GEMINI_API_KEY for fallback.'
     );
   }
 

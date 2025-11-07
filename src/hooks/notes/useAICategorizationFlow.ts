@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 import { Note } from '../../types';
 import { usePerNoteRateLimit } from '../usePerNoteRateLimit';
-import { getAICategorization } from '../../services/aiService';
-import { processAIResult } from '../useAICategorization';
 import {
-  validateCustomInstructions,
-  validateNoteContent,
-} from '../../utils/inputValidation';
+  getAICategorization,
+  SYSTEM_INSTRUCTION,
+} from '../../services/aiService';
+import { processAIResult } from '../useAICategorization';
+import { validateNoteContent } from '../../utils/inputValidation';
 
 export function useAICategorizationFlow(
   updateNote: (id: string, updates: Partial<Note>) => Promise<void>
@@ -18,13 +18,15 @@ export function useAICategorizationFlow(
       checkRateLimit(note.id);
 
       const validatedContent = validateNoteContent(newContent);
-      const validatedInstructions = validateCustomInstructions(
-        customInstructions || ''
-      );
+      // Use SYSTEM_INSTRUCTION as default if customInstructions is empty or whitespace
+      const useDefault = !(customInstructions || '').trim();
+      const instructionsToUse = useDefault
+        ? SYSTEM_INSTRUCTION
+        : customInstructions;
 
       const aiResult = await getAICategorization(
         validatedContent,
-        validatedInstructions
+        instructionsToUse
       );
       const processed = aiResult
         ? processAIResult(aiResult, validatedContent)

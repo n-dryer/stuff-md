@@ -21,6 +21,7 @@ import NoteListErrorBoundary from './NoteListErrorBoundary';
 import Sidebar from './Sidebar';
 import SidebarHelpButton from './SidebarHelpButton';
 import SidebarToggle from './SidebarToggle';
+import BrutalistSpinner from './BrutalistSpinner';
 
 interface MainLayoutProps
   extends NoteManagementProps,
@@ -116,7 +117,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
     <div className='flex h-screen font-mono bg-off-white text-off-black dark:bg-off-black dark:text-white overflow-x-hidden'>
       <a
         href='#main-content'
-        className='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent-black focus:text-off-white focus:border-2 focus:border-off-white focus:font-bold focus:uppercase focus:font-mono focus:ring-2 focus:ring-offset-4 focus:ring-accent-black dark:focus:bg-off-white dark:focus:text-off-black dark:focus:border-accent-black'
+        className='sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-dropdown focus:px-4 focus:py-2 focus:bg-accent-black focus:text-off-white focus:border-2 focus:border-off-white focus:font-bold focus:uppercase focus:font-mono focus:ring-2 focus:ring-offset-4 focus:ring-accent-black dark:focus:bg-off-white dark:focus:text-off-black dark:focus:border-accent-black'
       >
         Skip to Content
       </a>
@@ -124,8 +125,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
         id={sidebarId}
         className={`
         bg-off-white dark:bg-off-black border-r-2 border-accent-black dark:border-off-white/20 flex flex-col flex-shrink-0 overflow-hidden relative z-10
-        transition-[width] duration-300 ease-in-out
-        ${isSidebarCollapsed ? 'w-[72px] sm:w-[80px]' : 'w-[280px] md:w-[320px]'}
+        transition-[width] duration-layout ease-in-out
+        ${isSidebarCollapsed ? 'w-[theme(spacing.sidebar-collapsed-mobile)] sm:w-[theme(spacing.sidebar-collapsed)]' : 'w-[theme(spacing.sidebar-expanded-mobile)] md:w-[theme(spacing.sidebar-expanded)]'}
       `}
       >
         <div className='flex-grow overflow-y-auto overflow-x-hidden'>
@@ -197,6 +198,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           onChange={e => setDraft(e.target.value)}
           onSave={handleSaveNote}
           isSaving={isSaving}
+          isDeleting={isDeleting}
           onRequestClearOrBlur={onRequestClearOrBlur}
           onDraftSaved={onDraftSaved}
           onOpenInstructions={handleOpenInstructions}
@@ -208,6 +210,11 @@ const MainLayout: React.FC<MainLayoutProps> = ({
           notes={notes}
         />
       </div>
+      {isSaving && (
+        <div className='fixed inset-0 z-bulk-action flex items-center justify-center bg-off-white/80 dark:bg-off-black/80 backdrop-blur-sm pointer-events-none'>
+          <BrutalistSpinner />
+        </div>
+      )}
     </div>
   );
 };

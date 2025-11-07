@@ -58,21 +58,19 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = React.memo(
     const cancelButtonClasses = `${responsiveButtonClasses} !bg-off-white !text-off-black !border-accent-black dark:!bg-off-black dark:!text-off-white dark:!border-off-white/80`;
 
     return (
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
       <div
-        className='fixed inset-0 z-[60] flex items-stretch justify-center bg-off-black/30 backdrop-blur-sm px-0 py-0 dark:bg-off-black/50 sm:items-center sm:px-4'
+        className='fixed inset-0 z-modal-overlay flex items-stretch justify-center bg-off-black/30 backdrop-blur-sm px-0 py-0 dark:bg-off-black/50 sm:items-center sm:px-4'
         onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
-        aria-modal='true'
-        role='dialog'
-        aria-labelledby='confirmation-title'
-        tabIndex={-1}
+        role='presentation'
         aria-label='Confirmation dialog backdrop'
       >
         <div
           ref={modalRef}
-          className='relative flex h-full max-h-[100svh] w-full flex-col overflow-y-auto border-0 border-accent-black bg-off-white px-6 py-8 font-mono uppercase shadow-lg modal-enter dark:bg-brutal-gray sm:h-auto sm:max-w-lg sm:rounded-[1.5rem] sm:border-2 sm:py-10 sm:px-10'
-          role='document'
+          className='relative flex h-full max-h-[100svh] w-full flex-col overflow-y-auto border-0 border-accent-black bg-off-white px-6 py-8 font-mono uppercase shadow-lg modal-enter dark:bg-brutal-gray sm:h-auto sm:max-w-lg sm:rounded-radius-modal sm:border-2 sm:py-10 sm:px-10'
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='confirmation-title'
         >
           <button
             onClick={onCancel}
@@ -85,7 +83,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = React.memo(
             <div className='pr-10'>
               <h2
                 id='confirmation-title'
-                className='text-2xl font-black tracking-[0.25em] text-off-black dark:text-off-white sm:text-3xl'
+                className='text-2xl font-black tracking-modal-title text-off-black dark:text-off-white sm:text-3xl'
               >
                 {title}
               </h2>

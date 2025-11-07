@@ -52,13 +52,13 @@ const InstructionsModalContent: React.FC<InstructionsModalContentProps> = ({
     <div className={contentContainerClasses}>
       {mode === 'default' ? (
         <div className='w-full'>
-          <p className='text-sm sm:text-base text-off-black dark:text-off-white leading-relaxed tracking-wide normal-case whitespace-pre-wrap text-left transition-all duration-150'>
+          <p className='text-sm sm:text-base text-off-black dark:text-off-white leading-relaxed tracking-wide normal-case whitespace-pre-wrap text-left transition-all duration-normal'>
             {displayText}
           </p>
           {shouldTruncate && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className='mt-2 uppercase text-xs font-bold text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white transition-colors duration-150'
+              className='mt-2 uppercase text-xs font-bold text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white transition-colors duration-normal'
               aria-expanded={isExpanded}
               aria-label={
                 isExpanded

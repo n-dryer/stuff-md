@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { User, AuthError } from 'firebase/auth';
-
 import {
   signInWithGooglePopup,
   signOutFirebase,
-  onAuthStateChanged as onAuthStateChangedLazy,
+  onAuthStateChanged,
   loadAnalyticsIfSupported,
 } from '../lib/firebaseClient';
 import { logError } from '../utils/logger';
@@ -18,12 +17,7 @@ export interface UserProfile {
 
 const ACCESS_TOKEN_KEY = 'stuffmd.gdrive_access_token';
 
-/**
- * Normalize errors to AuthError format for consistent error handling.
- * Handles both Firebase AuthErrors and regular Errors (e.g., missing env vars).
- */
 function normalizeAuthError(error: unknown): AuthError {
-  // If it's already an AuthError, return it
   if (
     error &&
     typeof error === 'object' &&
@@ -32,8 +26,6 @@ function normalizeAuthError(error: unknown): AuthError {
   ) {
     return error as AuthError;
   }
-
-  // Convert regular Error to AuthError-like object
   const errorMessage = error instanceof Error ? error.message : String(error);
   return {
     code: errorMessage.includes('Missing required env')
@@ -44,108 +36,59 @@ function normalizeAuthError(error: unknown): AuthError {
   } as AuthError;
 }
 
-/**
- * This hook manages the entire authentication flow using Firebase Authentication.
- * Firebase SDK is loaded lazily only on first user interaction (login click).
- */
 export function useAuth() {
   const [user, setUser] = useState<UserProfile | null>(null);
-  // This state holds the OAuth 2.0 access token required for Google Drive API.
-  // It is separate from Firebase's own ID token.
   const [accessToken, setAccessToken] = useState<string | null>(() =>
     sessionStorage.getItem(ACCESS_TOKEN_KEY)
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<AuthError | null>(null);
-  const [authInitialized, setAuthInitialized] = useState(false);
 
-  // Initialize auth state listener only after first interaction or if access token exists
   useEffect(() => {
-    // If we have an access token, user was previously logged in - initialize auth check
-    if (accessToken && !authInitialized) {
-      let unsubscribe: (() => void) | null = null;
-
-      const initAuth = async () => {
-        try {
-          unsubscribe = await onAuthStateChangedLazy(
-            (firebaseUser: User | null) => {
-              if (firebaseUser) {
-                setUser({
-                  name: firebaseUser.displayName,
-                  email: firebaseUser.email,
-                  picture: firebaseUser.photoURL,
-                  sub: firebaseUser.uid,
-                });
-              } else {
-                setUser(null);
-                setAccessToken(null);
-                sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-              }
-              setIsLoading(false);
-              setAuthInitialized(true);
-            }
-          );
-        } catch (error) {
-          logError('Failed to initialize auth state:', error);
+    let unsubscribe: (() => void) | null = null;
+    const initAuth = async () => {
+      try {
+        unsubscribe = await onAuthStateChanged((firebaseUser: User | null) => {
+          if (firebaseUser) {
+            setUser({
+              name: firebaseUser.displayName,
+              email: firebaseUser.email,
+              picture: firebaseUser.photoURL,
+              sub: firebaseUser.uid,
+            });
+          } else {
+            setUser(null);
+            setAccessToken(null);
+            sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+          }
           setIsLoading(false);
-          setAuthInitialized(true);
-        }
-      };
-
-      // Delay by one frame to allow first paint
-      const timeoutId = setTimeout(initAuth, 0);
-
-      return () => {
-        clearTimeout(timeoutId);
-        if (unsubscribe) {
-          unsubscribe();
-        }
-      };
-    } else if (!accessToken) {
-      // No access token, so no user is logged in - skip Firebase initialization
-      setIsLoading(false);
-      setAuthInitialized(true);
-    }
-    return undefined;
-  }, [accessToken, authInitialized]);
+        });
+      } catch (error) {
+        logError('Failed to initialize auth state listener:', error);
+        setIsLoading(false);
+      }
+    };
+    initAuth();
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   const login = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Load analytics after first user interaction (login click)
       await loadAnalyticsIfSupported();
-
-      // Trigger the Google sign-in popup - this will dynamically load Firebase SDK
       const result = await signInWithGooglePopup();
-
-      // Extract the OAuth credential from the sign-in result.
-      // Dynamically import GoogleAuthProvider to avoid loading Firebase at module load time
       const { GoogleAuthProvider } = await import('firebase/auth');
       const credential = GoogleAuthProvider.credentialFromResult(result);
-      if (!credential) {
-        throw new Error('Could not get credential from result.');
-      }
-      const token = credential.accessToken;
-
+      const token = credential?.accessToken;
       if (token && result.user) {
-        // The OAuth access token is successfully retrieved. Set it in state and sessionStorage.
         setAccessToken(token);
         sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
-
-        // Also update the user profile from the result.
-        const firebaseUser = result.user;
-        setUser({
-          name: firebaseUser.displayName,
-          email: firebaseUser.email,
-          picture: firebaseUser.photoURL,
-          sub: firebaseUser.uid,
-        });
-
-        // Set up auth state listener now that we're logged in
-        setAuthInitialized(false);
       } else {
-        // This is a critical error if the token is missing after a successful sign-in.
         throw new Error(
           'Could not retrieve Google OAuth access token from credential.'
         );
@@ -153,8 +96,6 @@ export function useAuth() {
     } catch (error) {
       logError('Authentication failed:', error);
       setError(normalizeAuthError(error));
-      // Ensure a clean state on authentication failure.
-      setUser(null);
       setAccessToken(null);
       sessionStorage.removeItem(ACCESS_TOKEN_KEY);
     } finally {
@@ -162,19 +103,57 @@ export function useAuth() {
     }
   }, []);
 
-  const logout = useCallback(async () => {
+  const refreshAccessToken = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
     try {
-      // Sign out from Firebase - this will dynamically load Firebase SDK if not already loaded
-      await signOutFirebase();
-      // Clear the user state and access token.
-      setUser(null);
+      await loadAnalyticsIfSupported();
+      const result = await signInWithGooglePopup();
+      const { GoogleAuthProvider } = await import('firebase/auth');
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      const token = credential?.accessToken;
+      if (token && result.user) {
+        setAccessToken(token);
+        sessionStorage.setItem(ACCESS_TOKEN_KEY, token);
+        return token;
+      } else {
+        throw new Error(
+          'Could not retrieve Google OAuth access token from credential.'
+        );
+      }
+    } catch (error) {
+      logError('Authentication failed during token refresh:', error);
+      setError(normalizeAuthError(error));
       setAccessToken(null);
       sessionStorage.removeItem(ACCESS_TOKEN_KEY);
-      setAuthInitialized(false);
-    } catch (error) {
-      logError('Sign out failed:', error);
+      // re-throwing the error so the caller can handle it (e.g. show reauth modal)
+      throw error;
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
-  return { user, accessToken, isLoading, error, login, logout };
+  const logout = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      await signOutFirebase();
+      setAccessToken(null);
+      sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+    } catch (signOutError) {
+      logError('Firebase signOut error:', signOutError);
+      setError(normalizeAuthError(signOutError));
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return {
+    user,
+    accessToken,
+    isLoading,
+    error,
+    login,
+    logout,
+    refreshAccessToken,
+  };
 }

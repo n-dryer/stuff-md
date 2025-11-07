@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useTheme } from '../hooks/useTheme';
+import { SYSTEM_INSTRUCTION } from '../services/aiService';
 
 interface UIState {
   feedback: { type: 'success' | 'error'; message: string } | null;
@@ -64,7 +65,14 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const saveInstructions = useCallback((instructions: string) => {
     setCustomInstructions(instructions);
-    setLastCustomInstructions(instructions);
+    // Only update lastCustomInstructions if saving actual custom instructions (not default)
+    if (instructions.trim() !== SYSTEM_INSTRUCTION.trim()) {
+      setLastCustomInstructions(instructions);
+    } else {
+      // If resetting to default (including when user deletes all custom instructions),
+      // clear lastCustomInstructions so it doesn't appear when switching to CUSTOM tab
+      setLastCustomInstructions('');
+    }
   }, []);
 
   const state = {

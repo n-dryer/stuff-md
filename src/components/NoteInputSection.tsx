@@ -9,6 +9,7 @@ interface NoteInputSectionProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSave: () => void;
   isSaving: boolean;
+  isDeleting?: boolean;
   onRequestClearOrBlur: () => void;
   onDraftSaved?: () => void;
   onOpenInstructions: () => void;
@@ -21,6 +22,7 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
   onChange,
   onSave,
   isSaving,
+  isDeleting = false,
   onRequestClearOrBlur,
   onDraftSaved,
   onOpenInstructions,
@@ -34,21 +36,22 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
       <div
         className={`${
           isSidebarCollapsed
-            ? '-ml-[80px] w-[calc(100%+80px)]'
-            : '-ml-[320px] w-[calc(100%+320px)]'
+            ? '-ml-[theme(spacing.sidebar-collapsed)] w-[calc(100%+theme(spacing.sidebar-collapsed))]'
+            : '-ml-[theme(spacing.sidebar-expanded)] w-[calc(100%+theme(spacing.sidebar-expanded))]'
         } pointer-events-none`}
       >
         <div
           ref={containerRef}
-          className={`${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[320px]'} pointer-events-auto`}
+          className={`${isSidebarCollapsed ? 'ml-[theme(spacing.sidebar-collapsed)]' : 'ml-[theme(spacing.sidebar-expanded)]'} pointer-events-auto relative`}
         >
-          <div className='w-full px-2 sm:px-3 md:px-4 lg:px-5 py-3 sm:py-4 md:py-5 lg:py-6 flex flex-col sm:flex-row justify-start items-stretch sm:items-start gap-3 sm:gap-4'>
+          <div className='w-full px-2 sm:px-3 md:px-4 lg:px-5 py-3 sm:py-4 md:py-5 lg:py-6 relative'>
             <NoteInput
               inputRef={noteInputRef}
               value={value}
               onChange={onChange}
               onSave={onSave}
               isSaving={isSaving}
+              isDeleting={isDeleting}
               onRequestClearOrBlur={onRequestClearOrBlur}
               onDraftSaved={onDraftSaved}
               onOpenInstructions={onOpenInstructions}
@@ -57,7 +60,7 @@ const NoteInputSection: React.FC<NoteInputSectionProps> = ({
               variant='fill'
               onClick={onSave}
               disabled={!value.trim() || isSaving}
-              className='flex-shrink-0 w-full sm:w-auto'
+              className='absolute bottom-3 right-2 sm:bottom-4 sm:right-3 md:bottom-5 md:right-4 lg:bottom-6 lg:right-5 flex-shrink-0 z-10 text-sm sm:text-base px-3 py-1 sm:px-4 sm:py-2'
             >
               Add Stuff
             </Button>

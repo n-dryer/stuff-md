@@ -31,22 +31,20 @@ const ReauthModal: React.FC<ReauthModalProps> = React.memo(
     }
 
     return (
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
       <div
-        className='fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-center justify-center z-50'
+        className='fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-center justify-center z-modal'
         onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
-        aria-modal='true'
-        role='dialog'
-        aria-labelledby='reauth-title'
-        tabIndex={-1}
+        role='presentation'
         aria-label='Reauth dialog backdrop'
       >
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div
           ref={modalRef}
           className='bg-off-white dark:bg-brutal-gray p-8 border-2 border-accent-black dark:border-off-white/50 w-full max-w-md m-4 relative'
           onClick={event => event.stopPropagation()}
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='reauth-title'
         >
           <button
             onClick={onClose}
@@ -70,7 +68,7 @@ const ReauthModal: React.FC<ReauthModalProps> = React.memo(
               Reconnect
             </Button>
             <Button onClick={onLogout} variant='default'>
-              [LOGOUT]
+              LOGOUT
             </Button>
           </div>
         </div>

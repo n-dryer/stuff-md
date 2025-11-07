@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useLocalStorage } from './useLocalStorage';
+import { BREAKPOINTS } from '../constants/breakpoints';
 
 export function useSidebarCollapse() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useLocalStorage<boolean>(
@@ -11,7 +12,9 @@ export function useSidebarCollapse() {
     if (typeof window === 'undefined') {
       return;
     }
-    const mediaQuery = window.matchMedia('(max-width: 768px)');
+    const mediaQuery = window.matchMedia(
+      `(max-width: ${BREAKPOINTS.md - 1}px)`
+    );
 
     const collapseForMobile = (matches: boolean) => {
       if (matches) {

@@ -53,13 +53,6 @@ export const isValidUrl = (url: string): boolean => {
       return false;
     }
 
-    // Reject localhost and private IP ranges in production (optional)
-    // if (process.env.NODE_ENV === 'production') {
-    //   if (parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1') {
-    //     return false;
-    //   }
-    // }
-
     return true;
   } catch {
     // URL parsing failed, consider invalid

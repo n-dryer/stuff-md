@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useDebounce } from '../hooks/useDebounce';
 import { useNoteInputKeyboard } from '../hooks/useNoteInputKeyboard';
 import { useNoteInputResize } from '../hooks/useNoteInputResize';
-import BrutalistSpinner from './BrutalistSpinner';
 import MarkdownRenderer from './MarkdownRenderer';
 
 interface NoteInputProps {
@@ -11,6 +10,7 @@ interface NoteInputProps {
   onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onSave: () => void;
   isSaving: boolean;
+  isDeleting?: boolean;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
   onRequestClearOrBlur: () => void;
   onDraftSaved?: () => void;
@@ -24,6 +24,7 @@ const NoteInput: React.FC<NoteInputProps> = ({
   onChange,
   onSave,
   isSaving,
+  isDeleting: _isDeleting = false,
   inputRef,
   onRequestClearOrBlur,
   onDraftSaved,
@@ -39,11 +40,13 @@ const NoteInput: React.FC<NoteInputProps> = ({
 
   const handleSave = useCallback(() => {
     if (value.trim() && !isSaving) {
+      // Immediately hide draft saved message when save starts
+      setShowDraftSaved(false);
       justSavedRef.current = true;
       onSave();
       setTimeout(() => {
         justSavedRef.current = false;
-      }, 2000);
+      }, 3000);
     }
   }, [value, isSaving, onSave]);
 
@@ -55,6 +58,13 @@ const NoteInput: React.FC<NoteInputProps> = ({
     onRequestClearOrBlur,
     onOpenInstructions,
   });
+
+  // Hide draft saved message when saving starts
+  useEffect(() => {
+    if (isSaving) {
+      setShowDraftSaved(false);
+    }
+  }, [isSaving]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -133,16 +143,15 @@ const NoteInput: React.FC<NoteInputProps> = ({
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       onMouseDown={handleContainerMouseDown}
-      className={`relative flex w-full min-w-0 items-start gap-2 sm:gap-3 md:gap-4 transition-all duration-300 ease-in-out origin-left will-change-transform ${containerWidthClasses} ${containerScaleClasses} ${
+      className={`relative flex w-full min-w-0 items-start gap-2 sm:gap-3 md:gap-4 transition-all duration-layout ease-in-out origin-left will-change-transform ${containerWidthClasses} ${containerScaleClasses} ${
         isPreview ? '' : 'cursor-text'
       }`}
     >
       {isPreview ? (
-        <div className='flex-grow min-w-0 bg-transparent text-sm sm:text-base font-mono leading-relaxed break-words whitespace-pre-wrap overflow-y-auto transition-all duration-150 min-h-[48px] py-3 pr-2'>
+        <div className='flex-grow min-w-0 bg-transparent text-sm sm:text-base font-mono leading-relaxed break-words whitespace-pre-wrap overflow-y-auto transition-all duration-normal min-h-min-button-height py-3 pr-2'>
           <MarkdownRenderer
             content={
-              value ||
-              '**SHORTCUTS**\n\n* ⏎ - New Line\n* ⌘ + ↩ - Add Stuff'
+              value || '**SHORTCUTS**\n\n* ⏎ - New Line\n* ⌘ + ↩ - Add Stuff'
             }
           />
         </div>
@@ -157,16 +166,11 @@ const NoteInput: React.FC<NoteInputProps> = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholderText}
-            className='w-full bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:outline-none text-sm sm:text-base placeholder:text-sm sm:placeholder:text-base placeholder-light-gray dark:placeholder-light-gray font-mono leading-relaxed resize-none overflow-y-hidden transition-[height,padding,background-color,color] duration-250 ease-in-out px-4 sm:px-5 md:px-6 py-3.5 sm:py-5 md:py-6'
+            className='w-full bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:outline-none text-sm sm:text-base placeholder:text-sm sm:placeholder:text-base placeholder-light-gray dark:placeholder-light-gray font-mono leading-relaxed resize-none overflow-y-hidden transition-[height,padding,background-color,color] duration-slow ease-in-out px-4 sm:px-5 md:px-6 py-3.5 sm:py-5 md:py-6'
             disabled={isSaving}
             rows={1}
             maxLength={NOTE_MAX_LENGTH}
           />
-        </div>
-      )}
-      {isSaving && (
-        <div className='absolute top-3.5 sm:top-5 md:top-6 left-0 right-0 flex justify-center z-20 pointer-events-none transition-opacity duration-200 ease-in-out'>
-          <BrutalistSpinner />
         </div>
       )}
       {showDraftSaved && !isSaving && (

@@ -19,7 +19,7 @@ export { AuthError, RateLimitError };
 const DRIVE_API_URL = 'https://www.googleapis.com/drive/v3';
 const DRIVE_UPLOAD_URL = 'https://www.googleapis.com/upload/drive/v3';
 const NOTE_FILE_QUERY_TPL = `'--FOLDER-ID--' in parents and mimeType='text/markdown' and trashed=false`;
-const NOTE_FIELDS = 'id, name, createdTime, appProperties';
+const NOTE_FIELDS = 'id, name, createdTime, modifiedTime, appProperties';
 
 class GoogleDriveService implements INoteStorageService {
   public async getAllNotes(accessToken: string): Promise<Note[]> {

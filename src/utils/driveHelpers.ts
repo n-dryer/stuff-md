@@ -7,6 +7,7 @@ export interface DriveFile {
   id: string;
   name: string;
   createdTime: string;
+  modifiedTime: string;
   appProperties?: {
     title?: string;
     summary?: string;
@@ -46,6 +47,12 @@ export const driveFileToNote = (file: DriveFile, content: string): Note => {
     }
   }
 
+  // Ensure tags always has at least ['misc'] if empty
+  if (tags.length === 0) {
+    tags = ['misc'];
+    categoryPath = ['Misc'];
+  }
+
   // Parse AI generated data
   let aiGenerated: Note['aiGenerated'] = null;
   if (appProps.aiGenerated) {
@@ -64,7 +71,8 @@ export const driveFileToNote = (file: DriveFile, content: string): Note => {
     summary: appProps.summary || '',
     categoryPath,
     tags,
-    date: appProps.date || file.createdTime,
+    date: file.createdTime,
+    modifiedTime: file.modifiedTime,
     aiGenerated,
   };
 };
@@ -77,7 +85,6 @@ export const noteToAppProperties = (
     summary: note.summary,
     categoryPath: JSON.stringify(note.categoryPath),
     tags: JSON.stringify(note.tags),
-    date: note.date,
     aiGenerated: note.aiGenerated
       ? JSON.stringify(note.aiGenerated)
       : undefined,

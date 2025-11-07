@@ -100,7 +100,7 @@ const NoteListTableRow: React.FC<NoteListTableRowProps> = ({
           note.summary !== 'Processing...' ? (
             <>
               <MarkdownRenderer content={note.summary} />
-              <div className='absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-off-white dark:from-off-black to-transparent pointer-events-none transition-opacity duration-150 group-hover:opacity-0'></div>
+              <div className='absolute bottom-0 left-0 w-full h-8 bg-gradient-to-t from-off-white dark:from-off-black to-transparent pointer-events-none transition-opacity duration-normal group-hover:opacity-0'></div>
             </>
           ) : (
             <span className='text-off-black/40 dark:text-off-white/40 uppercase tracking-wider'>
@@ -114,29 +114,23 @@ const NoteListTableRow: React.FC<NoteListTableRowProps> = ({
           isEditMode ? 'hidden sm:table-cell' : ''
         }`}
       >
-        {note.tags && note.tags.length > 0 ? (
-          <div className='flex flex-wrap gap-1'>
-            {note.tags.slice(0, 3).map(tag => (
-              <Tag
-                key={tag}
-                tag={tag}
-                onClick={onTagClick}
-                isActive={activeTags.includes(tag)}
-              />
-            ))}
-          </div>
-        ) : (
-          <span className='font-mono text-[clamp(0.625rem,1.2vw,0.75rem)] text-off-black/40 dark:text-off-white/40 uppercase tracking-wider'>
-            Tags not yet generated
-          </span>
-        )}
+        <div className='flex flex-wrap gap-1'>
+          {note.tags.slice(0, 3).map(tag => (
+            <Tag
+              key={tag}
+              tag={tag}
+              onClick={onTagClick}
+              isActive={activeTags.includes(tag)}
+            />
+          ))}
+        </div>
       </td>
       <td
         className={`px-[clamp(0.75rem,1.5vw,1rem)] py-[clamp(0.5rem,1vw,0.75rem)] min-w-[clamp(5rem,12vw,7rem)] max-w-[clamp(7rem,18vw,9rem)] sm:max-w-none align-top whitespace-nowrap ${
           isEditMode ? 'max-w-[clamp(4rem,12vw,5.5rem)] sm:max-w-none' : ''
         }`}
       >
-        <DateDisplay date={note.date} />
+        <DateDisplay date={note.date} modifiedTime={note.modifiedTime} />
       </td>
     </tr>
   );

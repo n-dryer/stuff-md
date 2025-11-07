@@ -9,12 +9,14 @@ interface UseLogoutConfirmationProps {
     duration?: number
   ) => void;
   setConfirmLogoutOpen: (open: boolean) => void;
+  onLogoutSuccess?: () => void;
 }
 
 export const useLogoutConfirmation = ({
   logout,
   displayFeedback,
   setConfirmLogoutOpen,
+  onLogoutSuccess,
 }: UseLogoutConfirmationProps) => {
   const requestLogout = useCallback(() => {
     setConfirmLogoutOpen(true);
@@ -27,6 +29,8 @@ export const useLogoutConfirmation = ({
   const confirmLogout = useCallback(async () => {
     try {
       await logout();
+      // Clear draft and perform any other cleanup on successful logout
+      onLogoutSuccess?.();
       displayFeedback('success', 'You have been logged out.');
     } catch (error) {
       handleError(
@@ -38,7 +42,7 @@ export const useLogoutConfirmation = ({
     } finally {
       setConfirmLogoutOpen(false);
     }
-  }, [logout, displayFeedback, setConfirmLogoutOpen]);
+  }, [logout, displayFeedback, setConfirmLogoutOpen, onLogoutSuccess]);
 
   return { requestLogout, cancelLogout, confirmLogout };
 };

@@ -10,6 +10,8 @@ import {
 } from '../contexts/ModalContext';
 import { useUIStateContext, useUIActions } from '../contexts/UIContext';
 import { Note } from '../types';
+import { normalizeError } from '../utils/errorHandler';
+import { logError } from '../utils/logger';
 
 interface ModalContainerProps {
   handleConfirmDelete: () => void;
@@ -25,6 +27,12 @@ interface ModalContainerProps {
   handleConfirmDeleteAll: () => void;
   handleConfirmDeleteSelected: () => void;
   isDeleting: boolean;
+  setShowNoteEditedToast: (show: boolean) => void;
+  displayFeedback: (
+    type: 'success' | 'error',
+    message: string,
+    duration?: number
+  ) => void;
 }
 
 const ModalContainer: React.FC<ModalContainerProps> = ({
@@ -38,7 +46,10 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
   handleConfirmDeleteAll,
   handleConfirmDeleteSelected,
   isDeleting,
+  setShowNoteEditedToast,
+  displayFeedback,
 }) => {
+  const modalRef = React.useRef<HTMLDivElement>(null);
   const {
     noteToDelete,
     notesToDelete,
@@ -72,8 +83,8 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
           isOpen={!!noteToDelete}
           onCancel={() => setNoteToDelete(null)}
           onConfirm={handleConfirmDelete}
-          title='Delete Item'
-          message='Are you sure you want to delete this item? This action cannot be undone.'
+          title='Delete Stuff'
+          message='Are you sure you want to delete this stuff? This action cannot be undone.'
           confirmLabel='Delete'
           confirmTone='destructive'
           isDeleting={isDeleting}
@@ -92,17 +103,43 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
       )}
       {editingNote && (
         <EditNoteModal
+          ref={modalRef}
           isOpen={!!editingNote}
           onClose={closeEditModal}
+          initialNote={editingNote.content}
           note={editingNote}
-          onSave={handleUpdateAndRecategorizeNote}
-          onRequestDelete={(noteId: string) => {
-            const note = editingNote;
-            if (note && note.id === noteId) {
-              setNoteToDelete(note);
+          onSave={async (newContent: string) => {
+            try {
+              await handleUpdateAndRecategorizeNote(editingNote, newContent);
+              setShowNoteEditedToast(true);
+            } catch (error) {
+              const normalizedError = normalizeError(error);
+              let errorMessage = 'Failed to save edit. ';
+
+              // Provide more specific error messages based on error type
+              if (normalizedError.message.includes('Google Drive API')) {
+                errorMessage += normalizedError.message;
+              } else if (normalizedError.message.includes('Network error')) {
+                errorMessage +=
+                  'Network connection issue. Please check your internet connection and try again.';
+              } else if (normalizedError.message.includes('rate limit')) {
+                errorMessage +=
+                  'Too many requests. Please wait a moment and try again.';
+              } else if (
+                normalizedError.message.includes('access token') ||
+                normalizedError.message.includes('invalid') ||
+                normalizedError.message.includes('expired')
+              ) {
+                errorMessage +=
+                  'Authentication expired. Please try logging in again.';
+              } else {
+                errorMessage += normalizedError.message || 'Please try again.';
+              }
+
+              displayFeedback('error', errorMessage);
+              logError('Failed to update note:', error);
             }
           }}
-          isDeleting={isDeleting}
         />
       )}
       {showInstructions && (
@@ -155,8 +192,8 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
           isOpen={isDeleteAllModalOpen}
           onCancel={closeDeleteAllModal}
           onConfirm={handleConfirmDeleteAll}
-          title='Delete All Items'
-          message='Are you sure you want to delete all your items? This action cannot be undone.'
+          title='Delete All Stuff'
+          message='Are you sure you want to delete all your stuff? This action cannot be undone.'
           confirmLabel='Delete All'
           confirmTone='destructive'
           isDeleting={isDeleting}
@@ -167,8 +204,8 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
           isOpen={isDeleteSelectedModalOpen}
           onCancel={closeDeleteSelectedModal}
           onConfirm={handleConfirmDeleteSelected}
-          title={`Delete ${notesToDelete.length} Items`}
-          message={`Are you sure you want to delete ${notesToDelete.length} items? This action cannot be undone.`}
+          title={`Delete ${notesToDelete.length} Stuff`}
+          message={`Are you sure you want to delete ${notesToDelete.length} stuff? This action cannot be undone.`}
           confirmLabel='Delete Selected'
           confirmTone='destructive'
           isDeleting={isDeleting}

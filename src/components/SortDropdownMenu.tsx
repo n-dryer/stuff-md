@@ -28,7 +28,7 @@ const SortDropdownMenu: React.FC<SortDropdownMenuProps> = ({
       ref={menuRef}
       role='menu'
       aria-hidden={!isOpen}
-      className={`absolute left-0 top-full mt-2 min-w-[160px] sm:min-w-[180px] max-w-xs bg-off-white dark:bg-brutal-gray border-2 border-accent-black dark:border-off-white/40 rounded-sm shadow-lg flex flex-col overflow-hidden font-mono uppercase tracking-widest text-xs sm:text-sm md:text-base z-50 transition-all duration-150 ease-out origin-top ${
+      className={`absolute left-0 top-full mt-2 min-w-[160px] sm:min-w-[180px] max-w-xs bg-off-white dark:bg-brutal-gray border-2 border-accent-black dark:border-off-white/40 rounded-sm shadow-lg flex flex-col overflow-hidden font-mono uppercase tracking-widest text-xs sm:text-sm md:text-base z-dropdown transition-all duration-normal ease-out origin-top ${
         isOpen
           ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
           : 'opacity-0 -translate-y-1 scale-95 pointer-events-none'
@@ -50,7 +50,7 @@ const SortDropdownMenu: React.FC<SortDropdownMenuProps> = ({
                 onRequestClose();
               }
             }}
-            className={`font-mono text-sm uppercase text-accent-black dark:text-off-white w-full text-left px-4 py-2 min-h-[44px] transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
+            className={`font-mono text-sm uppercase text-accent-black dark:text-off-white w-full text-left px-4 py-2 min-h-min-touch-target transition-colors duration-normal focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
               isActive
                 ? 'font-bold bg-off-black/10 dark:bg-off-white/10'
                 : 'hover:font-bold hover:bg-off-black/10 dark:hover:bg-off-white/10'

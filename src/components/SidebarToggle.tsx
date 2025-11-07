@@ -22,7 +22,7 @@ const SidebarToggle: React.FC<SidebarToggleProps> = ({
   const sidebarCursor = isSidebarCollapsed ? cursorRight : cursorLeft;
 
   const sidebarChevronBaseClasses =
-    'w-8 h-8 flex items-center justify-center text-current transition-transform duration-200 ease-out motion-reduce:transition-none';
+    'w-8 h-8 flex items-center justify-center text-current transition-transform duration-medium ease-out motion-reduce:transition-none';
 
   const sidebarToggleButtonClasses = `group text-accent-black dark:text-off-white hover:text-accent-black/80 dark:hover:text-off-white/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
     isSidebarCollapsed

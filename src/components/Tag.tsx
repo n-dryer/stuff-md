@@ -8,7 +8,7 @@ interface TagProps {
 
 const Tag: React.FC<TagProps> = React.memo(({ tag, onClick, isActive }) => {
   const baseClasses =
-    'text-xs font-mono uppercase px-2 py-0.5 transition-colors duration-150 ease-in-out';
+    'text-xs font-mono uppercase px-2 py-0.5 transition-colors duration-normal ease-in-out';
   const interactiveClasses = onClick ? 'cursor-pointer' : '';
 
   const colorClasses = isActive

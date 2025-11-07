@@ -21,6 +21,7 @@ export interface Note {
   categoryPath: string[];
   tags: string[];
   date: string; // ISO 8601 format
+  modifiedTime: string; // ISO 8601 format for last modification
 }
 
 export interface AICategorizationResult {

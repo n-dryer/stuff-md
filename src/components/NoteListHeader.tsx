@@ -4,7 +4,7 @@ const NoteListHeader: React.FC = () => {
   return (
     <div className='mb-4'>
       <h2 className='uppercase font-bold text-base tracking-widest'>
-        ALL NOTES
+        ALL YOUR STUFF
       </h2>
     </div>
   );

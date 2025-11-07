@@ -5,13 +5,13 @@ import { SYSTEM_INSTRUCTION } from '../services/aiService';
 import Button from './Button';
 import SegmentedControl from './SegmentedControl';
 import InstructionsModalContent from './InstructionsModalContent';
+import { useUIActions } from '../contexts/UIContext';
 
 interface InstructionsModalProps {
   isVisible: boolean;
   onClose: () => void;
   onSave: (instructions: string) => void;
   initialInstructions: string;
-  initialMode?: 'default' | 'custom';
   lastCustomInstructions?: string;
 }
 
@@ -21,18 +21,22 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
     onClose,
     onSave,
     initialInstructions,
-    initialMode = 'custom',
     lastCustomInstructions = '',
   }) => {
-    const [instructions, setInstructions] = useState(initialInstructions);
-    const [mode, setMode] = useState<'default' | 'custom'>('custom');
+    // Initialize with empty string - useEffect will set correct initial value
+    const [instructions, setInstructions] = useState('');
+    const [hasChanged, setHasChanged] = useState(false);
+    const [mode, setMode] = useState<'default' | 'custom'>('default');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    const prevVisibleRef = useRef(false);
+    const backdropRef = useRef<HTMLDivElement>(null);
     const { handleBackdropClick, handleBackdropKeyDown } = useModalInteraction({
       isOpen: isVisible,
       onClose,
       modalRef,
     });
+    const { displayFeedback } = useUIActions();
 
     const sanitizedInitialInstructions = useMemo(
       () => initialInstructions.slice(0, 2000),
@@ -44,13 +48,31 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
       return !!norm && norm !== SYSTEM_INSTRUCTION.trim();
     }, [sanitizedInitialInstructions]);
 
+    // Only reset state when modal FIRST becomes visible, not when props change
     useEffect(() => {
-      if (!isVisible) {
-        return;
+      const justOpened = isVisible && !prevVisibleRef.current;
+      if (justOpened) {
+        // Set mode based on whether there are existing custom instructions
+        // Compare full strings (not sanitized) to properly detect SYSTEM_INSTRUCTION
+        const norm = initialInstructions.trim();
+        const systemNorm = SYSTEM_INSTRUCTION.trim();
+
+        // Robust comparison: check if empty or exactly matches SYSTEM_INSTRUCTION
+        const isDefault = !norm || norm === systemNorm;
+
+        if (isDefault) {
+          // Default instructions are active - set to default mode and keep custom textarea empty
+          setMode('default');
+          setInstructions(''); // Keep custom textarea empty, reserved for custom instructions only
+        } else {
+          // Custom instructions exist - set to custom mode with those instructions
+          setMode('custom');
+          setInstructions(sanitizedInitialInstructions);
+        }
+        setHasChanged(false);
       }
-      setInstructions(sanitizedInitialInstructions);
-      setMode('default');
-    }, [isVisible, sanitizedInitialInstructions]);
+      prevVisibleRef.current = isVisible;
+    }, [isVisible, initialInstructions, sanitizedInitialInstructions]);
 
     useEffect(() => {
       if (isVisible && mode === 'custom') {
@@ -59,6 +81,18 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
       }
       return undefined;
     }, [isVisible, mode]);
+
+    // Defensive check: prevent default instructions from appearing in custom textarea
+    useEffect(() => {
+      if (
+        mode === 'custom' &&
+        instructions.trim() === SYSTEM_INSTRUCTION.trim()
+      ) {
+        // If somehow default instructions got into custom textarea, clear it
+        setInstructions('');
+        setHasChanged(true);
+      }
+    }, [mode, instructions]);
 
     useEffect(() => {
       if (!isVisible || typeof document === 'undefined') {
@@ -84,17 +118,25 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
     }, [isVisible]);
 
     const handleSave = () => {
+      // Close modal first to prevent state reset
+      onClose();
+
+      // Then save and show feedback
       if (mode === 'default') {
         onSave(SYSTEM_INSTRUCTION);
-        return;
+        displayFeedback('success', 'AI Rules reset to default.');
+      } else {
+        // If custom instructions are empty/whitespace, switch back to default
+        const trimmedInstructions = instructions.trim();
+        if (!trimmedInstructions) {
+          onSave(SYSTEM_INSTRUCTION);
+          displayFeedback('success', 'AI Rules reset to default.');
+        } else {
+          onSave(instructions);
+          displayFeedback('success', 'Custom instructions saved.');
+        }
       }
-      onSave(instructions);
     };
-
-    const hasChanges = useMemo(
-      () => instructions !== sanitizedInitialInstructions,
-      [instructions, sanitizedInitialInstructions]
-    );
 
     const segmentedOptions = useMemo(
       () => [
@@ -105,15 +147,10 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
     );
 
     const shouldEnableSave =
-      mode === 'custom' ? hasChanges : hasExistingCustom && mode === 'default';
+      (mode === 'custom' && hasChanged) ||
+      (mode === 'default' && hasExistingCustom);
     const shouldShowActions =
       mode === 'custom' || (mode === 'default' && hasExistingCustom);
-
-    if (!isVisible) {
-      return null;
-    }
-
-    const backdropRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
       if (isVisible && backdropRef.current) {
@@ -126,31 +163,32 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
       return undefined;
     }, [isVisible]);
 
+    if (!isVisible) {
+      return null;
+    }
+
     return (
-      // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
       <div
         ref={backdropRef}
-        className='fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-stretch justify-center px-0 py-0 z-50 sm:items-center sm:px-4'
+        className='fixed inset-0 bg-off-black/30 dark:bg-off-black/50 backdrop-blur-sm flex items-stretch justify-center px-0 py-0 z-modal sm:items-center sm:px-4'
         onClick={handleBackdropClick}
         onKeyDown={handleBackdropKeyDown}
-        aria-modal='true'
-        role='dialog'
-        tabIndex={-1}
+        role='presentation'
         aria-labelledby='instructions-modal-title'
         aria-describedby='instructions-description'
       >
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
         <div
           ref={modalRef}
-          className='relative flex h-full max-h-[100svh] w-full flex-col overflow-hidden bg-off-white dark:bg-brutal-gray border-0 border-accent-black font-mono uppercase modal-enter sm:h-auto sm:max-w-4xl sm:rounded-[1.5rem] sm:border-2 sm:px-2 lg:max-w-3xl'
-          onClick={event => event.stopPropagation()}
+          className='relative flex h-full max-h-[100svh] w-full flex-col overflow-hidden bg-off-white dark:bg-brutal-gray border-0 border-accent-black font-mono uppercase modal-enter sm:h-auto sm:max-w-4xl sm:rounded-radius-modal sm:border-2 sm:px-2 lg:max-w-3xl'
+          role='dialog'
+          aria-modal='true'
         >
           <header className='sticky top-0 z-10 flex items-center justify-between border-b border-accent-black/15 dark:border-off-white/20 px-5 py-4 bg-off-white dark:bg-brutal-gray sm:static sm:px-8 sm:py-6'>
             <h2
               className='text-2xl font-black tracking-wider text-off-black dark:text-off-white'
               id='instructions-modal-title'
             >
-              AI INSTRUCTIONS
+              AI RULES
             </h2>
             <button
               onClick={onClose}
@@ -177,12 +215,21 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
                     const next = value as 'default' | 'custom';
                     setMode(next);
                     if (next === 'custom') {
-                      const norm = sanitizedInitialInstructions.trim();
-                      if (
-                        norm === SYSTEM_INSTRUCTION.trim() &&
-                        lastCustomInstructions
-                      ) {
+                      // When switching to custom tab, only populate if there are actual custom instructions
+                      // Use full string comparison (not sanitized) to properly detect default
+                      const norm = initialInstructions.trim();
+                      const systemNorm = SYSTEM_INSTRUCTION.trim();
+                      const isDefault = !norm || norm === systemNorm;
+
+                      if (isDefault && lastCustomInstructions) {
+                        // Default is active but we have previous custom instructions - use those
                         setInstructions(lastCustomInstructions.slice(0, 2000));
+                      } else if (!isDefault) {
+                        // Custom instructions exist - use current custom instructions
+                        setInstructions(sanitizedInitialInstructions);
+                      } else {
+                        // Default is active and no previous custom instructions - keep textarea empty
+                        setInstructions('');
                       }
                     }
                   }}
@@ -193,7 +240,10 @@ const InstructionsModal: React.FC<InstructionsModalProps> = React.memo(
                 <InstructionsModalContent
                   mode={mode}
                   instructions={instructions}
-                  setInstructions={setInstructions}
+                  setInstructions={newInstructions => {
+                    setInstructions(newInstructions);
+                    setHasChanged(true);
+                  }}
                   textareaRef={textareaRef}
                 />
               </div>

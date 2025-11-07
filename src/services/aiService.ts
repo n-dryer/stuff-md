@@ -1,6 +1,9 @@
 import { AICategorizationResult } from '../types';
 import { logError, logWarning, logDebug } from '../utils/logger';
-import { validateContentForAI } from '../utils/inputValidation';
+import {
+  validateContentForAI,
+  validateCustomInstructions,
+} from '../utils/inputValidation';
 import { useChromeBuiltInAI } from './ai/chromeAI';
 import {
   useGeminiAPI,
@@ -106,6 +109,11 @@ export const getAICategorization = async (
     } catch (validationError) {
       logError('Content validation failed:', validationError);
       return null;
+    }
+
+    // Validate user prompt before combining with system instructions
+    if (userPrompt) {
+      validateCustomInstructions(userPrompt);
     }
 
     const contentHashForCache = hashContent(validatedContent);

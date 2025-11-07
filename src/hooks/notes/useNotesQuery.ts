@@ -7,7 +7,7 @@ export function useNotesQuery(accessToken: string | null) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchNotes = useCallback(async () => {
+  const refetch = useCallback(async () => {
     if (!accessToken) return;
 
     setIsLoading(true);
@@ -16,15 +16,23 @@ export function useNotesQuery(accessToken: string | null) {
       const fetchedNotes = await googleDriveService.getAllNotes(accessToken);
       setNotes(fetchedNotes);
     } catch (err) {
-      setError(err as Error);
+      const error = err as Error;
+      console.error('Failed to fetch notes:', error);
+      setError(error);
     } finally {
       setIsLoading(false);
     }
   }, [accessToken]);
 
   useEffect(() => {
-    fetchNotes();
-  }, [fetchNotes]);
+    if (accessToken) {
+      refetch();
+    } else {
+      setNotes([]);
+      setError(null);
+      setIsLoading(false);
+    }
+  }, [accessToken, refetch]);
 
-  return { notes, setNotes, isLoading, error, refetch: fetchNotes };
+  return { notes, setNotes, isLoading, error, refetch };
 }

@@ -32,19 +32,21 @@ export const useDeleteOperations = ({
   isDeleting,
   setIsDeleting,
 }: UseDeleteOperationsProps) => {
-  const { closeDeleteAllModal, closeDeleteSelectedModal } = useModalActions();
+  const { closeDeleteAllModal, closeDeleteSelectedModal, setNoteToDelete } =
+    useModalActions();
 
   const handleConfirmDelete = useCallback(async () => {
     if (noteToDelete && accessToken && !isDeleting) {
       setIsDeleting(true);
       try {
         await deleteNote(noteToDelete.id);
-        displayFeedback('success', 'Item deleted.');
+        displayFeedback('success', 'Stuff deleted.');
+        setNoteToDelete(null);
       } catch (error) {
         handleError(
           error,
           displayFeedback,
-          'Failed to delete item.',
+          'Failed to delete stuff.',
           'useDeleteOperations:handleConfirmDelete'
         );
       } finally {
@@ -60,6 +62,7 @@ export const useDeleteOperations = ({
     deleteNote,
     displayFeedback,
     closeEditModal,
+    setNoteToDelete,
   ]);
 
   const handleConfirmDeleteAll = useCallback(async () => {
@@ -68,12 +71,12 @@ export const useDeleteOperations = ({
     try {
       const allNoteIds = notes.map(n => n.id);
       await deleteNotesByIds(allNoteIds);
-      displayFeedback('success', 'All items have been deleted.');
+      displayFeedback('success', 'All stuff has been deleted.');
     } catch (error) {
       handleError(
         error,
         displayFeedback,
-        'Failed to delete all items.',
+        'Failed to delete all stuff.',
         'useDeleteOperations:handleConfirmDeleteAll'
       );
     } finally {
@@ -95,12 +98,12 @@ export const useDeleteOperations = ({
     setIsDeleting(true);
     try {
       await deleteNotesByIds(notesToDelete);
-      displayFeedback('success', `${notesToDelete.length} items deleted.`);
+      displayFeedback('success', `${notesToDelete.length} stuff deleted.`);
     } catch (error) {
       handleError(
         error,
         displayFeedback,
-        'Failed to delete selected items.',
+        'Failed to delete selected stuff.',
         'useDeleteOperations:handleConfirmDeleteSelected'
       );
     } finally {

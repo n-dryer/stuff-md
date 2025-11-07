@@ -22,8 +22,8 @@ const InstructionsButton: React.FC<InstructionsButtonProps> = ({
 
   const instructionsTooltipText =
     instructionsStatus === 'DEFAULT'
-      ? 'Set custom instructions.'
-      : 'Update custom instructions.';
+      ? 'Set custom instructions'
+      : 'Update custom instructions';
 
   const buttonTitle = instructionsTooltipText;
   const footerControlButtonClasses =

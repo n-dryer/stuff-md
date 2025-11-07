@@ -149,12 +149,12 @@ const NoteListFilters: React.FC<NoteListFiltersProps> = ({
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder='Search by keyword...'
-            className='w-full bg-off-white dark:bg-off-black p-3 pl-12 border-2 border-accent-black dark:border-off-white/50 focus:outline-none focus:border-5 focus:p-[9px] focus:pl-[45px] transition-all duration-100 placeholder-gray-400 dark:placeholder-gray-500 font-mono text-base min-h-[44px]'
+            className='w-full bg-off-white dark:bg-off-black p-3 pl-12 border-2 border-accent-black dark:border-off-white/50 focus:outline-none focus:border-5 focus:p-[9px] focus:pl-[45px] transition-all duration-fast placeholder-gray-400 dark:placeholder-gray-500 font-mono text-base min-h-min-touch-target'
             aria-label='Search notes'
           />
         </div>
 
-        <div className='flex w-full sm:w-auto flex-wrap items-center justify-between gap-2 sm:gap-3 md:gap-4 px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 min-h-[48px]'>
+        <div className='flex w-full sm:w-auto flex-wrap items-center justify-between gap-2 sm:gap-3 md:gap-4 px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 min-h-min-button-height'>
           <div className='flex items-center gap-2 sm:gap-3 md:gap-4'>
             <div className='relative flex-shrink-0'>
               <BrutalistTooltip text='Choose sort order' position='top'>
@@ -165,7 +165,7 @@ const NoteListFilters: React.FC<NoteListFiltersProps> = ({
                   aria-expanded={isSortMenuOpen}
                   aria-haspopup='menu'
                   aria-label={`Sort notes, currently ${currentSortLabel}`}
-                  className={`uppercase font-bold text-xs sm:text-sm md:text-base tracking-widest transition-colors px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 min-h-[44px] whitespace-nowrap flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
+                  className={`uppercase font-bold text-xs sm:text-sm md:text-base tracking-widest transition-colors px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 min-h-min-touch-target whitespace-nowrap flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
                     isSortActive
                       ? 'text-accent-black dark:text-off-white'
                       : 'text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white'
@@ -195,7 +195,7 @@ const NoteListFilters: React.FC<NoteListFiltersProps> = ({
                   type='button'
                   onClick={handleEditToggle}
                   aria-pressed={isEditMode}
-                  className={`flex-shrink-0 whitespace-nowrap uppercase font-bold text-xs sm:text-sm md:text-base transition-colors px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 min-h-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
+                  className={`flex-shrink-0 whitespace-nowrap uppercase font-bold text-xs sm:text-sm md:text-base transition-colors px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 min-h-min-touch-target focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
                     isEditMode
                       ? 'text-accent-black dark:text-off-white'
                       : 'text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white'
@@ -210,7 +210,7 @@ const NoteListFilters: React.FC<NoteListFiltersProps> = ({
               <button
                 type='button'
                 onClick={onResetFilters}
-                className='flex-shrink-0 whitespace-nowrap uppercase font-bold text-xs sm:text-sm md:text-base transition-colors px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 min-h-[44px] text-destructive-red hover:text-accent-black dark:text-destructive-red/90 dark:hover:text-off-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black'
+                className='flex-shrink-0 whitespace-nowrap uppercase font-bold text-xs sm:text-sm md:text-base transition-colors px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 min-h-min-touch-target text-destructive-red hover:text-accent-black dark:text-destructive-red/90 dark:hover:text-off-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black'
               >
                 [CLEAR FILTERS]
               </button>

@@ -26,8 +26,8 @@ const SidebarHelpButton: React.FC<SidebarHelpButtonProps> = ({
       aria-controls='help-modal'
       title='HELP & INFO'
       className={`
-        w-full flex items-center justify-start uppercase font-black text-lg tracking-wider p-4 min-h-[44px] sm:min-h-[48px]
-        transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-accent-black dark:focus-visible:ring-off-white
+        w-full flex items-center justify-start uppercase font-black text-lg tracking-wider p-4 min-h-min-touch-target sm:min-h-min-button-height
+        transition-colors duration-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-accent-black dark:focus-visible:ring-off-white
         ${isCollapsed ? 'justify-center rounded-full' : ''}
         ${
           isHelpOpen
@@ -45,7 +45,7 @@ const SidebarHelpButton: React.FC<SidebarHelpButtonProps> = ({
       </span>
       <span
         className={`
-          overflow-hidden transition-all duration-300 ease-in-out flex items-center text-left
+          overflow-hidden transition-all duration-layout ease-in-out flex items-center text-left
           ${
             isCollapsed
               ? 'max-w-0 opacity-0 ml-0'

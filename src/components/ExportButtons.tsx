@@ -113,7 +113,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
   }, [isExpanded, handleClose]);
 
   const buttonClasses =
-    'uppercase font-bold text-xs sm:text-sm md:text-base text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white hover:font-black focus:font-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 whitespace-nowrap min-h-[44px]';
+    'uppercase font-bold text-xs sm:text-sm md:text-base text-light-gray hover:text-accent-black dark:text-gray-500 dark:hover:text-off-white hover:font-black focus:font-black transition-colors flex-shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 whitespace-nowrap min-h-min-touch-target';
 
   return (
     <div
@@ -122,7 +122,7 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
       style={{ pointerEvents: 'auto' }}
     >
       {error && (
-        <div className='absolute bottom-full mb-2 right-0 z-50'>
+        <div className='absolute bottom-full mb-2 right-0 z-dropdown'>
           <ErrorDisplay message={error} onDismiss={() => setError(null)} />
         </div>
       )}
@@ -157,9 +157,9 @@ const ExportButtons: React.FC<ExportButtonsProps> = ({ notes }) => {
           aria-expanded={isExpanded}
           aria-haspopup='menu'
           aria-label='Export options'
-          className={buttonClasses}
+          className={`${buttonClasses} z-export-button`}
           type='button'
-          style={{ pointerEvents: 'auto', cursor: 'pointer', zIndex: 100 }}
+          style={{ pointerEvents: 'auto', cursor: 'pointer' }}
         >
           [EXPORT]
         </button>

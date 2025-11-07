@@ -26,6 +26,8 @@ const getFriendlyErrorMessage = (
       return 'Login process was cancelled. Please try again.';
     case 'auth/cancelled-popup-request':
       return 'Login process was cancelled. Please try again.';
+    case 'auth/visibility-check-was-unavailable.-please-retry-the-request-and-contact-support-if-the-problem-persists':
+      return 'Authentication check failed. This can happen if browser extensions or privacy settings are blocking the login. Please try: (1) Disable browser extensions temporarily, (2) Check if popup blockers are enabled, (3) Try in an incognito/private window, or (4) Refresh the page and try again.';
     default:
       return 'An unexpected error occurred during login. Please try again later.';
   }
@@ -35,16 +37,13 @@ const LoginScreen: React.FC<LoginScreenProps> = React.memo(
   ({ onLogin, error }) => {
     return (
       <div className='min-h-screen flex flex-col items-center justify-center text-center p-4 bg-off-white dark:bg-off-black'>
-        <h1 className='text-7xl font-black font-mono text-accent-black dark:text-off-white'>
+        <h1 className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black font-mono text-accent-black dark:text-off-white'>
           STUFF.MD
         </h1>
-        <p className='mt-6 text-lg font-mono text-off-black/90 max-w-lg dark:text-off-white/90 leading-relaxed'>
-          Just add your stuff. We intelligently create titles, summaries, tags,
-          and categories—so you don't have to think about it.
-        </p>
-        <p className='mt-4 text-base font-mono text-off-black/70 max-w-lg dark:text-off-white/70'>
-          Minimal interface. Everything saved to your Google Drive. Zero
-          friction.
+        <p className='mt-6 text-base sm:text-lg font-mono text-off-black/90 max-w-lg dark:text-off-white/90 leading-relaxed whitespace-nowrap'>
+          Your stuff, intelligently organized.
+          <br />
+          Titles, summaries, and tags auto-magically.
         </p>
         <div
           className='my-8 h-1 w-24 bg-accent-black dark:bg-off-white'

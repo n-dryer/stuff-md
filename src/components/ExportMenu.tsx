@@ -51,6 +51,7 @@ const ExportMenu: React.FC<ExportMenuProps> = ({
         flex flex-col
         overflow-y-auto
         shadow-lg
+        z-export-menu
       `}
       style={{
         position: 'fixed',
@@ -60,7 +61,6 @@ const ExportMenu: React.FC<ExportMenuProps> = ({
           : { bottom: `${menuPosition.bottom}px` }),
         maxWidth: 'calc(100vw - 2rem)',
         maxHeight: 'min(240px, calc(100vh - 6rem))',
-        zIndex: 9999,
         opacity: 1,
         visibility: 'visible',
       }}
@@ -79,8 +79,8 @@ const ExportMenu: React.FC<ExportMenuProps> = ({
           className={`
             font-mono text-sm uppercase
             text-accent-black dark:text-off-white
-            w-full text-left px-4 py-2 min-h-[44px]
-            transition-colors duration-150
+            w-full text-left px-4 py-2 min-h-min-touch-target
+            transition-colors duration-normal
             hover:font-bold hover:bg-off-black/10 dark:hover:bg-off-white/10
             focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black focus-visible:bg-off-black/10 dark:focus-visible:bg-off-white/10
             disabled:opacity-60 disabled:cursor-not-allowed

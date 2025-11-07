@@ -55,29 +55,26 @@ const HelpModal: React.FC<HelpModalProps> = ({
   }
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       ref={backdropRef}
-      className='fixed inset-0 z-50 flex items-stretch justify-center bg-off-black/30 backdrop-blur-sm px-0 py-0 dark:bg-off-black/50 sm:items-center sm:px-4'
+      className='fixed inset-0 z-modal flex items-stretch justify-center bg-off-black/30 backdrop-blur-sm px-0 py-0 dark:bg-off-black/50 sm:items-center sm:px-4'
       onClick={handleBackdropClick}
       onKeyDown={handleBackdropKeyDown}
-      role='dialog'
-      aria-modal='true'
-      aria-labelledby='help-modal-title'
-      aria-describedby='help-modal-description'
+      role='presentation'
       id='help-modal'
-      tabIndex={-1}
     >
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
       <div
         ref={modalRef}
-        className='relative flex h-full max-h-[100svh] w-full flex-col overflow-hidden border-0 border-accent-black bg-off-white font-mono uppercase shadow-lg modal-enter dark:border-off-white/40 dark:bg-brutal-gray sm:h-auto sm:max-w-4xl sm:border-2 sm:rounded-[1.5rem]'
-        onClick={event => event.stopPropagation()}
+        className='relative flex h-full max-h-[100svh] w-full flex-col overflow-hidden border-0 border-accent-black bg-off-white font-mono uppercase shadow-lg modal-enter dark:border-off-white/40 dark:bg-brutal-gray sm:h-auto sm:max-w-4xl sm:border-2 sm:rounded-radius-modal'
+        role='dialog'
+        aria-modal='true'
+        aria-labelledby='help-modal-title'
+        aria-describedby='help-modal-description'
       >
         <header className='flex items-center justify-between border-b border-accent-black/15 px-5 py-4 dark:border-off-white/20 dark:bg-brutal-gray sm:px-8 sm:py-6'>
           <h2
             id='help-modal-title'
-            className='text-2xl font-black tracking-[0.22em] text-accent-black dark:text-off-white sm:text-[1.75rem]'
+            className='text-2xl font-black tracking-widest text-accent-black dark:text-off-white sm:text-[1.75rem]'
           >
             HELP &amp; INFO
           </h2>
@@ -101,7 +98,7 @@ const HelpModal: React.FC<HelpModalProps> = ({
 
             <section className='grid gap-6 sm:grid-cols-2 sm:gap-10'>
               <div className='space-y-4'>
-                <h3 className='text-xs font-black tracking-[0.35em] text-accent-black/80 dark:text-off-white/80'>
+                <h3 className='text-xs font-black tracking-heading text-accent-black/80 dark:text-off-white/80'>
                   CAPTURE
                 </h3>
                 <p className='text-sm leading-relaxed text-off-black/75 dark:text-off-white/75'>
@@ -118,7 +115,7 @@ const HelpModal: React.FC<HelpModalProps> = ({
                 </ul>
               </div>
               <div className='space-y-4'>
-                <h3 className='text-xs font-black tracking-[0.35em] text-accent-black/80 dark:text-off-white/80'>
+                <h3 className='text-xs font-black tracking-heading text-accent-black/80 dark:text-off-white/80'>
                   FIND STUFF
                 </h3>
                 <p className='text-sm leading-relaxed text-off-black/75 dark:text-off-white/75'>
@@ -137,7 +134,7 @@ const HelpModal: React.FC<HelpModalProps> = ({
 
             <section className='grid gap-6 sm:grid-cols-2 sm:gap-10'>
               <div className='space-y-4'>
-                <h3 className='text-xs font-black tracking-[0.35em] text-accent-black/80 dark:text-off-white/80'>
+                <h3 className='text-xs font-black tracking-heading text-accent-black/80 dark:text-off-white/80'>
                   LAYOUT
                 </h3>
                 <p className='text-sm leading-relaxed text-off-black/75 dark:text-off-white/75'>
@@ -150,7 +147,7 @@ const HelpModal: React.FC<HelpModalProps> = ({
                 </ul>
               </div>
               <div className='space-y-4'>
-                <h3 className='text-xs font-black tracking-[0.35em] text-accent-black/80 dark:text-off-white/80'>
+                <h3 className='text-xs font-black tracking-heading text-accent-black/80 dark:text-off-white/80'>
                   AI CONTROLS
                 </h3>
                 <p className='text-sm leading-relaxed text-off-black/75 dark:text-off-white/75'>
@@ -179,16 +176,16 @@ const HelpModal: React.FC<HelpModalProps> = ({
               </div>
             </section>
 
-            <div className='rounded-xl border border-accent-black/20 bg-off-white/80 px-5 py-4 text-sm font-bold uppercase tracking-[0.24em] text-off-black/70 shadow-sm dark:border-off-white/15 dark:bg-off-black/50 dark:text-off-white/70 sm:text-base sm:px-6 sm:py-5'>
+            <div className='rounded-xl border border-accent-black/20 bg-off-white/80 px-5 py-4 text-sm font-bold uppercase tracking-extreme text-off-black/70 shadow-sm dark:border-off-white/15 dark:bg-off-black/50 dark:text-off-white/70 sm:text-base sm:px-6 sm:py-5'>
               <div className='flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-center'>
                 <span className='whitespace-nowrap'>SHORTCUTS</span>
-                <span className='whitespace-nowrap font-normal tracking-[0.08em] text-off-black/65 dark:text-off-white/65'>
+                <span className='whitespace-nowrap font-normal tracking-tight text-off-black/65 dark:text-off-white/65'>
                   <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
                     ⏎
                   </kbd>{' '}
                   - New Line
                 </span>
-                <span className='whitespace-nowrap font-normal tracking-[0.08em] text-off-black/65 dark:text-off-white/65'>
+                <span className='whitespace-nowrap font-normal tracking-tight text-off-black/65 dark:text-off-white/65'>
                   <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
                     ⌘
                   </kbd>{' '}

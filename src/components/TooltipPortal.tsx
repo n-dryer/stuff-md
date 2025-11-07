@@ -25,7 +25,6 @@ const TooltipPortal: React.FC<TooltipPortalProps> = ({
         position: 'fixed',
         top: `${coords.top}px`,
         left: `${coords.left}px`,
-        zIndex: 9999,
         backgroundColor: 'var(--tooltip-bg)',
         color: 'var(--tooltip-fg)',
         maxWidth: '80vw',
@@ -34,7 +33,7 @@ const TooltipPortal: React.FC<TooltipPortalProps> = ({
         border: 'none',
         boxShadow: 'none',
       }}
-      className='text-xs sm:text-sm font-mono leading-snug tracking-wide'
+      className='z-tooltip text-xs sm:text-sm font-mono leading-snug tracking-wide'
     >
       {text}
     </div>,

@@ -1,11 +1,11 @@
 import { Note } from '../types';
 import { logError } from '../utils/logger';
+import type JSZip from 'jszip';
 
 // Lazy load jszip only when needed to reduce initial bundle size
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let jszipModule: any = null;
+let jszipModule: { default: typeof JSZip } | null = null;
 
-const loadJSZip = async () => {
+const loadJSZip = async (): Promise<typeof JSZip> => {
   if (!jszipModule) {
     jszipModule = await import('jszip');
   }

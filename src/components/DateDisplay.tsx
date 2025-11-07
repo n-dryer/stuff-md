@@ -28,21 +28,35 @@ const formatRelativeTime = (dateString: string): string => {
 
 interface DateDisplayProps {
   date: string;
+  modifiedTime: string;
 }
 
-const DateDisplay: React.FC<DateDisplayProps> = React.memo(({ date }) => {
-  const dateObj = new Date(date);
-  const isValidDate = !isNaN(dateObj.getTime());
+const DateDisplay: React.FC<DateDisplayProps> = React.memo(
+  ({ date, modifiedTime }) => {
+    const createdDate = new Date(date);
+    const modifiedDate = new Date(modifiedTime);
+    const isValidCreated = !isNaN(createdDate.getTime());
+    const isValidModified = !isNaN(modifiedDate.getTime());
 
-  return (
-    <span
-      className='font-mono text-xs text-off-black/60 dark:text-off-white/60 flex-shrink-0 whitespace-nowrap'
-      title={isValidDate ? dateObj.toLocaleString() : 'Invalid date'}
-    >
-      {formatRelativeTime(date)}
-    </span>
-  );
-});
+    const isEdited =
+      isValidCreated &&
+      isValidModified &&
+      modifiedDate.getTime() - createdDate.getTime() > 1000 * 60; // 1 minute threshold
+
+    const displayDate = isEdited ? modifiedTime : date;
+    const titleDate = isEdited ? modifiedDate : createdDate;
+
+    return (
+      <span
+        className='font-mono text-xs text-off-black/60 dark:text-off-white/60 flex-shrink-0 whitespace-nowrap'
+        title={isValidCreated ? titleDate.toLocaleString() : 'Invalid date'}
+      >
+        {isEdited ? 'EDITED ' : ''}
+        {formatRelativeTime(displayDate)}
+      </span>
+    );
+  }
+);
 
 DateDisplay.displayName = 'DateDisplay';
 

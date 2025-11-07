@@ -16,7 +16,7 @@ const Button: React.FC<ButtonProps> = ({
     uppercase px-6 py-3 text-base font-mono font-normal border-2 border-accent-black cursor-pointer
     focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-accent-black focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black
     active:shadow-none active:translate-x-0 active:translate-y-0
-    transition-all duration-150
+    transition-all duration-normal
   `;
 
   const disabledClasses = `

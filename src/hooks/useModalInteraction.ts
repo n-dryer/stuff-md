@@ -15,7 +15,7 @@ const ESCAPE_PROTECTED_SELECTOR =
 interface UseModalInteractionOptions {
   isOpen: boolean;
   onClose: () => void;
-  modalRef: React.RefObject<HTMLElement | null>;
+  modalRef: React.Ref<HTMLElement | null>;
   triggerRef?: React.RefObject<HTMLElement | null>;
 }
 
@@ -30,7 +30,9 @@ export const useModalInteraction = ({
 
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
-      if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+      const modalEl =
+        modalRef && 'current' in modalRef ? modalRef.current : null;
+      if (modalEl && !modalEl.contains(e.target as Node)) {
         onClose();
       }
     },
@@ -51,7 +53,10 @@ export const useModalInteraction = ({
     const modalId = modalIdRef.current;
 
     if (isOpen) {
-      registerModal({ id: modalId, modalRef });
+      registerModal({
+        id: modalId,
+        modalRef: modalRef as React.RefObject<HTMLElement | null>,
+      });
     }
 
     return () => {
@@ -115,9 +120,9 @@ export const useModalInteraction = ({
   }, [isOpen, onClose]);
 
   useEffect(() => {
-    if (!isOpen || !modalRef.current) return;
+    const modal = modalRef && 'current' in modalRef ? modalRef.current : null;
+    if (!isOpen || !modal) return;
 
-    const modal = modalRef.current;
     const triggerElement = triggerRef?.current ?? null;
 
     if (!previousActiveElementRef.current) {

@@ -24,10 +24,10 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({
       title={category}
       className={`
         w-full flex items-center uppercase font-black text-lg tracking-wider p-4 group
-        transition-colors duration-200 
+        transition-colors duration-medium 
         focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-accent-black dark:focus-visible:ring-off-white
         ${isCollapsed ? 'justify-center' : ''}
-        min-h-[44px] sm:min-h-[48px]
+        min-h-min-touch-target sm:min-h-min-button-height
         ${
           isActive
             ? 'text-off-black dark:text-off-white'
@@ -43,7 +43,7 @@ const CategoryHeader: React.FC<CategoryHeaderProps> = ({
       </div>
       <div
         className={`
-        overflow-hidden transition-all duration-300 ease-in-out flex items-center
+        overflow-hidden transition-all duration-layout ease-in-out flex items-center
         ${isCollapsed ? 'max-w-0 opacity-0 ml-0' : 'max-w-xs ml-3 sm:ml-4 opacity-100'}`}
       >
         <span

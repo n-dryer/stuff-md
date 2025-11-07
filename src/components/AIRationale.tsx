@@ -51,7 +51,7 @@ const AIRationale: React.FC<AIRationaleProps> = ({
         {isTruncated && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className='ml-1 min-h-[44px] min-w-[44px] px-2 py-1 uppercase text-light-gray hover:text-off-black dark:hover:text-off-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-2'
+            className='ml-1 min-h-min-touch-target min-w-min-touch-target px-2 py-1 uppercase text-light-gray hover:text-off-black dark:hover:text-off-white focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-2'
             aria-expanded={isExpanded}
             aria-label={
               isExpanded ? 'Show less rationale' : 'Show more rationale'

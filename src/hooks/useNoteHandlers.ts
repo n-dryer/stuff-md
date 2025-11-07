@@ -15,11 +15,6 @@ interface UseNoteHandlersProps {
     customInstructions: string
   ) => Promise<void>;
   customInstructions: string;
-  displayFeedback: (
-    type: 'success' | 'error',
-    message: string,
-    duration?: number
-  ) => void;
   noteInputRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
@@ -29,11 +24,16 @@ export const useNoteHandlers = ({
   saveNote,
   regenerateNote,
   customInstructions,
-  displayFeedback,
   noteInputRef,
 }: UseNoteHandlersProps) => {
   const handleSaveNote = useCallback(async () => {
-    if (!accessToken || !draft.trim()) return;
+    if (!accessToken || !draft.trim()) {
+      logError('Cannot save note: missing accessToken or empty draft', {
+        hasAccessToken: !!accessToken,
+        hasDraft: !!draft.trim(),
+      });
+      throw new Error('Cannot save note: missing access token or empty draft');
+    }
 
     try {
       const result = await saveNote(draft, customInstructions);
@@ -47,13 +47,13 @@ export const useNoteHandlers = ({
       // Let the specific error from the service layer propagate.
       throw error;
     }
-  }, [displayFeedback]);
+  }, [accessToken, draft, saveNote, customInstructions, noteInputRef]);
 
   const handleUpdateAndRecategorizeNote = useCallback(
     async (note: Note, newContent: string) => {
-      await handleSaveNote(note, newContent, true);
+      await regenerateNote(note, newContent, customInstructions);
     },
-    [customInstructions, displayFeedback, regenerateNote]
+    [regenerateNote, customInstructions]
   );
 
   return {

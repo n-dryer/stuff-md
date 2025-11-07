@@ -32,7 +32,7 @@ const DateFilter: React.FC<DateFilterProps> = ({
             role='radio'
             aria-checked={isActive}
             onClick={() => onSortChange(option.value)}
-            className={`flex-1 px-2 sm:px-3 md:px-4 py-2 min-h-[44px] font-mono text-xs sm:text-sm uppercase tracking-widest cursor-pointer transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
+            className={`flex-1 px-2 sm:px-3 md:px-4 py-2 min-h-min-touch-target font-mono text-xs sm:text-sm uppercase tracking-widest cursor-pointer transition-colors duration-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black ${
               index !== options.length - 1
                 ? 'border-r-2 border-accent-black dark:border-off-white'
                 : ''

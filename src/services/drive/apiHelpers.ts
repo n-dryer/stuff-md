@@ -106,9 +106,67 @@ export const authorizedFetch = async (
         Object.assign(error, { status: 403 });
         throw error;
       }
-      const error = new Error(
-        `Google Drive API client error: 404 (Resource not found)`
-      );
+
+      // For 404, provide specific message
+      if (response.status === 404) {
+        let errorMessage = 'Google Drive API resource not found (404). ';
+        try {
+          const clonedResponse = response.clone();
+          let errorBody: {
+            error?: {
+              message?: string;
+              errors?: Array<{ message?: string; reason?: string }>;
+            };
+          };
+          try {
+            errorBody = (await clonedResponse.json()) as typeof errorBody;
+          } catch {
+            // If we can't parse, use generic message
+          }
+          if (errorBody?.error?.message) {
+            errorMessage += errorBody.error.message;
+          } else if (errorBody?.error?.errors?.[0]?.message) {
+            errorMessage += errorBody.error.errors[0].message;
+          } else {
+            errorMessage += 'The requested file or folder could not be found.';
+          }
+        } catch {
+          errorMessage += 'The requested resource could not be found.';
+        }
+        const error = new Error(errorMessage);
+        Object.assign(error, { status: 404 });
+        throw error;
+      }
+
+      // For other 4xx errors, try to extract error message from response
+      let errorMessage = `Google Drive API client error (${response.status}). `;
+      try {
+        const clonedResponse = response.clone();
+        let errorBody: {
+          error?: {
+            message?: string;
+            errors?: Array<{ message?: string; reason?: string }>;
+          };
+        };
+        try {
+          errorBody = (await clonedResponse.json()) as typeof errorBody;
+        } catch {
+          // If we can't parse, use status text
+          errorMessage += response.statusText || 'Unknown error';
+        }
+        if (errorBody?.error?.message) {
+          errorMessage += errorBody.error.message;
+        } else if (errorBody?.error?.errors?.[0]?.message) {
+          errorMessage += errorBody.error.errors[0].message;
+        } else if (errorBody?.error?.errors?.[0]?.reason) {
+          errorMessage += `Reason: ${errorBody.error.errors[0].reason}`;
+        } else {
+          errorMessage += response.statusText || 'Unknown error';
+        }
+      } catch {
+        errorMessage += response.statusText || 'Unknown error';
+      }
+      const error = new Error(errorMessage);
       Object.assign(error, { status: response.status });
       throw error;
     }

@@ -28,11 +28,14 @@ import {
   normalizeError,
   sanitizeErrorMessage,
 } from './utils/errorHandler';
+import { logError } from './utils/logger';
 import { useModalActions, useModalStateContext } from './contexts/ModalContext';
 import { useUIStateContext, useUIActions } from './contexts/UIContext';
 
 const App: React.FC = () => {
-  const { accessToken, login, logout } = useAuth();
+  const { accessToken, login, logout, user, refreshAccessToken } = useAuth();
+  const isLoggedIn = !!user;
+
   const {
     notes,
     isLoading: isNotesLoading,
@@ -75,8 +78,13 @@ const App: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('ALL');
   const instructionsButtonRef = useRef<HTMLButtonElement>(null);
 
-  const { showNoteSavedToast, setShowNoteSavedToast, handleDraftSavedToast } =
-    useToasts();
+  const {
+    showNoteSavedToast,
+    setShowNoteSavedToast,
+    showNoteEditedToast,
+    setShowNoteEditedToast,
+    handleDraftSavedToast,
+  } = useToasts();
 
   const { dynamicCategories } = useCategories(notes);
 
@@ -96,6 +104,10 @@ const App: React.FC = () => {
     logout,
     displayFeedback,
     setConfirmLogoutOpen,
+    onLogoutSuccess: () => {
+      // Clear draft when user logs out
+      setDraft('');
+    },
   });
 
   const {
@@ -107,7 +119,6 @@ const App: React.FC = () => {
     saveNote,
     regenerateNote,
     customInstructions,
-    displayFeedback,
     noteInputRef,
   });
 
@@ -123,13 +134,39 @@ const App: React.FC = () => {
         openReauthModal();
       }
     }
-  }, [notesError, openReauthModal, displayFeedback]);
+  }, [notesError, isLoggedIn, openReauthModal, displayFeedback]);
 
   const handleSaveNote = useCallback(async () => {
-    if (!draft.trim() || !accessToken || isSaving) return;
+    if (!draft.trim() || isSaving) {
+      if (!draft.trim()) {
+        displayFeedback(
+          'error',
+          'Cannot save empty note. Please enter some content.'
+        );
+      }
+      return;
+    }
+
+    if (!accessToken) {
+      if (user) {
+        try {
+          await refreshAccessToken();
+        } catch (error) {
+          displayFeedback('error', 'Session expired. Please log in again.');
+          openReauthModal();
+          return;
+        }
+      } else {
+        displayFeedback('error', 'Not authenticated. Please log in again.');
+        openReauthModal();
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
       await handleSaveNoteBase();
+      // Only clear draft and show toast after successful save
       setDraft('');
       setShowNoteSavedToast(true);
     } catch (error) {
@@ -137,8 +174,9 @@ const App: React.FC = () => {
       const errorMessage = sanitizeErrorMessage(normalizedError);
       displayFeedback(
         'error',
-        errorMessage || 'Failed to save note. Please try again.'
+        errorMessage || 'Failed to save stuff. Please try again.'
       );
+      // Don't clear draft on error - user can retry
     } finally {
       setIsSaving(false);
     }
@@ -150,6 +188,9 @@ const App: React.FC = () => {
     setDraft,
     setShowNoteSavedToast,
     displayFeedback,
+    openReauthModal,
+    user,
+    refreshAccessToken,
   ]);
 
   const {
@@ -246,10 +287,14 @@ const App: React.FC = () => {
           handleConfirmDeleteAll={handleConfirmDeleteAll}
           handleConfirmDeleteSelected={handleConfirmDeleteSelected}
           isDeleting={isDeleting}
+          setShowNoteEditedToast={setShowNoteEditedToast}
+          displayFeedback={displayFeedback}
         />
         <ToastContainer
           showNoteSavedToast={showNoteSavedToast}
           setShowNoteSavedToast={setShowNoteSavedToast}
+          showNoteEditedToast={showNoteEditedToast}
+          setShowNoteEditedToast={setShowNoteEditedToast}
           feedback={
             feedback
               ? {

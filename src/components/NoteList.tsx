@@ -169,14 +169,16 @@ const NoteList: React.FC<NoteListProps> = ({
           <section className='relative mx-auto w-full max-w-3xl overflow-hidden rounded-lg border-2 border-accent-black dark:border-off-white/20 bg-off-white/80 p-8 text-center dark:bg-off-black/60 sm:p-10'>
             <div
               aria-hidden='true'
-              className='absolute inset-0 pointer-events-none opacity-50 bg-[length:28px_28px] bg-[radial-gradient(circle_at_1px_1px,_rgba(28,28,28,0.08)_1px,_transparent_0)] dark:hidden'
+              className='absolute inset-0 pointer-events-none opacity-50 bg-[length:theme(spacing.grid-pattern-size)_theme(spacing.grid-pattern-size)] bg-[radial-gradient(circle_at_1px_1px,_rgba(28,28,28,0.08)_1px,_transparent_0)] dark:hidden'
+              // Note: rgba(28,28,28,0.08) in gradient matches off-black/8 opacity from tailwind.config.js
             />
             <div
               aria-hidden='true'
-              className='absolute inset-0 hidden pointer-events-none opacity-40 dark:block bg-[length:28px_28px] bg-[radial-gradient(circle_at_1px_1px,_rgba(240,240,240,0.18)_1px,_transparent_0)]'
+              className='absolute inset-0 hidden pointer-events-none opacity-40 dark:block bg-[length:theme(spacing.grid-pattern-size)_theme(spacing.grid-pattern-size)] bg-[radial-gradient(circle_at_1px_1px,_rgba(240,240,240,0.18)_1px,_transparent_0)]'
+              // Note: rgba(240,240,240,0.18) in gradient matches off-white/18 opacity from tailwind.config.js
             />
             <div className='relative mx-auto flex w-full max-w-2xl flex-col items-center gap-4 sm:gap-6'>
-              <h3 className='text-xl font-black uppercase tracking-[0.35em] text-accent-black dark:text-off-white sm:text-2xl'>
+              <h3 className='text-xl font-black uppercase tracking-heading text-accent-black dark:text-off-white sm:text-2xl'>
                 No Matches Yet
               </h3>
               <p className='text-sm sm:text-base normal-case tracking-wide text-off-black/70 dark:text-off-white/70'>

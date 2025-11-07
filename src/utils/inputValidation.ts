@@ -7,6 +7,7 @@ import { hasDangerousPatterns } from './securityPatterns';
 const NOTE_MAX_LENGTH = 100000;
 const AI_CONTENT_MIN_LENGTH = 10;
 const AI_CONTENT_MAX_LENGTH = 50000;
+const CUSTOM_INSTRUCTIONS_MAX_LENGTH = 2000;
 
 /**
  * Validate note content for saving
@@ -62,7 +63,7 @@ export const validateContentForAI = (content: string): string => {
 
 export const validateCustomInstructions = (
   instructions: string,
-  maxLength: number = 2000
+  maxLength: number = CUSTOM_INSTRUCTIONS_MAX_LENGTH
 ): string => {
   const trimmed = instructions.trim();
 
@@ -70,6 +71,7 @@ export const validateCustomInstructions = (
     throw new Error('Custom instructions cannot be empty.');
   }
 
+  // Only validate maxLength if it's not the default instruction
   if (trimmed.length > maxLength) {
     throw new Error(
       `Custom instructions cannot exceed ${maxLength} characters. You have ${trimmed.length} characters.`

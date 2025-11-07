@@ -52,11 +52,11 @@ export async function getFirebaseApp(): Promise<
  */
 export async function getAuthClient(): Promise<import('firebase/auth').Auth> {
   const app = await getFirebaseApp();
-  const { getAuth, setPersistence, browserLocalPersistence } = await import(
+  const { getAuth, setPersistence, browserSessionPersistence } = await import(
     'firebase/auth'
   );
   const auth = getAuth(app);
-  await setPersistence(auth, browserLocalPersistence);
+  await setPersistence(auth, browserSessionPersistence);
   return auth;
 }
 

@@ -73,17 +73,16 @@ const NoteItem: React.FC<NoteItemProps> = ({
   const contentPadding = isEditMode ? 'pl-12' : '';
 
   return (
-    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-    <div
-      className={`relative py-3 sm:py-4 px-3 sm:px-4 border-b border-gray-200 dark:border-off-white/10 break-inside-avoid transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black group ${
+    <button
+      type='button'
+      className={`relative py-3 sm:py-4 px-3 sm:px-4 border-b border-gray-200 dark:border-off-white/10 break-inside-avoid transition-colors duration-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black group w-full text-left ${
         isEditMode
           ? isSelected
             ? 'cursor-pointer bg-accent-black/5 dark:bg-off-white/10'
             : 'cursor-pointer hover:bg-off-black/5 dark:hover:bg-off-white/10'
           : 'cursor-pointer hover:bg-off-black/5 dark:hover:bg-off-white/10'
       }`}
-      role={isEditMode ? 'checkbox' : 'button'}
-      tabIndex={0}
+      role={isEditMode ? 'checkbox' : undefined}
       aria-labelledby={titleId}
       aria-describedby={summaryId}
       aria-checked={isEditMode ? isSelected : undefined}
@@ -96,14 +95,14 @@ const NoteItem: React.FC<NoteItemProps> = ({
       onKeyDown={handleEnterSpace}
     >
       {isEditMode && (
-        <div className='absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-10 pointer-events-none'>
+        <div className='absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 pointer-events-none'>
           <input
             type='checkbox'
             checked={isSelected}
             onChange={handleCheckboxClick}
             onClick={e => e.stopPropagation()}
             onMouseDown={e => e.stopPropagation()}
-            className='w-5 h-5 sm:w-6 sm:h-6 cursor-pointer accent-accent-black dark:accent-off-white border-2 border-accent-black dark:border-off-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black pointer-events-auto'
+            className='w-5 h-5 sm:w-6 sm:h-6 cursor-pointer accent-accent-black dark:accent-off-white border-2 border-accent-black dark:border-off-white/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-accent-black dark:focus-visible:ring-off-white focus-visible:ring-offset-off-white dark:focus-visible:ring-offset-off-black pointer-events-auto relative z-0'
             aria-label={`Select note: ${note.title || 'Untitled note'}`}
             aria-describedby={titleId}
           />
@@ -124,7 +123,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
             </h3>
           </div>
           <div className='flex items-center gap-x-2 flex-shrink-0 px-2 py-1 sm:-mx-2 text-xs uppercase text-off-black/60 dark:text-off-white/60 rounded'>
-            <DateDisplay date={note.date} />
+            <DateDisplay date={note.date} modifiedTime={note.modifiedTime} />
           </div>
         </div>
         {hasSummary ? (
@@ -165,7 +164,7 @@ const NoteItem: React.FC<NoteItemProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </button>
   );
 };
 

@@ -39,7 +39,7 @@ export interface InputProps {
   isSaving: boolean;
   noteInputRef: React.RefObject<HTMLTextAreaElement | null>;
   onRequestClearOrBlur: () => void;
-  onDraftSaved: () => void;
+  onDraftSaved?: () => void;
 }
 
 export interface InstructionProps {

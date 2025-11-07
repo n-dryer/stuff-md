@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {hasLinks && (
         <div className='pt-4'>
           <hr
-            className={`mx-4 border-t-2 border-accent-black/20 dark:border-off-white/10 transition-opacity duration-300 ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}
+            className={`mx-4 border-t-2 border-accent-black/20 dark:border-off-white/10 transition-opacity duration-layout ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}
           />
           <ul className='pt-4'>
             <li>
