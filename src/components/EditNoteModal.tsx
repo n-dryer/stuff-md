@@ -1,10 +1,9 @@
-import React, {
+import {
   useState,
   useEffect,
-  useRef,
   useCallback,
 } from 'react';
-import { TrashIcon } from '@tabler/icons-react';
+import { IconTrash } from '@tabler/icons-react';
 
 import { useModalInteraction } from '../hooks/useModalInteraction';
 import Button from './Button';
@@ -23,7 +22,10 @@ const EditNoteModal = (
   }
 ) => {
   const [note, setNote] = useState(initialNote);
-  const { modalRef, handleClickOutside } = useModalInteraction();
+  const { modalRef, handleBackdropClick } = useModalInteraction({
+    isOpen,
+    onClose,
+  });
 
   useEffect(() => {
     setNote(initialNote);
@@ -46,7 +48,7 @@ const EditNoteModal = (
   return (
     <div
       ref={modalRef}
-      onClick={handleClickOutside}
+      onClick={handleBackdropClick}
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
     >
       <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
@@ -57,12 +59,12 @@ const EditNoteModal = (
           onChange={(e) => setNote(e.target.value)}
         />
         <div className="flex justify-end gap-2">
-          <Button variant="secondary" onClick={onClose}>
+          <Button variant="default" onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={handleSave}>Save</Button>
-          <Button variant="danger" onClick={handleDelete}>
-            <TrashIcon className="mr-2" /> Delete
+          <Button variant="default" onClick={handleDelete}>
+            <IconTrash className="mr-2" /> Delete
           </Button>
         </div>
       </div>
