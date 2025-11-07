@@ -289,8 +289,8 @@ input {
   overflow: hidden;
 }
 
-/* Google Sign-In Button - Light Mode (Dark Button) */
-/* Note: Google branding requires specific colors, some values kept for compliance */
+/* Google Sign-In Button - Brutalist Design with Google UX Compliance */
+/* Note: Google branding requires Roboto font and minimum 48px height */
 .google-signin-button {
   display: inline-flex;
   align-items: center;
@@ -306,45 +306,49 @@ input {
   font-size: 14px;
   line-height: 1;
   color: #f8f8f8; /* off-white */
-  background-color: #1a1a1a; /* off-black */
-  border: 1px solid #1a1a1a; /* off-black */
-  border-radius: 4px;
-  padding: 10px 24px;
-  min-height: 48px;
+  background-color: #000000; /* accent-black - brutalist */
+  border: 2px solid #000000; /* accent-black - brutalist border */
+  border-radius: 0; /* Sharp corners - brutalist */
+  padding: 12px 24px;
+  min-height: 48px; /* Google UX requirement */
   min-width: 240px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 4px 0px #1a1a1a; /* Brutalist shadow */
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.1s ease;
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .google-signin-button:hover {
-  background-color: #222222; /* brutal-gray */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  background-color: #1a1a1a; /* off-black */
+  border-color: #1a1a1a;
+  box-shadow: 4px 4px 0px #333333; /* brutal-gray shadow */
+  transform: translate(-1px, -1px); /* Brutalist hover effect */
 }
 
 .google-signin-button:active {
   background-color: #000000; /* accent-black */
-  transform: scale(0.99);
+  transform: translate(0, 0); /* Reset on click */
+  box-shadow: 2px 2px 0px #1a1a1a; /* Reduced shadow on active */
 }
 
 .google-signin-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.35);
+  box-shadow: 4px 4px 0px #1a1a1a, 0 0 0 3px rgba(66, 133, 244, 0.5); /* Google blue focus ring + brutalist shadow */
 }
 
 .google-signin-button:disabled {
   cursor: not-allowed;
   opacity: 0.65;
   box-shadow: none;
+  transform: none;
 }
 
 .google-signin-button__icon {
   display: inline-flex;
   width: 18px;
   height: 18px;
+  flex-shrink: 0;
 }
 
 .google-signin-button__label {
@@ -356,21 +360,24 @@ input {
 /* Note: Google branding requires specific colors, some values kept for compliance */
 .dark .google-signin-button {
   background-color: #f8f8f8; /* off-white */
-  border-color: #cccccc; /* light-gray */
+  border: 2px solid #f8f8f8; /* off-white border - brutalist */
   color: #1a1a1a; /* off-black */
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 4px 4px 0px #cccccc; /* Brutalist shadow with light-gray */
 }
 
 .dark .google-signin-button:hover {
   background-color: #ffffff; /* pure white for hover per Google spec */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  border-color: #ffffff;
+  box-shadow: 4px 4px 0px #f0f0f0; /* Lighter shadow on hover */
+  transform: translate(-1px, -1px); /* Brutalist hover effect */
 }
 
 .dark .google-signin-button:active {
-  background-color: #f0f0f0; /* slightly off white */
-  transform: scale(0.99);
+  background-color: #f8f8f8; /* off-white */
+  transform: translate(0, 0); /* Reset on click */
+  box-shadow: 2px 2px 0px #cccccc; /* Reduced shadow on active */
 }
 
 .dark .google-signin-button:focus-visible {
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.35);
+  box-shadow: 4px 4px 0px #cccccc, 0 0 0 3px rgba(66, 133, 244, 0.5); /* Google blue focus ring + brutalist shadow */
 }

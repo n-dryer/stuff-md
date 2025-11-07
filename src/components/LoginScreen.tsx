@@ -38,10 +38,13 @@ const LoginScreen: React.FC<LoginScreenProps> = React.memo(
         <h1 className='text-7xl font-black font-mono text-accent-black dark:text-off-white'>
           STUFF.MD
         </h1>
-        <p className='mt-4 text-off-black/80 max-w-md dark:text-off-white/80'>
-          A minimalist, AI-powered organizer that saves your stuff directly to
-          Google Drive. Auto-organizes with AI categorization, smart search, and
-          export options.
+        <p className='mt-6 text-lg font-mono text-off-black/90 max-w-lg dark:text-off-white/90 leading-relaxed'>
+          Just add your stuff. We intelligently create titles, summaries, tags,
+          and categories—so you don't have to think about it.
+        </p>
+        <p className='mt-4 text-base font-mono text-off-black/70 max-w-lg dark:text-off-white/70'>
+          Minimal interface. Everything saved to your Google Drive. Zero
+          friction.
         </p>
         <div
           className='my-8 h-1 w-24 bg-accent-black dark:bg-off-white'
