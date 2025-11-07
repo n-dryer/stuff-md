@@ -181,8 +181,8 @@ const NoteList: React.FC<NoteListProps> = ({
               </h3>
               <p className='text-sm sm:text-base normal-case tracking-wide text-off-black/70 dark:text-off-white/70'>
                 {hasActiveFilters
-                  ? 'Nothing fits those filters right now. Clear them to bring all of your notes back into view.'
-                  : 'No notes are available just yet. Start typing above to create your first entry.'}
+                  ? 'Nothing fits those filters right now. Clear them to bring all of your stuff back into view.'
+                  : 'No items are available just yet. Start typing above to create your first entry.'}
               </p>
               {hasActiveFilters && (
                 <div className='flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center'>

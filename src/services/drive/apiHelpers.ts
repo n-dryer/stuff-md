@@ -107,7 +107,7 @@ export const authorizedFetch = async (
         throw error;
       }
       const error = new Error(
-        `Google Drive API client error: ${response.status} ${response.statusText}`
+        `Google Drive API client error: 404 (Resource not found)`
       );
       Object.assign(error, { status: response.status });
       throw error;

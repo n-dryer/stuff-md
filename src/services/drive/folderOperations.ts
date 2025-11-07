@@ -51,6 +51,23 @@ export const clearFolderCache = () => {
   }
 };
 
+const validateFolderExists = async (
+  accessToken: string,
+  folderId: string
+): Promise<boolean> => {
+  try {
+    const response = await authorizedFetch(
+      accessToken,
+      `${DRIVE_API_URL}/files/${folderId}?fields=id`,
+      {},
+      false // Don't retry validation requests
+    );
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+};
+
 /**
  * Find or create the app folder in Google Drive
  */
@@ -59,8 +76,15 @@ export const findOrCreateAppFolder = async (
   signal?: AbortSignal
 ): Promise<string> => {
   // Try to load from cache first
-  const cached = loadFolderCache();
-  if (cached) return cached;
+  const cachedId = loadFolderCache();
+  if (cachedId) {
+    const isValid = await validateFolderExists(accessToken, cachedId);
+    if (isValid) {
+      return cachedId;
+    } else {
+      clearFolderCache(); // Stale cache, clear it
+    }
+  }
 
   const searchResponse = await authorizedFetch(
     accessToken,

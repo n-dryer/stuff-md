@@ -20,12 +20,14 @@ export const useNoteSorting = ({
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
       // Handle invalid dates by treating them as 0 (oldest)
-      const dateCompare = (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+      const dateCompare =
+        (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
       const titleCompare = (a.title || '').localeCompare(b.title || '');
 
       if (sortKey === 'date') {
         return sortDirection === 'desc' ? dateCompare : -dateCompare;
-      } else { // title
+      } else {
+        // title
         return sortDirection === 'asc' ? titleCompare : -titleCompare;
       }
     });
@@ -33,4 +35,3 @@ export const useNoteSorting = ({
 };
 
 export type { SortKey, SortDirection };
-

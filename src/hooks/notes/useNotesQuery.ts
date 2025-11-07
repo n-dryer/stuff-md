@@ -28,5 +28,3 @@ export function useNotesQuery(accessToken: string | null) {
 
   return { notes, setNotes, isLoading, error, refetch: fetchNotes };
 }
-
-

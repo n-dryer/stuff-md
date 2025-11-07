@@ -29,11 +29,13 @@ const NoteListEmpty: React.FC<NoteListEmptyProps> = ({
       <div className='relative grid gap-[clamp(1.75rem,3.5vw+1rem,3.75rem)] text-center md:grid-cols-[minmax(0,1fr)_minmax(0,21rem)] md:items-start md:text-left'>
         <div className='flex flex-col items-center gap-[clamp(1.35rem,2.5vw+0.9rem,2.5rem)] text-pretty md:items-start'>
           <h3 className='text-balance text-[clamp(1.65rem,3.25vw+0.9rem,2.9rem)] font-black uppercase tracking-[0.12em] text-accent-black dark:text-off-white sm:tracking-[0.18em] xl:tracking-[0.26em]'>
-            ADD YOUR FIRST NOTE
+            ADD YOUR STUFF
           </h3>
           <p className='max-w-[52ch] text-[clamp(0.92rem,1.1vw+0.58rem,1.18rem)] leading-relaxed text-off-black/70 dark:text-off-white/70 sm:text-[clamp(0.98rem,1vw+0.65rem,1.25rem)]'>
-            Notes organized automatically as you type. Categorized, tagged, and
-            searchable. Stored in your Google Drive—your data, always accessible.
+            Your stuff organized automatically as you type. Add notes, lists,
+            prompts, anything! It&apos;s intelligently categorized, tagged, and
+            summarized. Stored in your Google Drive—your data, always accessible
+            and secure.
           </p>
         </div>
         <div className='flex flex-col items-center gap-[clamp(1.4rem,2vw+0.9rem,2.35rem)] md:col-start-2 md:items-stretch md:text-left'>
@@ -54,8 +56,24 @@ const NoteListEmpty: React.FC<NoteListEmptyProps> = ({
             </Button>
           </div>
         </div>
-        <p className='text-[clamp(0.75rem,0.5vw+0.68rem,0.95rem)] uppercase tracking-[0.2em] text-off-black/55 dark:text-off-white/55 md:col-span-2 md:justify-self-start md:text-left md:text-pretty'>
-          ⌘K to search · ⌘S to save
+        <p className='text-[clamp(0.75rem,0.5vw+0.68rem,0.95rem)] uppercase tracking-[0.2em] text-off-black/55 dark:text-off-white/55 md:col-span-2 md:justify-self-start md:text-left md:text-pretty flex flex-wrap items-center gap-x-2 gap-y-1'>
+          <span className='whitespace-nowrap'>
+            <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
+              ⏎
+            </kbd>{' '}
+            New Line
+          </span>
+          <span>·</span>
+          <span className='whitespace-nowrap'>
+            <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
+              ⌘
+            </kbd>
+            {' + '}
+            <kbd className='px-3 py-2 text-base font-semibold text-off-white bg-off-black rounded-lg dark:bg-off-white dark:text-off-black'>
+              ↩
+            </kbd>{' '}
+            Add Stuff
+          </span>
         </p>
       </div>
     </section>

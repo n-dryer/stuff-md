@@ -25,7 +25,7 @@ export const isValidUrl = (url: string): boolean => {
   try {
     // Check for dangerous schemes
     const lowerUrl = url.toLowerCase().trim();
-    
+
     for (const scheme of DANGEROUS_SCHEMES) {
       if (lowerUrl.startsWith(`${scheme}:`)) {
         return false;
@@ -34,7 +34,7 @@ export const isValidUrl = (url: string): boolean => {
 
     // Try to parse as URL (handles both absolute and relative URLs)
     let parsedUrl: URL;
-    
+
     // If it doesn't start with http/https, try adding https://
     if (!lowerUrl.startsWith('http://') && !lowerUrl.startsWith('https://')) {
       parsedUrl = new URL(`https://${url}`);
@@ -80,14 +80,17 @@ export const sanitizeUrl = (url: string): string | null => {
   try {
     // Normalize the URL
     let normalizedUrl = url.trim();
-    
+
     // Add https:// if missing
-    if (!normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+    if (
+      !normalizedUrl.startsWith('http://') &&
+      !normalizedUrl.startsWith('https://')
+    ) {
       normalizedUrl = `https://${normalizedUrl}`;
     }
 
     const parsedUrl = new URL(normalizedUrl);
-    
+
     // Force HTTPS for security
     if (parsedUrl.protocol === 'http:') {
       parsedUrl.protocol = 'https:';
@@ -98,4 +101,3 @@ export const sanitizeUrl = (url: string): string | null => {
     return null;
   }
 };
-

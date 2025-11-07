@@ -1,6 +1,6 @@
 /**
  * AI Service Error Classes
- * 
+ *
  * Custom error classes for AI service operations.
  * Extracted to prevent circular dependencies with validation.ts
  */
@@ -25,4 +25,3 @@ export class TimeoutError extends Error {
     this.name = 'TimeoutError';
   }
 }
-

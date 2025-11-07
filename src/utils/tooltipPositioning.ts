@@ -17,7 +17,13 @@ export const computeTooltipPosition = (
   const placements: Placement[] = forcePreferredPosition
     ? [preferredPosition]
     : Array.from(
-        new Set<Placement>([preferredPosition, 'top', 'bottom', 'right', 'left'])
+        new Set<Placement>([
+          preferredPosition,
+          'top',
+          'bottom',
+          'right',
+          'left',
+        ])
       );
 
   const computeForPlacement = (placement: Placement) => {

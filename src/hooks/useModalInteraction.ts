@@ -39,7 +39,7 @@ export const useModalInteraction = ({
 
   const handleBackdropKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Enter' || e.key === ' ') {
+      if (e.key === 'Escape') {
         e.preventDefault();
         onClose();
       }

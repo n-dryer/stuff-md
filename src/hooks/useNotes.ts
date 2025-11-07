@@ -35,28 +35,31 @@ export function useNotes(accessToken: string | null) {
         tags: ['misc'],
         aiGenerated: null,
       };
-      
+
       // Create the note first with placeholder data
       const createdNote = await saveNote(noteData);
-      
+
       // Then asynchronously call AI service to generate title, summary, tags, and categoryPath
       getAICategorization(validatedContent, customInstructions)
-        .then((aiResult) => {
+        .then(aiResult => {
           if (aiResult) {
             const processed = processAIResult(aiResult, validatedContent);
             if (processed) {
               // Update the note with AI-generated data
-              updateNote(createdNote.id, processed).catch((error) => {
-                logError('Failed to update note with AI categorization:', error);
+              updateNote(createdNote.id, processed).catch(error => {
+                logError(
+                  'Failed to update note with AI categorization:',
+                  error
+                );
               });
             }
           }
         })
-        .catch((error) => {
+        .catch(error => {
           logError('AI categorization failed:', error);
           // Note remains with default Misc category and placeholder data
         });
-      
+
       return noteData;
     },
     [saveNote, updateNote]

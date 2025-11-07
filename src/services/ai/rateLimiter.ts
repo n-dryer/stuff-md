@@ -1,6 +1,6 @@
 /**
  * AI Rate Limiter
- * 
+ *
  * Singleton class for managing rate limits on AI requests.
  * Prevents too many requests per minute and per hour.
  */
@@ -35,4 +35,3 @@ class AIRateLimiter {
 
 // Export singleton instance
 export const aiRateLimiter = new AIRateLimiter();
-

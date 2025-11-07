@@ -42,5 +42,3 @@ export function useAICategorizationFlow(
 
   return { regenerateNote };
 }
-
-

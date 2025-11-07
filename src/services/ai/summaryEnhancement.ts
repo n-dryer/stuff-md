@@ -1,6 +1,6 @@
 /**
  * Summary Enhancement Utilities
- * 
+ *
  * Functions for enhancing and generating summaries to meet
  * the 100-300 character requirement with 2-4 sentences.
  */
@@ -157,4 +157,3 @@ export const generateFallbackSummary = (content: string): string => {
 
   return summary;
 };
-

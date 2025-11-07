@@ -22,4 +22,3 @@ interface ImportMeta {
 declare const fetch: typeof globalThis.fetch;
 declare type RequestInit = globalThis.RequestInit;
 declare type Response = globalThis.Response;
-

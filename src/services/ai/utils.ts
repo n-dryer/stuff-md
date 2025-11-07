@@ -20,11 +20,14 @@ export const hashContent = (content: string): string => {
 /**
  * Truncate content to a reasonable length for AI processing
  */
-export const truncateContent = (content: string, maxLength: number = 5000): string => {
+export const truncateContent = (
+  content: string,
+  maxLength: number = 5000
+): string => {
   if (content.length <= maxLength) {
     return content;
   }
-  
+
   // Try to truncate at a sentence boundary
   const truncated = content.slice(0, maxLength - 3);
   const lastPunct = Math.max(
@@ -33,11 +36,11 @@ export const truncateContent = (content: string, maxLength: number = 5000): stri
     truncated.lastIndexOf('?'),
     truncated.lastIndexOf('\n')
   );
-  
+
   if (lastPunct > maxLength * 0.8) {
     return truncated.slice(0, lastPunct + 1);
   }
-  
+
   return truncated + '...';
 };
 

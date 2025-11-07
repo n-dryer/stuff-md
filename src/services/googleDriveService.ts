@@ -7,7 +7,10 @@ import {
   noteToAppProperties,
 } from '../utils/driveHelpers';
 import { authorizedFetch, AuthError, RateLimitError } from './drive/apiHelpers';
-import { findOrCreateAppFolder } from './drive/folderOperations';
+import {
+  clearFolderCache,
+  findOrCreateAppFolder,
+} from './drive/folderOperations';
 import { INoteStorageService } from './INoteStorageService';
 
 // Re-export error types for compatibility
@@ -65,52 +68,70 @@ class GoogleDriveService implements INoteStorageService {
     accessToken: string,
     noteData: Omit<Note, 'id'>
   ): Promise<Note> {
-    const folderId = await findOrCreateAppFolder(accessToken);
-    const metadata = {
-      name: noteData.name,
-      mimeType: 'text/markdown',
-      parents: [folderId],
-      appProperties: noteToAppProperties(noteData),
-    };
-
-    const boundary = '-------314159265358979323846';
-    const multipartRequestBody = [
-      `--${boundary}`,
-      'Content-Type: application/json; charset=UTF-8',
-      '',
-      JSON.stringify(metadata),
-      `--${boundary}`,
-      'Content-Type: text/markdown',
-      '',
-      noteData.content,
-      `--${boundary}--`,
-    ].join('\r\n');
-
-    const res = await authorizedFetch(
-      accessToken,
-      `${DRIVE_UPLOAD_URL}/files?uploadType=multipart`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': `multipart/related; boundary=${boundary}`,
-        },
-        body: multipartRequestBody,
-      },
-      true
-    );
-
-    if (!res.ok) {
-      const errorText = await res.text().catch(() => 'Unknown error');
-      throw new Error(`Failed to save note: ${errorText}`);
-    }
-    let createdFile: DriveFile;
     try {
-      createdFile = (await res.json()) as DriveFile;
+      const folderId = await findOrCreateAppFolder(accessToken);
+      const metadata = {
+        name: noteData.name,
+        mimeType: 'text/markdown',
+        parents: [folderId],
+        appProperties: noteToAppProperties(noteData),
+      };
+
+      const boundary = '-------314159265358979323846';
+      const multipartRequestBody = [
+        `--${boundary}`,
+        'Content-Type: application/json; charset=UTF-8',
+        '',
+        JSON.stringify(metadata),
+        `--${boundary}`,
+        'Content-Type: text/markdown',
+        '',
+        noteData.content,
+        `--${boundary}--`,
+      ].join('\r\n');
+
+      const res = await authorizedFetch(
+        accessToken,
+        `${DRIVE_UPLOAD_URL}/files?uploadType=multipart`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': `multipart/related; boundary=${boundary}`,
+          },
+          body: multipartRequestBody,
+        },
+        true
+      );
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error(
+            'Failed to save note: Parent folder not found. The app folder may have been deleted.'
+          );
+        }
+        const errorText = await res.text().catch(() => 'Unknown error');
+        throw new Error(`Failed to save note: ${errorText}`);
+      }
+      let createdFile: DriveFile;
+      try {
+        createdFile = (await res.json()) as DriveFile;
+      } catch (error) {
+        logError('Failed to parse save note response:', error);
+        throw new Error('Invalid response format from Google Drive API.');
+      }
+      return driveFileToNote(createdFile, noteData.content);
     } catch (error) {
-      logError('Failed to parse save note response:', error);
-      throw new Error('Invalid response format from Google Drive API.');
+      if (
+        error instanceof Error &&
+        error.message.includes('Parent folder not found')
+      ) {
+        clearFolderCache();
+        throw new Error(
+          'Failed to save note: Parent folder not found. Retrying may fix the issue.'
+        );
+      }
+      throw error;
     }
-    return driveFileToNote(createdFile, noteData.content);
   }
 
   public async updateNote(

@@ -25,25 +25,28 @@ export const useNoteFilters = ({
       if (activeCategory === 'LINKS') return containsURL(note.content);
 
       const pathString = note.categoryPath.join(' / ').toUpperCase();
-      
+
       if (activeCategory === 'PERSONAL / SHOPPING') {
-        return pathString.includes('PERSONAL') || pathString.includes('SHOPPING');
+        return (
+          pathString.includes('PERSONAL') || pathString.includes('SHOPPING')
+        );
       }
 
       return pathString.includes(activeCategory);
     });
 
     if (activeTags.length > 0) {
-      result = result.filter(note => 
+      result = result.filter(note =>
         activeTags.every(activeTag => note.tags.includes(activeTag))
       );
     }
-    
+
     if (debouncedSearchQuery.trim()) {
       const lowercasedQuery = debouncedSearchQuery.toLowerCase();
-      result = result.filter(note => 
-        note.title.toLowerCase().includes(lowercasedQuery) ||
-        note.content.toLowerCase().includes(lowercasedQuery)
+      result = result.filter(
+        note =>
+          note.title.toLowerCase().includes(lowercasedQuery) ||
+          note.content.toLowerCase().includes(lowercasedQuery)
       );
     }
 
@@ -72,6 +75,12 @@ export const useNoteFilters = ({
     }
 
     return result;
-  }, [notes, activeCategory, activeTags, debouncedSearchQuery, startDate, endDate]);
+  }, [
+    notes,
+    activeCategory,
+    activeTags,
+    debouncedSearchQuery,
+    startDate,
+    endDate,
+  ]);
 };
-

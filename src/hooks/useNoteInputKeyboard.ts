@@ -7,6 +7,7 @@ interface UseNoteInputKeyboardProps {
   setIsPreview: (preview: boolean) => void;
   onSave: () => void;
   onRequestClearOrBlur: () => void;
+  onOpenInstructions: () => void;
 }
 
 /**
@@ -18,6 +19,7 @@ export const useNoteInputKeyboard = ({
   setIsPreview,
   onSave,
   onRequestClearOrBlur,
+  onOpenInstructions,
 }: UseNoteInputKeyboardProps) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -30,12 +32,9 @@ export const useNoteInputKeyboard = ({
         return;
       }
 
-      if (!isPreview && !modifierKey && e.key === 'Enter') {
-        if (e.shiftKey) {
-          return;
-        }
+      if (modifierKey && e.key.toLowerCase() === 'i') {
         e.preventDefault();
-        onSave();
+        onOpenInstructions();
         return;
       }
 
@@ -73,5 +72,12 @@ export const useNoteInputKeyboard = ({
         input?.removeEventListener('keydown', handleKeyDown);
       }
     };
-  }, [onSave, isPreview, inputRef, onRequestClearOrBlur, setIsPreview]);
+  }, [
+    onSave,
+    isPreview,
+    inputRef,
+    onRequestClearOrBlur,
+    setIsPreview,
+    onOpenInstructions,
+  ]);
 };

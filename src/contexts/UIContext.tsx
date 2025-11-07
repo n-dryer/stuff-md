@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
+import { useTheme } from '../hooks/useTheme';
 
 interface UIState {
   feedback: { type: 'success' | 'error'; message: string } | null;
@@ -6,6 +7,7 @@ interface UIState {
   customInstructions: string;
   lastCustomInstructions: string;
   viewMode: 'grid' | 'table';
+  theme: 'light' | 'dark';
 }
 
 interface UIActions {
@@ -19,6 +21,7 @@ interface UIActions {
   handleClearTags: () => void;
   saveInstructions: (instructions: string) => void;
   setViewMode: (mode: 'grid' | 'table') => void;
+  toggleTheme: () => void;
 }
 
 const UIStateContext = createContext<UIState | undefined>(undefined);
@@ -27,6 +30,7 @@ const UIActionsContext = createContext<UIActions | undefined>(undefined);
 export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const [theme, toggleTheme] = useTheme();
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error';
     message: string;
@@ -37,11 +41,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   const displayFeedback = useCallback(
-    (
-      type: 'success' | 'error',
-      message: string,
-      duration: number = 3000
-    ) => {
+    (type: 'success' | 'error', message: string, duration: number = 3000) => {
       setFeedback({ type, message });
       setTimeout(() => setFeedback(null), duration);
     },
@@ -73,6 +73,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
     customInstructions,
     lastCustomInstructions,
     viewMode,
+    theme,
   };
 
   const actions = {
@@ -82,6 +83,7 @@ export const UIProvider: React.FC<{ children: React.ReactNode }> = ({
     handleClearTags,
     saveInstructions,
     setViewMode,
+    toggleTheme,
   };
 
   return (

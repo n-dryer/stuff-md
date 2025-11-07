@@ -92,9 +92,7 @@ export function processAIResult(
 
   // If no tags generated, assign "misc" tag and ensure "Misc" category exists
   const finalTags = validTags.length === 0 ? ['misc'] : validTags;
-
-  // If no tags were generated, ensure the category is "Misc"
-  if (validTags.length === 0 && !categories.includes('Misc')) {
+  if (validTags.length === 0) {
     categories = ['Misc'];
   }
 

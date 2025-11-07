@@ -8,15 +8,18 @@ function getStorageValue<T>(key: string, defaultValue: T): T {
   const saved = window.localStorage.getItem(key);
   if (saved) {
     try {
-        return JSON.parse(saved);
+      return JSON.parse(saved);
     } catch {
-        return defaultValue;
+      return defaultValue;
     }
   }
   return defaultValue;
 }
 
-export function useLocalStorage<T>(key: string, defaultValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+export function useLocalStorage<T>(
+  key: string,
+  defaultValue: T
+): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState(() => {
     return getStorageValue(key, defaultValue);
   });

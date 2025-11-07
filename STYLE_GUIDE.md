@@ -117,6 +117,7 @@ gap-[clamp(1.75rem,3.5vw+1rem,3.75rem)]       /* Section gaps */
 ### Buttons
 
 **Fill Variant** (Primary):
+
 ```tsx
 bg-accent-black text-off-white
 hover:shadow-brutalist hover:-translate-x-1 hover:-translate-y-1
@@ -124,6 +125,7 @@ dark:bg-off-white dark:text-off-black
 ```
 
 **Default Variant** (Secondary):
+
 ```tsx
 bg-off-white text-off-black border-2 border-accent-black
 hover:border-5
@@ -131,6 +133,7 @@ dark:bg-off-black dark:text-off-white dark:border-off-white/80
 ```
 
 **Common Classes**:
+
 - `uppercase px-6 py-3 text-base font-mono font-normal`
 - `transition-all duration-150`
 - `focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-4`
@@ -177,6 +180,7 @@ p-[clamp(0.75rem,2vw,1rem)]
 ### Accessibility
 
 Always respect `prefers-reduced-motion`:
+
 ```css
 @media (prefers-reduced-motion: reduce) {
   animation: none;
@@ -195,6 +199,7 @@ Always respect `prefers-reduced-motion`:
 ### Fluid Typography & Spacing
 
 Use `clamp()` for responsive values:
+
 ```css
 text-[clamp(0.92rem,1.1vw+0.58rem,1.18rem)]
 px-[clamp(1.15rem,2vw+0.85rem,3.25rem)]
@@ -216,12 +221,12 @@ px-[clamp(1.15rem,2vw+0.85rem,3.25rem)]
 
 ### Color Mapping
 
-| Light Mode | Dark Mode |
-|------------|-----------|
-| `off-white` | `off-black` |
-| `off-black` | `off-white` |
-| `accent-black` | `off-white` |
-| `brutal-gray` | `brutal-gray` |
+| Light Mode     | Dark Mode     |
+| -------------- | ------------- |
+| `off-white`    | `off-black`   |
+| `off-black`    | `off-white`   |
+| `accent-black` | `off-white`   |
+| `brutal-gray`  | `brutal-gray` |
 
 ## Focus States
 
@@ -249,22 +254,25 @@ px-[clamp(1.15rem,2vw+0.85rem,3.25rem)]
 ## Examples
 
 ### Button
+
 ```tsx
-<button className="uppercase px-6 py-3 text-base font-mono font-normal border-2 border-accent-black bg-accent-black text-off-white hover:shadow-brutalist hover:-translate-x-1 hover:-translate-y-1 transition-all duration-150">
+<button className='uppercase px-6 py-3 text-base font-mono font-normal border-2 border-accent-black bg-accent-black text-off-white hover:shadow-brutalist hover:-translate-x-1 hover:-translate-y-1 transition-all duration-150'>
   Save
 </button>
 ```
 
 ### Card
+
 ```tsx
-<div className="border-2 border-accent-black dark:border-off-white/20 shadow-brutalist dark:shadow-brutalist-dark p-4 bg-off-white dark:bg-brutal-gray">
+<div className='border-2 border-accent-black dark:border-off-white/20 shadow-brutalist dark:shadow-brutalist-dark p-4 bg-off-white dark:bg-brutal-gray'>
   Content
 </div>
 ```
 
 ### Responsive Text
+
 ```tsx
-<h1 className="text-[clamp(1.65rem,3.25vw+0.9rem,2.9rem)] font-black uppercase tracking-wider text-accent-black dark:text-off-white">
+<h1 className='text-[clamp(1.65rem,3.25vw+0.9rem,2.9rem)] font-black uppercase tracking-wider text-accent-black dark:text-off-white'>
   Heading
 </h1>
 ```

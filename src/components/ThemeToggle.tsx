@@ -1,18 +1,17 @@
 import React from 'react';
+import { useUIStateContext, useUIActions } from '../contexts/UIContext';
 
-interface ThemeToggleProps {
-  isDarkMode: boolean;
-  onToggle: () => void;
-}
-
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ isDarkMode, onToggle }) => {
+const ThemeToggle: React.FC = () => {
+  const { theme } = useUIStateContext();
+  const { toggleTheme } = useUIActions();
+  const isDarkMode = theme === 'dark';
   const label = isDarkMode ? 'DARK' : 'LIGHT';
   const ariaLabel = isDarkMode ? 'Switch to Light mode' : 'Switch to Dark mode';
 
   return (
     <button
       type='button'
-      onClick={onToggle}
+      onClick={toggleTheme}
       aria-label={ariaLabel}
       role='switch'
       aria-checked={isDarkMode}

@@ -14,6 +14,7 @@ interface NoteInputProps {
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
   onRequestClearOrBlur: () => void;
   onDraftSaved?: () => void;
+  onOpenInstructions: () => void;
 }
 
 const NOTE_MAX_LENGTH = 100000;
@@ -26,6 +27,7 @@ const NoteInput: React.FC<NoteInputProps> = ({
   inputRef,
   onRequestClearOrBlur,
   onDraftSaved,
+  onOpenInstructions,
 }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [isPreview, setIsPreview] = useState(false);
@@ -51,6 +53,7 @@ const NoteInput: React.FC<NoteInputProps> = ({
     setIsPreview,
     onSave: handleSave,
     onRequestClearOrBlur,
+    onOpenInstructions,
   });
 
   useEffect(() => {
@@ -94,8 +97,7 @@ const NoteInput: React.FC<NoteInputProps> = ({
     isPreview,
   });
 
-  const placeholderText =
-    'Type your note. Saved to Google Drive, organized by AI. Press Enter or Cmd/Ctrl + Enter to save.';
+  const placeholderText = 'Type to add stuff...';
 
   const containerWidthClasses = isFocused
     ? 'max-w-[calc(100%_-_1rem)] sm:max-w-[calc(100%_-_1.25rem)] md:max-w-[min(100%,70ch)] lg:max-w-[min(100%,78ch)] xl:max-w-[min(100%,84ch)]'
@@ -137,7 +139,11 @@ const NoteInput: React.FC<NoteInputProps> = ({
     >
       {isPreview ? (
         <div className='flex-grow min-w-0 bg-transparent text-sm sm:text-base font-mono leading-relaxed break-words whitespace-pre-wrap overflow-y-auto transition-all duration-150 min-h-[48px] py-3 pr-2'>
-          <MarkdownRenderer content={value || 'No preview.'} />
+          <MarkdownRenderer
+            content={
+              value || '**SHORTCUTS**\n\n* ⏎ - New Line\n* ⌘ + ↩ - Add Stuff'
+            }
+          />
         </div>
       ) : (
         <div className='relative flex-grow min-w-0 max-w-full w-full'>
@@ -150,7 +156,7 @@ const NoteInput: React.FC<NoteInputProps> = ({
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
             placeholder={placeholderText}
-            className='w-full bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:outline-none text-sm sm:text-base placeholder:text-sm sm:placeholder:text-base placeholder-gray-400 dark:placeholder-gray-500 font-mono leading-relaxed resize-none overflow-y-hidden transition-[height,padding,background-color,color] duration-250 ease-in-out px-4 sm:px-5 md:px-6 py-3.5 sm:py-5 md:py-6'
+            className='w-full bg-transparent focus:outline-none focus-visible:ring-0 focus-visible:outline-none text-sm sm:text-base placeholder:text-sm sm:placeholder:text-base placeholder-light-gray dark:placeholder-light-gray font-mono leading-relaxed resize-none overflow-y-hidden transition-[height,padding,background-color,color] duration-250 ease-in-out px-4 sm:px-5 md:px-6 py-3.5 sm:py-5 md:py-6'
             disabled={isSaving}
             rows={1}
             maxLength={NOTE_MAX_LENGTH}
