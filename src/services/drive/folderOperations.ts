@@ -126,7 +126,18 @@ export const findOrCreateAppFolder = async (
     true,
     signal
   );
-  if (!createResponse.ok) throw new Error('Failed to create app folder.');
+  if (!createResponse.ok) {
+    try {
+      const error = await createResponse.json();
+      if (error.error.code === 409) {
+        throw new Error('Folder already exists.');
+      }
+      logError('Error creating folder, but continuing:', error);
+    } catch (error) {
+      logError('Failed to parse folder create response:', error);
+      throw new Error('Invalid response format from Google Drive API.');
+    }
+  }
   let createResult: { id?: string };
   try {
     createResult = (await createResponse.json()) as { id?: string };

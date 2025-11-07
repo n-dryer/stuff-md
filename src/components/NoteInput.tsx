@@ -141,7 +141,8 @@ const NoteInput: React.FC<NoteInputProps> = ({
         <div className='flex-grow min-w-0 bg-transparent text-sm sm:text-base font-mono leading-relaxed break-words whitespace-pre-wrap overflow-y-auto transition-all duration-150 min-h-[48px] py-3 pr-2'>
           <MarkdownRenderer
             content={
-              value || '**SHORTCUTS**\n\n* ⏎ - New Line\n* ⌘ + ↩ - Add Stuff'
+              value ||
+              '**SHORTCUTS**\n\n* ⏎ - New Line\n* ⌘ + ↩ - Add Stuff'
             }
           />
         </div>

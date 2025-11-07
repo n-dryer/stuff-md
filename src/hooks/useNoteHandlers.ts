@@ -47,24 +47,11 @@ export const useNoteHandlers = ({
       // Let the specific error from the service layer propagate.
       throw error;
     }
-  }, [
-    accessToken,
-    draft,
-    customInstructions,
-    displayFeedback,
-    noteInputRef,
-    saveNote,
-  ]);
+  }, [displayFeedback]);
 
   const handleUpdateAndRecategorizeNote = useCallback(
     async (note: Note, newContent: string) => {
-      try {
-        await regenerateNote(note, newContent, customInstructions);
-        displayFeedback('success', 'Note updated.');
-      } catch (error) {
-        logError('Failed to update note:', error);
-        displayFeedback('error', 'Failed to update note.');
-      }
+      await handleSaveNote(note, newContent, true);
     },
     [customInstructions, displayFeedback, regenerateNote]
   );
