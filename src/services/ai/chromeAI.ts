@@ -66,14 +66,6 @@ export const createChromeAISession =
  * Note: The Prompt API (window.ai.createTextSession) is the correct API for structured output.
  * The Prompt API doesn't support separate system instructions, so we concatenate the system
  * instruction with the user prompt. This matches the API's expected usage pattern.
- *
- * The API is available when:
- * - Chrome browser with built-in AI enabled
- * - Gemini Nano model is available (readily or after-download)
- * - For web: Origin trial enrollment required (https://developer.chrome.com/origintrials/#/view_trial/2533837740349325313)
- * - For extensions: Chrome 138+ stable
- *
- * Reference: https://developer.chrome.com/docs/ai/built-in-apis
  */
 export const useChromeBuiltInAI = async (
   prompt: string,

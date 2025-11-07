@@ -17,9 +17,6 @@ export interface DriveFile {
   };
 }
 
-/**
- * Convert a Google Drive file to a Note
- */
 export const driveFileToNote = (file: DriveFile, content: string): Note => {
   const appProps = file.appProperties || {};
 
@@ -72,9 +69,6 @@ export const driveFileToNote = (file: DriveFile, content: string): Note => {
   };
 };
 
-/**
- * Convert a Note to Google Drive appProperties
- */
 export const noteToAppProperties = (
   note: Omit<Note, 'id'> | Note
 ): DriveFile['appProperties'] => {
@@ -88,14 +82,4 @@ export const noteToAppProperties = (
       ? JSON.stringify(note.aiGenerated)
       : undefined,
   };
-};
-
-/**
- * Validate and parse a note from Drive file
- */
-export const validateAndParseNote = (
-  file: DriveFile,
-  content: string
-): Note => {
-  return driveFileToNote(file, content);
 };
